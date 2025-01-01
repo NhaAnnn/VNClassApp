@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/common/design/color.dart';
 
 class AppBarContainer extends StatelessWidget {
   const AppBarContainer({
@@ -28,7 +29,7 @@ class AppBarContainer extends StatelessWidget {
               automaticallyImplyLeading: false,
               elevation: 0,
               toolbarHeight: 110,
-              backgroundColor: Colors.amber,
+              backgroundColor: ColorApp.primaryColor,
               title: title ??
                   Row(
                     children: [

@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             SizedBox(
-              height: 30,
+              height: 20,
             ),
             TextField(
               controller: _userName,
@@ -98,10 +98,11 @@ class _LoginPageState extends State<LoginPage> {
                 prefixIcon: Icon(
                   Icons.person_outline_outlined,
                   size: 28,
+                  color: const Color.fromARGB(255, 29, 92, 252),
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 24),
             Stack(
               alignment: AlignmentDirectional.centerEnd,
               children: [
@@ -129,6 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: Icon(
                       Icons.lock_outline,
                       size: 28,
+                      color: const Color.fromARGB(255, 29, 92, 252),
                     ),
                   ),
                 ),
@@ -147,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                 )
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [

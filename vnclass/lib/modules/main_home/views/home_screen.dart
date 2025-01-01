@@ -17,23 +17,29 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       body: Container(
+        color: const Color.fromARGB(255, 255, 255, 255),
         child: AppBarContainer(
           title: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      24,
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(50),
                   ),
-                  child: ImageHelper.loadFromAsset(
-                      AssetHelper.imageLogoSplashScreen),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                        24,
+                      ),
+                    ),
+                    child: ImageHelper.loadFromAsset(
+                        AssetHelper.imageLogoSplashScreen),
+                  ),
                 ),
                 SizedBox(
                   width: 12,
@@ -62,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Spacer(),
                 Icon(
                   FontAwesomeIcons.bell,
-                  size: 16,
+                  size: 24,
                   color: Colors.white,
                 ),
               ],
@@ -71,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
           implementLeading: true,
           child: Container(
             //margin: EdgeInsets.only(top: 20),
-            color: ColorApp.primaryColor,
+            color: Colors.white,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -100,83 +106,36 @@ class _HomeScreenState extends State<HomeScreen> {
                   //   ),
                   // ),
                   SizedBox(
-                    height: 10,
+                    height: 20,
                   ),
                   ItemHome(
-                    // onTap: () => Navigator.of(context)
-                    //     .pushNamed(ClassGeneralMistake.routeName),
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham ss',
+                      // onTap: () => Navigator.of(context)
+                      //     .pushNamed(ClassGeneralMistake.routeName),
+                      icon: AssetHelper.iconMainHomeWrite,
+                      title: 'Cập Nhật Vi Phạm'),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  ItemHome(
+                    icon: AssetHelper.iconMainHomeTaskView,
+                    title: 'KQ Rèn Luyện',
                   ),
                   SizedBox(
                     height: 20,
                   ),
                   ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
+                    icon: AssetHelper.iconMainHomeClass,
+                    title: 'Lớp Học',
                   ),
                   SizedBox(
                     height: 20,
                   ),
                   ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
+                    icon: AssetHelper.iconMainHomeReport,
+                    title: 'Báo Cáo',
                   ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
-                  ),
-                  ItemHome(
-                    icon: AssetHelper.imageLogoSplashScreen,
-                    title: 'Cap Nhat Vi Pham',
+                  SizedBox(
+                    height: 20,
                   ),
                 ],
               ),

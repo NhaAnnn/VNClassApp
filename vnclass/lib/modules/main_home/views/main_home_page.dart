@@ -20,7 +20,7 @@ class _MainHomePageState extends State<MainHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(253, 255, 255, 255),
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -38,28 +38,43 @@ class _MainHomePageState extends State<MainHomePage> {
         },
         selectedItemColor: ColorApp.primaryColor,
         unselectedItemColor: ColorApp.primaryColor.withAlpha(200),
-        margin: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        margin: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         items: [
           SalomonBottomBarItem(
             icon: Icon(
               FontAwesomeIcons.house,
-              size: 16,
+              size: 28,
             ),
-            title: Text('Home'),
+            title: Text(
+              'Home',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
           SalomonBottomBarItem(
             icon: Icon(
               FontAwesomeIcons.circleQuestion,
-              size: 16,
+              size: 28,
             ),
-            title: Text('Help'),
+            title: Text(
+              'Help',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
           SalomonBottomBarItem(
             icon: Icon(
               FontAwesomeIcons.user,
-              size: 16,
+              size: 28,
             ),
-            title: Text('User'),
+            title: Text(
+              'User',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
           ),
         ],
       ),

@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       title: 'StuApp',
       theme: ThemeData(
         primaryColor: ColorApp.primaryColor,
-        scaffoldBackgroundColor: ColorApp.primaryColor,
+        // scaffoldBackgroundColor: ColorApp.primaryColor,
         // dialogBackgroundColor: ColorApp.primaryColor,
       ),
       routes: routes,
