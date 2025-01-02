@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/app_bar_container.dart';
 import 'package:vnclass/modules/login/widget/item_home.dart';
+import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,12 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(50),
-                  ),
                   child: Container(
-                    width: 64,
-                    height: 64,
+                    width: 70,
+                    height: 70,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(
                         24,
@@ -46,31 +42,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Hello Suong',
+                      'Hello Suong nguyễn trần châu',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       ),
                     ),
                     SizedBox(
-                      height: 12,
+                      height: 8,
                     ),
                     Text(
                       'Position',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                       ),
                     ),
                   ],
                 ),
-                Spacer(),
-                Icon(
-                  FontAwesomeIcons.bell,
-                  size: 24,
-                  color: Colors.white,
-                ),
+                // Spacer(),
+                // Icon(
+                //   FontAwesomeIcons.bell,
+                //   size: 24,
+                //   color: Colors.black,
+                // ),
               ],
             ),
           ),
@@ -109,8 +106,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 20,
                   ),
                   ItemHome(
-                      // onTap: () => Navigator.of(context)
-                      //     .pushNamed(ClassGeneralMistake.routeName),
+                      onTap: () => Navigator.of(context)
+                          .pushNamed(MistakeMainPage.routeName),
                       icon: AssetHelper.iconMainHomeWrite,
                       title: 'Cập Nhật Vi Phạm'),
                   SizedBox(

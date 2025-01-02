@@ -62,15 +62,14 @@ class ItemHome extends StatelessWidget {
                   height: 150,
                   color: const Color.fromARGB(
                       251, 254, 254, 254), // Chiều cao của Container con
-                  child: Expanded(
-                      child: Text(
+                  child: Text(
                     title,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: const Color.fromARGB(255, 8, 81, 140),
                     ),
-                  )),
+                  ),
                 ),
               ),
             ),
