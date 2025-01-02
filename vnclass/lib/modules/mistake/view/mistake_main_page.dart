@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
-import 'package:vnclass/common/widget/app_bar_container.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
-import 'package:vnclass/modules/mistake/view/mistake_class_detail_page.dart';
 import 'package:vnclass/modules/mistake/widget/item_class_mistake.dart';
 
 class MistakeMainPage extends StatefulWidget {
@@ -91,9 +89,50 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                 ),
               ],
             ),
-            SizedBox(height: 10),
-            SearchBar(hintText: 'Search for....'),
-            SizedBox(height: 10),
+            SizedBox(
+              height: 20,
+            ),
+            TextField(
+              style: TextStyle(
+                fontSize: 18,
+              ),
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm...',
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: Icon(
+                    Icons.search_outlined,
+                    color: Colors.black,
+                    size: 28,
+                  ),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+
+                // Thêm viền bên ngoài
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.blue, // Màu viền
+                    width: 2.0, // Độ dày viền
+                  ),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.blueAccent, // Màu viền khi focus
+                    width: 2.0, // Độ dày viền
+                  ),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
             FutureBuilder<List<ClassMistakeModel>>(
               future: futureMistakeClass,
               builder: (context, snapshot) {
@@ -108,14 +147,10 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                 }
 
                 // Hiển thị danh sách các lỗi
-                return GestureDetector(
-                  onTap: () => Navigator.of(context)
-                      .pushNamed(MistakeClassDetailPage.routeName),
-                  child: Column(
-                    children: snapshot.data!
-                        .map((e) => ItemClassmodels(classMistakeModel: e))
-                        .toList(),
-                  ),
+                return Column(
+                  children: snapshot.data!
+                      .map((e) => ItemClassModels(classMistakeModel: e))
+                      .toList(),
                 );
               },
             ),
