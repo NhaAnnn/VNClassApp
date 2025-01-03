@@ -35,7 +35,7 @@ class ButtonAdd extends StatelessWidget {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: color ?? Colors.cyanAccent,
           foregroundColor: Colors.white,
           minimumSize: size, // Set the minimum width and height
         ),
