@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ItemHome extends StatelessWidget {
-  const ItemHome(
-      {super.key, required this.icon, required this.title, this.onTap});
+  const ItemHome({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.onTap,
+  });
   final String icon;
   final String title;
   final Function()? onTap;

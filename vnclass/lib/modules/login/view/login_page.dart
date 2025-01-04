@@ -41,12 +41,12 @@ class _LoginPageState extends State<LoginPage> {
       try {
         await firestore.collection('users').add({
           'name': 'John Doe $i',
-          'age': 30,
+          'age': '30',
           'email': 'john.doe@example.com',
         });
-        print('Document added successfully');
+        print('Document added successfullybb');
       } catch (e) {
-        print('Error adding document: $e');
+        print('Error adding documelnt: $e');
       }
     }
   }
@@ -173,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
               title: 'Đăng Nhập',
               ontap: () {
                 // CustomDialogWidget.show(context);
-                // _addData();
+                //_addData();
                 Navigator.of(context).pushNamed(MainHomePage.routeName);
               },
             ),

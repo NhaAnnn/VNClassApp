@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:vnclass/common/design/color.dart';
 
 class ButtonWidget extends StatelessWidget {
-  const ButtonWidget({super.key, required this.title, this.ontap});
+  const ButtonWidget({
+    super.key,
+    required this.title,
+    this.ontap,
+    this.color,
+  });
 
   final String title;
   final Function()? ontap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -13,10 +19,10 @@ class ButtonWidget extends StatelessWidget {
       //timf hieeur
       onTap: ontap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: ColorApp.primaryColor,
+          color: color ?? ColorApp.primaryColor,
         ),
         alignment: Alignment.center,
         child: Text(

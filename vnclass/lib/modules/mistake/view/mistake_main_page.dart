@@ -37,125 +37,103 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     return AppBarWidget(
       titleString: 'Cập Nhật Vi Phạm',
       implementLeading: true,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Lớp',
-                    items: ['Lớp 10', 'Lớp 11', 'Lớp 12'],
-                    selectedItem: selectedItem,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedItem = newValue;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 8,
-                ),
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Học kỳ',
-                    items: ['Item 1', 'Item 2', 'Item 3'],
-                    selectedItem: selectedItem,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedItem = newValue;
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 8,
-                ),
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Năm học',
-                    items: ['Item 1', 'Item 2', 'Item 3'],
-                    selectedItem: selectedItem,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedItem = newValue;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            TextField(
-              style: TextStyle(
-                fontSize: 18,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm...',
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Icon(
-                    Icons.search_outlined,
-                    color: Colors.black,
-                    size: 28,
-                  ),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-
-                // Thêm viền bên ngoài
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.blue, // Màu viền
-                    width: 2.0, // Độ dày viền
-                  ),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.blueAccent, // Màu viền khi focus
-                    width: 2.0, // Độ dày viền
-                  ),
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
-                  ),
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: DropMenuWidget<String>(
+                  hintText: 'Lớp',
+                  items: ['Lớp 10', 'Lớp 11', 'Lớp 12'],
+                  selectedItem: selectedItem,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedItem = newValue;
+                    });
+                  },
                 ),
               ),
+              SizedBox(width: 8),
+              Expanded(
+                child: DropMenuWidget<String>(
+                  hintText: 'Học kỳ',
+                  items: ['Item 1', 'Item 2', 'Item 3'],
+                  selectedItem: selectedItem,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedItem = newValue;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: DropMenuWidget<String>(
+                  hintText: 'Năm học',
+                  items: ['Item 1', 'Item 2', 'Item 3'],
+                  selectedItem: selectedItem,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedItem = newValue;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          TextField(
+            style: TextStyle(fontSize: 18),
+            decoration: InputDecoration(
+              hintText: 'Tìm kiếm...',
+              prefixIcon: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Icon(
+                  Icons.search_outlined,
+                  color: Colors.black,
+                  size: 28,
+                ),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
             ),
-            SizedBox(
-              height: 20,
-            ),
-            FutureBuilder<List<ClassMistakeModel>>(
+          ),
+          SizedBox(height: 20),
+          Expanded(
+            // Sử dụng Expanded để cho ListView chiếm không gian còn lại
+            child: FutureBuilder<List<ClassMistakeModel>>(
               future: futureMistakeClass,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(); // Hiển thị loading
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
-                  return Text('Có lỗi xảy ra: ${snapshot.error}');
+                  return Center(
+                      child: Text('Có lỗi xảy ra: ${snapshot.error}'));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('Không có dữ liệu');
+                  return Center(child: Text('Không có dữ liệu'));
                 }
 
                 // Hiển thị danh sách các lỗi
-                return Column(
+                return ListView(
                   children: snapshot.data!
                       .map((e) => ItemClassModels(classMistakeModel: e))
                       .toList(),
                 );
               },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

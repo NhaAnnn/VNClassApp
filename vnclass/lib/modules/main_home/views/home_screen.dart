@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/app_bar_container.dart';
+import 'package:vnclass/modules/account/view/account_main_page.dart';
 import 'package:vnclass/modules/login/widget/item_home.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
+import 'package:vnclass/modules/report/view/report_main_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -128,11 +130,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 20,
                   ),
                   ItemHome(
+                    onTap: () => Navigator.of(context)
+                        .pushNamed(ReportMainPage.routeName),
                     icon: AssetHelper.iconMainHomeReport,
                     title: 'Báo Cáo',
                   ),
                   SizedBox(
                     height: 20,
+                  ),
+                  ItemHome(
+                    onTap: () => Navigator.of(context)
+                        .pushNamed(AccountMainPage.routeName),
+                    icon: AssetHelper.iconMainHomeAccount,
+                    title: 'Quản Lý Tài Khoản',
                   ),
                 ],
               ),

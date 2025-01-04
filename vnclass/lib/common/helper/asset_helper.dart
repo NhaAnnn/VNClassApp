@@ -8,4 +8,6 @@ class AssetHelper {
       'assets/icons/icon_main_home_google_classroom_.png';
   static const String iconMainHomeReport =
       'assets/icons/icon_main_home_report.png';
+  static const String iconMainHomeAccount =
+      'assets/icons/icon_main_home_account.png';
 }
