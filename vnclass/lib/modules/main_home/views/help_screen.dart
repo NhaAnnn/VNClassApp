@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
+import 'package:vnclass/modules/conduct/view/all_conduct.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -20,7 +21,11 @@ class _HelpScreenState extends State<HelpScreen> {
             ButtonWidget(
                 title: 'Lớp học',
                 ontap: () =>
-                    Navigator.of(context).pushNamed(AllClasses.routeName))
+                    Navigator.of(context).pushNamed(AllClasses.routeName)),
+            ButtonWidget(
+                title: 'DRL',
+                ontap: () =>
+                    Navigator.of(context).pushNamed(AllConduct.routeName))
           ],
         ),
       ),

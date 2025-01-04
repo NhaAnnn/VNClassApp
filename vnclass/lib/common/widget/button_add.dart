@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ButtonAdd extends StatelessWidget {
   const ButtonAdd({
@@ -8,6 +7,7 @@ class ButtonAdd extends StatelessWidget {
     this.icon,
     this.color,
     this.size,
+    this.onTap,
   });
 
   final String? label;
@@ -15,29 +15,28 @@ class ButtonAdd extends StatelessWidget {
   final Color? color;
   final Size? size;
 
+  final Function()? onTap;
+
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
       child: ElevatedButton.icon(
         onPressed: () {
           // Action to perform when the button is pressed
-          print('Alooo');
+
+          onTap;
         },
-        // icon: Icon(
-        //   FontAwesomeIcons.addressCard,
-        //   color: Colors.white,
-        // ),
         icon: icon,
         label: Text(
-          label!, // Replace with your desired text
+          label!,
           style: TextStyle(
-            fontWeight: FontWeight.bold, // Make the text bold
+            fontWeight: FontWeight.bold,
           ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color ?? Colors.cyanAccent,
           foregroundColor: Colors.white,
-          minimumSize: size, // Set the minimum width and height
+          minimumSize: size,
         ),
       ),
     );

@@ -14,6 +14,12 @@ class BackBar extends StatelessWidget {
     return AppBar(
       backgroundColor: Colors.blue,
       title: Text(title!),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(10),
+          bottomRight: Radius.circular(10),
+        ),
+      ),
       leading: IconButton(
         icon: Transform.rotate(
             angle: -1.57,

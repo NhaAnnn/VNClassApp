@@ -24,68 +24,83 @@ class _AllClassesState extends State<AllClasses> {
           BackBar(
             title: 'Danh sách các lớp',
           ),
-          Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ButtonAdd(
-                          color: Colors.cyan.shade500,
-                          size: Size(150, 50),
-                          label: 'Thêm 1 lớp học',
-                          icon: Icon(
-                            FontAwesomeIcons.addressCard,
-                            color: Colors.white,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ButtonAdd(
+                            color: Colors.cyan.shade500,
+                            size: Size(150, 50),
+                            label: 'Thêm 1 lớp học',
+                            icon: Icon(
+                              FontAwesomeIcons.addressCard,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        ButtonAdd(
-                          color: Colors.cyan.shade500,
-                          size: Size(150, 50),
-                          label: 'Thêm DS lớp học',
-                          icon: Icon(
-                            FontAwesomeIcons.addressCard,
-                            color: Colors.white,
+                          ButtonAdd(
+                            color: Colors.cyan.shade500,
+                            size: Size(150, 50),
+                            label: 'Thêm DS lớp học',
+                            icon: Icon(
+                              FontAwesomeIcons.addressCard,
+                              color: Colors.white,
+                            ),
+                            onTap: () => {print('Alooo')},
                           ),
-                        ),
-                      ]),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: DropMenuWidget(
-                        items: ['Học kỳ 1', 'Học kỳ 2'],
-                        hintText: 'Học kỳ',
-                      ),
-                    ),
-                    SizedBox(width: 20),
-                    Expanded(
-                      child: DropMenuWidget(
-                        items: ['2023-2024'],
-                        hintText: 'Năm học',
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: SearchBar(
-                    hintText: 'Search...',
-                    leading: Icon(FontAwesomeIcons.searchengin),
+                        ]),
                   ),
-                ),
-                SingleChildScrollView(
-                  child: Column(
+                  Row(
                     children: [
-                      AllClassesCard(),
-                      AllClassesCard(),
+                      Expanded(
+                        child: DropMenuWidget(
+                          items: ['Học kỳ 1', 'Học kỳ 2'],
+                          hintText: 'Học kỳ',
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: DropMenuWidget(
+                          items: ['2023-2024'],
+                          hintText: 'Năm học',
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: SearchBar(
+                      hintText: 'Search...',
+                      leading: Icon(FontAwesomeIcons.searchengin),
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                          AllClassesCard(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           )
         ],

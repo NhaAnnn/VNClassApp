@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:vnclass/common/widget/button_add.dart';
-import 'package:vnclass/modules/class_detail/view/class_detail.dart';
+import 'package:vnclass/modules/classes/class_detail/view/class_detail.dart';
 
 class AllClassesCard extends StatefulWidget {
   const AllClassesCard({super.key});
@@ -32,6 +31,7 @@ class _AllClassesCardState extends State<AllClassesCard> {
               child: Column(
                 children: [
                   _buildClassRow('Lớp:', '12a1'),
+                  _buildClassRow('Niên khóa:', '2024-2025'),
                   _buildClassRow('Sỉ số:', 'value'),
                   _buildClassRow('GVCN', 'value'),
                   if (_isVisible) _buildControlRow(),

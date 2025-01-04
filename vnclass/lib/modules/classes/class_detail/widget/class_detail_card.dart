@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:vnclass/common/widget/button_add.dart';
-import 'package:vnclass/modules/class_detail/view/class_detail.dart';
-import 'package:vnclass/modules/student_info/view/student_info.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/view/student_info.dart';
 
 class ClassDetailCard extends StatefulWidget {
   const ClassDetailCard({super.key});
@@ -30,7 +28,6 @@ class _ClassDetailCardState extends State<ClassDetailCard> {
               child: Column(
                 children: [
                   _buildClassDetailRow('Mã học sinh:', '13231323'),
-                  _buildClassDetailRow('STT:', '13231323'),
                   _buildClassDetailRow('Họ và tên:', '13231323'),
                   _buildClassDetailRow('Chức vụ:', '13231323'),
                 ],
