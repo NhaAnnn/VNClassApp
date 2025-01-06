@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/modules/account/model/account_model.dart';
+import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
 
 class ItemAccount extends StatelessWidget {
   const ItemAccount({super.key, required this.accountModel});
@@ -52,11 +54,13 @@ class ItemAccount extends StatelessWidget {
             child: GestureDetector(
               // onTap: () => Navigator.of(context)
               //     .pushNamed(MistakeClassDetailPage.routeName),
+              onTap: () =>
+                  Navigator.of(context).pushNamed(AccountEditAccPage.routeName),
               child: Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Icon(
-                  FontAwesomeIcons.arrowRight,
-                  size: 36,
+                  FontAwesomeIcons.pen,
+                  size: 30,
                   color: Colors.black,
                 ),
               ),
@@ -65,14 +69,14 @@ class ItemAccount extends StatelessWidget {
           Expanded(
             flex: 1,
             child: GestureDetector(
-              // onTap: () => Navigator.of(context)
-              //     .pushNamed(MistakeClassDetailPage.routeName),
+              onTap: () => CustomDialogWidget.showConfirmationDialog(
+                  context, 'Xác nhận xóa tài khoản?'),
               child: Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Icon(
-                  FontAwesomeIcons.arrowRight,
-                  size: 36,
-                  color: Colors.black,
+                  FontAwesomeIcons.trash,
+                  size: 30,
+                  color: Colors.red,
                 ),
               ),
             ),

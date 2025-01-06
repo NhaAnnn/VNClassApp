@@ -23,6 +23,7 @@ class CustomDialogWidget extends StatelessWidget {
       type: QuickAlertType.confirm,
       title: 'Bạn chắc chắn muốn xóa chứ?',
       showConfirmBtn: false,
+      showCancelBtn: false,
       widget: Padding(
         padding: const EdgeInsets.all(16.0), // Khoảng cách bên trong
         child: Row(
@@ -30,6 +31,36 @@ class CustomDialogWidget extends StatelessWidget {
           children: [
             Expanded(
               child: ButtonWidget(
+                title: 'Cancel',
+                color: Colors.red,
+              ),
+            ),
+            Spacer(),
+            Expanded(
+              child: ButtonWidget(
+                title: 'Okey',
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  static void showConfirmationDialog(BuildContext context, String title) {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.info,
+      title: title,
+      showConfirmBtn: false,
+      widget: Padding(
+        padding: const EdgeInsets.all(16.0), // Khoảng cách bên trong
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded(
+              child: ButtonWidget(
+                ontap: () => Navigator.of(context).pop(),
                 title: 'Cancel',
                 color: Colors.red,
               ),

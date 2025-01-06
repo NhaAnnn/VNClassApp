@@ -1,11 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 import 'package:vnclass/modules/mistake/view/mistake_write_mistake_page.dart';
+import 'package:vnclass/modules/report/widget/dialog_report.dart';
 
 class ItemTypeMistake extends StatelessWidget {
-  const ItemTypeMistake({super.key});
+  const ItemTypeMistake({
+    super.key,
+    this.leading,
+    this.routeName,
+    this.showDialogs,
+  });
+
+  final Widget? leading;
+  final String? routeName;
+  final bool? showDialogs;
 
   Future<List<TypeMistakeModel>> _fetchItems() async {
     final QuerySnapshot snapshot =
@@ -45,16 +56,31 @@ class ItemTypeMistake extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8), // Bo tròn góc
               ),
               child: ExpansionTile(
+                leading: leading,
                 title: Padding(
                   padding: const EdgeInsets.only(
                       bottom: 8.0), // Khoảng cách giữa title và border
-                  child: Text(item.idType),
+                  child: Row(
+                    children: [
+                      Text(item.idType),
+                    ],
+                  ),
                 ),
                 children: item.nameType // Sử dụng nameType làm children
                     .map(
                       (subtitle) => ListTile(
-                        onTap: () => Navigator.of(context)
-                            .pushNamed(MistakeWriteMistakePage.routeName),
+                        onTap: () {
+                          if (showDialogs ?? false) {
+                            Navigator.of(context)
+                                .pushNamed(MistakeWriteMistakePage.routeName);
+                          }
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return UserDialogEditType();
+                            },
+                          );
+                        },
                         title: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
