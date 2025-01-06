@@ -5,13 +5,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/helper/local_storage_helper.dart';
 import 'package:vnclass/common/routes/routes.dart';
+import 'package:vnclass/firebase_options.dart';
 import 'package:vnclass/modules/login/view/login_page.dart';
 
 void main() async {
   await Hive.initFlutter();
   await LocalStorageHelper.initLocalStorageHelper();
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
