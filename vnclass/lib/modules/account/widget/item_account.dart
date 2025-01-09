@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/modules/account/model/account_model.dart';
 import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
+import 'package:vnclass/modules/account/widget/dialog_permisstion.dart';
 
 class ItemAccount extends StatelessWidget {
   const ItemAccount({super.key, required this.accountModel});
@@ -33,7 +34,7 @@ class ItemAccount extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 8,
+            flex: 6,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -77,6 +78,27 @@ class ItemAccount extends StatelessWidget {
                   FontAwesomeIcons.trash,
                   size: 30,
                   color: Colors.red,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DialogPermisstion();
+                  },
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Icon(
+                  FontAwesomeIcons.apple,
+                  size: 30,
+                  color: const Color.fromARGB(255, 17, 67, 154),
                 ),
               ),
             ),

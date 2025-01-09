@@ -36,17 +36,104 @@ class _LoginPageState extends State<LoginPage> {
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<void> _addData() async {
-    for (int i = 0; i < 5; i++) {
+  Future<void> _addMistakeTypeData() async {
+    // Danh sách các dữ liệu bạn muốn thêm
+    List<Map<String, dynamic>> mistakeTypes = [
+      {
+        '_id': 'MT01',
+        '_mistakeTypeName': 'Trật tự, Tác Phong',
+        '_status': true,
+      },
+      {
+        '_id': 'MT02',
+        '_mistakeTypeName': 'Chuyên Cần',
+        '_status': true,
+      },
+      {
+        '_id': 'MT03',
+        '_mistakeTypeName': 'Học Tập',
+        '_status': true,
+      },
+      {
+        '_id': 'MT04',
+        '_mistakeTypeName': 'Nghiêm Trọng',
+        '_status': true,
+      }
+    ];
+
+    for (var mistake in mistakeTypes) {
       try {
-        await firestore.collection('users').add({
-          'name': 'John Doe $i',
-          'age': '30',
-          'email': 'john.doe@example.com',
-        });
-        print('Document added successfullybb');
+        await firestore
+            .collection('MISTAKE_TYPE')
+            .doc(mistake['_id'])
+            .set(mistake);
+        // print('Document ${mistake['_id']} added successfully');
       } catch (e) {
-        print('Error adding documelnt: $e');
+        // print('Error adding document ${mistake['_id']}: $e');
+      }
+    }
+  }
+
+  Future<void> _addMistakeData() async {
+    // Danh sách các dữ liệu bạn muốn thêm
+    List<Map<String, dynamic>> mistakeTypes = [
+      {
+        '_id': 'M01',
+        '_MTID': 'MT02',
+        '_minusPoint': 5,
+        '_mistakeName': 'Đi học trễ buổi sáng',
+        '_status': true,
+      },
+      {
+        '_id': 'M02',
+        '_MTID': 'MT02',
+        '_minusPoint': 5,
+        '_mistakeName': 'Đi học trễ buổi chiều',
+        '_status': true,
+      },
+      {
+        '_id': 'M03',
+        '_MTID': 'MT03',
+        '_minusPoint': 5,
+        '_mistakeName': 'Không thuộc bài',
+        '_status': true,
+      },
+      {
+        '_id': 'M04',
+        '_MTID': 'MT03',
+        '_minusPoint': 5,
+        '_mistakeName': 'Học môn khác, làm việc riêng trong giờ học',
+        '_status': true,
+      },
+      {
+        '_id': 'M05',
+        '_MTID': 'MT04',
+        '_minusPoint': 50,
+        '_mistakeName': 'Đùa giỡn gây hư hỏng tài sản nhà trường',
+        '_status': true,
+      },
+      {
+        '_id': 'M06',
+        '_MTID': 'MT04',
+        '_minusPoint': 60,
+        '_mistakeName': 'Sử dụng tài liệu trong kiểm tra trên lớp',
+        '_status': true,
+      },
+      {
+        '_id': 'M07',
+        '_MTID': 'MT01',
+        '_minusPoint': 5,
+        '_mistakeName': 'Áo không phù hiệu',
+        '_status': true,
+      }
+    ];
+
+    for (var mistake in mistakeTypes) {
+      try {
+        await firestore.collection('MISTAKE').doc(mistake['_id']).set(mistake);
+        // print('Document ${mistake['_id']} added successfully');
+      } catch (e) {
+        // print('Error adding document ${mistake['_id']}: $e');
       }
     }
   }
@@ -174,7 +261,8 @@ class _LoginPageState extends State<LoginPage> {
               title: 'Đăng Nhập',
               ontap: () {
                 // CustomDialogWidget.show(context);
-                //_addData();
+                // _addMistakeData();
+                // _addMistakeTypeData();
                 Navigator.of(context).pushNamed(MainHomePage.routeName);
               },
             ),

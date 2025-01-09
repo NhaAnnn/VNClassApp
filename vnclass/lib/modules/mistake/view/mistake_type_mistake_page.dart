@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
+import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/mistake/widget/item_type_mistake.dart';
 
 class MistakeTypeMistakePage extends StatefulWidget {
@@ -11,6 +12,8 @@ class MistakeTypeMistakePage extends StatefulWidget {
 }
 
 class _MistakeTypeMistakePageState extends State<MistakeTypeMistakePage> {
+  final MistakeController controller = MistakeController();
+
   @override
   Widget build(BuildContext context) {
     return AppBarWidget(
@@ -23,7 +26,9 @@ class _MistakeTypeMistakePageState extends State<MistakeTypeMistakePage> {
             height: MediaQuery.of(context).size.height *
                 0.8, // Chiều cao của ListView
             child: SingleChildScrollView(
-              child: ItemTypeMistake(),
+              child: ItemTypeMistake(
+                controller: controller,
+              ),
             ),
           ),
         ],

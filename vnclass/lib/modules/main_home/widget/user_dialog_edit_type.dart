@@ -3,16 +3,19 @@ import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/common/widget/radio_button_widget.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
+import 'package:vnclass/modules/mistake/models/mistake_model.dart';
 
 class UserDialogEditType extends StatefulWidget {
   const UserDialogEditType({
     super.key,
     this.showBtnDelete = true,
-    this.mistakeDialog = false, // Giá trị mặc định là true
+    this.mistakeDialog = false,
+    this.mistake, // Giá trị mặc định là true
   });
 
   final bool showBtnDelete; // Đổi thành non-nullable
   final bool mistakeDialog;
+  final MistakeModel? mistake;
   @override
   State<UserDialogEditType> createState() => _UserDialogEditTypeState();
 }
@@ -48,7 +51,8 @@ class _UserDialogEditTypeState extends State<UserDialogEditType> {
               Row(
                 children: [
                   Expanded(
-                    child: TextfieldWidget(labelText: 'Tên Vi Phạm'),
+                    child:
+                        TextfieldWidget(labelText: widget.mistake!.nameMistake),
                   ),
                 ],
               ),

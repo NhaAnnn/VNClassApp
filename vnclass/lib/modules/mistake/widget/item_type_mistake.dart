@@ -1,42 +1,30 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
+import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
+import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
 import 'package:vnclass/modules/mistake/view/mistake_write_mistake_page.dart';
-import 'package:vnclass/modules/report/widget/dialog_report.dart';
 
 class ItemTypeMistake extends StatelessWidget {
   const ItemTypeMistake({
     super.key,
-    this.leading,
-    this.routeName,
-    this.showDialogs,
+    required this.controller,
   });
 
-  final Widget? leading;
-  final String? routeName;
-  final bool? showDialogs;
-
-  Future<List<TypeMistakeModel>> _fetchItems() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('users').get();
-    return snapshot.docs.map((doc) {
-      return TypeMistakeModel.fromFirestore(doc); // Sử dụng từ factory
-    }).toList();
-  }
+  final MistakeController controller;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<TypeMistakeModel>>(
-      future: _fetchItems(),
+      future: controller.fetchMistakeTypes(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
+          return Center(
+              child: Text('Error loading mistake types: ${snapshot.error}'));
         }
 
         final items = snapshot.data!;
@@ -49,48 +37,43 @@ class ItemTypeMistake extends StatelessWidget {
             var item = items[index];
 
             return Container(
-              margin: EdgeInsets.symmetric(
-                  vertical: 4), // Khoảng cách giữa các item
+              margin: EdgeInsets.symmetric(vertical: 4),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey), // Border quanh item
-                borderRadius: BorderRadius.circular(8), // Bo tròn góc
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: ExpansionTile(
-                leading: leading,
+                leading: Icon(FontAwesomeIcons.trash),
                 title: Padding(
-                  padding: const EdgeInsets.only(
-                      bottom: 8.0), // Khoảng cách giữa title và border
+                  padding: const EdgeInsets.only(bottom: 8.0),
                   child: Row(
                     children: [
-                      Text(item.idType),
+                      Text(item
+                          .nameType), // Thay đổi để hiển thị tên loại vi phạm
                     ],
                   ),
                 ),
-                children: item.nameType // Sử dụng nameType làm children
-                    .map(
-                      (subtitle) => ListTile(
-                        onTap: () {
-                          if (showDialogs ?? false) {
-                            Navigator.of(context)
-                                .pushNamed(MistakeWriteMistakePage.routeName);
-                          }
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return UserDialogEditType();
-                            },
-                          );
+                children: item.mistakes.map((mistake) {
+                  return ListTile(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return UserDialogEditType(
+                            mistake: mistake,
+                          ); // Hiển thị hộp thoại chỉnh sửa
                         },
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(subtitle),
-                            Icon(FontAwesomeIcons.pen), // Thay đổi icon nếu cần
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
+                      );
+                    },
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(mistake.nameMistake), // Hiển thị tên vi phạm
+                        Icon(FontAwesomeIcons.pen),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             );
           },
