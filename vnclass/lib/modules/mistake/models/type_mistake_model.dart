@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'mistake_model.dart';
 
 class TypeMistakeModel {
   final String idType;
   final String nameType;
-  final List<MistakeModel> mistakes;
+  final List<MistakeModel>? mistakes;
   final bool status;
 
   TypeMistakeModel({
     required this.idType,
     required this.nameType,
-    required this.mistakes,
+    this.mistakes,
     required this.status,
   });
 
@@ -21,8 +22,9 @@ class TypeMistakeModel {
     // Lấy idType từ tài liệu
     String typeId = data['_id'] ?? '';
 
-    // Lấy danh sách các vi phạm từ Firestore
-    List<MistakeModel> mistakes = await _fetchMistakesByTypeId(typeId);
+    // Lấy danh sách các vi phạm từ Firestore thông qua MistakeController
+    List<MistakeModel> mistakes =
+        await MistakeController.fetchMistakesByTypeId(typeId);
 
     return TypeMistakeModel(
       idType: typeId,
@@ -32,17 +34,11 @@ class TypeMistakeModel {
     );
   }
 
-  // Phương thức tĩnh để lấy các vi phạm theo mtID
-  static Future<List<MistakeModel>> _fetchMistakesByTypeId(
-      String typeId) async {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('MISTAKE')
-        .where('_MTID', isEqualTo: typeId) // Lọc theo mtID
-        .get();
-
-    return snapshot.docs
-        .map((doc) =>
-            MistakeModel.fromFirestore(doc.data() as Map<String, dynamic>))
-        .toList();
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': idType,
+      '_mistakeTypeName': nameType,
+      '_status': status,
+    };
   }
 }

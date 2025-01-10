@@ -18,8 +18,18 @@ class MistakeModel {
       idMistake: data['_id'] ?? '',
       nameMistake: data['_mistakeName'] ?? '',
       status: data['_status'] ?? false,
-      mtID: data['_MTID'] ?? '',
+      mtID: data['MT_id'] ?? '',
       minusPoint: data['_minusPoint'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': idMistake,
+      '_mistakeName': nameMistake,
+      '_status': status,
+      'MT_id': mtID,
+      '_minusPoint': minusPoint,
+    };
   }
 }

@@ -1,5 +1,3 @@
-// user_change_type_mistake_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
@@ -21,6 +19,12 @@ class _UserChangeTypeMistakeScreenState
     extends State<UserChangeTypeMistakeScreen> {
   final MistakeController controller = MistakeController();
 
+  Future<void> _reloadData() async {
+    // Logic để tải lại dữ liệu
+    await controller.fetchMistakeTypes();
+// Cập nhật lại giao diện
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBarWidget(
@@ -29,24 +33,33 @@ class _UserChangeTypeMistakeScreenState
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.03,
-            ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.03),
             Row(
               children: [
                 Expanded(
                   child: ButtonWidget(
                     title: 'Thêm vi phạm và loại vi phạm',
-                    ontap: () => Navigator.of(context)
-                        .pushNamed(UserAddTypeMistakeScreen.routeName),
+                    ontap: () async {
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => UserAddTypeMistakeScreen(),
+                        ),
+                      );
+                      // Sau khi quay lại, bạn cần tìm widget ItemTypeMistake và gọi refreshData
+                    },
                   ),
                 ),
               ],
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.02,
+            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+            // Loại bỏ từ khóa const
+            Column(
+              children: [
+                ItemTypeMistake(
+                  controller: controller,
+                ),
+              ],
             ),
-            ItemTypeMistake(controller: controller), // Truyền controller vào
           ],
         ),
       ),

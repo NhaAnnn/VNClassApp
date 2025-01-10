@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_add_type.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
+import 'package:vnclass/modules/mistake/widget/item_type_mistake.dart';
 
 class UserAddTypeMistakeScreen extends StatefulWidget {
   const UserAddTypeMistakeScreen({super.key});
@@ -16,6 +17,9 @@ class _UserAddTypeMistakeScreenState extends State<UserAddTypeMistakeScreen> {
   @override
   Widget build(BuildContext context) {
     return AppBarWidget(
+      onback: () {
+        // ItemTypeMistake.loadMistakeTypes(context);
+      },
       implementLeading: true,
       titleString: 'Thêm Loại và Vi Phạm',
       child: SingleChildScrollView(

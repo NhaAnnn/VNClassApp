@@ -9,16 +9,19 @@ class AppBarWidget extends StatelessWidget {
     this.title,
     this.implementLeading = false,
     this.titleString,
+    this.onback,
   });
 
   final Widget child;
   final Widget? title;
   final String? titleString;
   final bool implementLeading;
+  final Function? onback;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: Stack(
         children: [
@@ -41,7 +44,12 @@ class AppBarWidget extends StatelessWidget {
                     children: [
                       if (implementLeading)
                         GestureDetector(
-                          onTap: () => Navigator.pop(context),
+                          onTap: () {
+                            if (onback != null) {
+                              onback!(); // Gọi hàm onBack nếu có
+                            }
+                            Navigator.pop(context);
+                          },
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.all(

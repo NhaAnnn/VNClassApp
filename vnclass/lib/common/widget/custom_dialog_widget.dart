@@ -47,7 +47,8 @@ class CustomDialogWidget extends StatelessWidget {
     );
   }
 
-  static void showConfirmationDialog(BuildContext context, String title) {
+  static void showConfirmationDialog(BuildContext context, String title,
+      {VoidCallback? onTapOK}) {
     QuickAlert.show(
       context: context,
       type: QuickAlertType.info,
@@ -69,6 +70,11 @@ class CustomDialogWidget extends StatelessWidget {
             Expanded(
               child: ButtonWidget(
                 title: 'Okey',
+                ontap: () {
+                  if (onTapOK != null) {
+                    onTapOK();
+                  }
+                },
               ),
             )
           ],
