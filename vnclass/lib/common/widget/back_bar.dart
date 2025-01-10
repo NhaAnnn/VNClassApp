@@ -23,8 +23,7 @@ class BackBar extends StatelessWidget {
       leading: IconButton(
         icon: Transform.rotate(
             angle: -1.57,
-            child:
-                Icon(FontAwesomeIcons.arrowTurnUp)), // Custom back button icon
+            child: Icon(FontAwesomeIcons.turnUp)), // Custom back button icon
         onPressed: () {
           Navigator.pop(context); // Navigate back
         },

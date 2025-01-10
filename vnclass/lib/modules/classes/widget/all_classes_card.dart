@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/class_detail/view/class_detail.dart';
+import 'package:vnclass/modules/classes/widget/delete_class_dialog.dart';
+import 'package:vnclass/modules/classes/widget/update_class_dialog.dart';
 
 class AllClassesCard extends StatefulWidget {
-  const AllClassesCard({super.key});
-
+  const AllClassesCard({
+    super.key,
+    required this.classModel,
+  });
+  final ClassModel classModel;
   @override
   State<AllClassesCard> createState() => _AllClassesCardState();
 }
@@ -12,6 +18,8 @@ class AllClassesCard extends StatefulWidget {
 class _AllClassesCardState extends State<AllClassesCard> {
   bool _isVisible = false;
   bool _isRotated = false;
+  ClassModel get classModel => widget.classModel;
+  // String classID = ;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +38,10 @@ class _AllClassesCardState extends State<AllClassesCard> {
             Expanded(
               child: Column(
                 children: [
-                  _buildClassRow('Lớp:', '12a1'),
-                  _buildClassRow('Niên khóa:', '2024-2025'),
-                  _buildClassRow('Sỉ số:', 'value'),
-                  _buildClassRow('GVCN', 'value'),
+                  _buildClassRow('Lớp:', classModel.className.toString()),
+                  _buildClassRow('Niên khóa:', classModel.year.toString()),
+                  _buildClassRow('Sỉ số:', classModel.amount.toString()),
+                  _buildClassRow('GVCN', classModel.teacherName.toString()),
                   if (_isVisible) _buildControlRow(),
                 ],
               ),
@@ -108,13 +116,37 @@ class _AllClassesCardState extends State<AllClassesCard> {
             child: _buildControlButton(
                 'Xem', FontAwesomeIcons.solidEye, Colors.black),
             onTap: () => {
-              Navigator.of(context).pushNamed(ClassDetail.routeName),
+              Navigator.of(context).pushNamed(ClassDetail.routeName,
+                  arguments: {
+                    'classID': classModel.id,
+                    'className': classModel.className
+                  }),
             },
           ),
-          _buildControlButton(
-              'Sửa', FontAwesomeIcons.pencil, Colors.blueAccent),
-          _buildControlButton(
-              'Xóa', FontAwesomeIcons.solidTrashCan, Colors.redAccent)
+          GestureDetector(
+            child: _buildControlButton(
+                'Sửa', FontAwesomeIcons.pencil, Colors.blueAccent),
+            onTap: () => {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return UpdateClassDialog();
+                },
+              )
+            },
+          ),
+          GestureDetector(
+            child: _buildControlButton(
+                'Xóa', FontAwesomeIcons.solidTrashCan, Colors.redAccent),
+            onTap: () => {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return DeleteClassDialog();
+                },
+              )
+            },
+          )
         ],
       ),
     );

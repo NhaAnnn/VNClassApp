@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
-import 'package:vnclass/common/widget/button_add.dart';
+import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
+import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
+import 'package:vnclass/modules/classes/widget/create_list_class_dialog.dart';
+import 'package:vnclass/modules/classes/widget/create_one_class_dialog.dart';
 
 class AllClasses extends StatefulWidget {
   const AllClasses({super.key});
@@ -34,24 +38,48 @@ class _AllClassesState extends State<AllClasses> {
                     child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          ButtonAdd(
-                            color: Colors.cyan.shade500,
-                            size: Size(150, 50),
+                          ButtonN(
+                            colorText: Colors.black,
+                            color: Colors.cyan.shade200,
+                            size: Size(
+                              MediaQuery.of(context).size.width * 0.42,
+                              MediaQuery.of(context).size.height * 0.05,
+                            ),
                             label: 'Thêm 1 lớp học',
                             icon: Icon(
-                              FontAwesomeIcons.addressCard,
-                              color: Colors.white,
+                              FontAwesomeIcons.circlePlus,
+                              color: Colors.black,
                             ),
+                            ontap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CreateOneClassDialog();
+                                },
+                              );
+                              // CustomDialogWidget.show(context);
+                            },
                           ),
-                          ButtonAdd(
-                            color: Colors.cyan.shade500,
-                            size: Size(150, 50),
+                          ButtonN(
+                            colorText: Colors.black,
+                            color: Colors.cyan.shade200,
+                            size: Size(
+                              MediaQuery.of(context).size.width * 0.42,
+                              MediaQuery.of(context).size.height * 0.05,
+                            ),
                             label: 'Thêm DS lớp học',
                             icon: Icon(
-                              FontAwesomeIcons.addressCard,
-                              color: Colors.white,
+                              FontAwesomeIcons.circlePlus,
+                              color: Colors.black,
                             ),
-                            onTap: () => {print('Alooo')},
+                            ontap: () => {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CreateListClassDialog();
+                                },
+                              )
+                            },
                           ),
                         ]),
                   ),
@@ -80,23 +108,32 @@ class _AllClassesState extends State<AllClasses> {
                     ),
                   ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                          AllClassesCard(),
-                        ],
-                      ),
+                    child: FutureBuilder<List<ClassModel>>(
+                      future: ClassController.fetchAllClasses(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Center(child: Text('Không có lớp học'));
+                        }
+
+                        // Dữ liệu đã được lấy thành công
+                        List<ClassModel> classes = snapshot.data!;
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: classes.map((classModel) {
+                              return AllClassesCard(
+                                  classModel:
+                                      classModel); // Truyền dữ liệu vào ClassDetailCard
+                            }).toList(),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
+import 'package:vnclass/common/widget/button_n.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 
 class StudentInfo extends StatefulWidget {
   const StudentInfo({super.key});
@@ -10,18 +13,31 @@ class StudentInfo extends StatefulWidget {
 }
 
 class _StudentInfoState extends State<StudentInfo> {
-  final TextEditingController _controller = TextEditingController();
-  String? _selectedPosition = 'Ban cán sự';
+  // final ClassModel classModel;
 
-  void onChanged(String? value) {
-    setState(() {
-      _selectedPosition = value; // Update the state variable
-    });
-    // Call function to update database
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   // Lấy arguments từ ModalRoute
+  //   final args = ModalRoute.of(context)!.settings.arguments as StudentModel;
+  //    // Lấy arguments từ ModalRoute
+  //   final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+  //   // Lấy đối tượng StudentModel và ClassModel
+  //   final StudentModel studentModel = args['student'] as StudentModel;
+  //   final ClassModel classModel = args['class'] as ClassModel;
+  //   studentModel = args; // Gán giá trị cho classID
+  // }
 
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    // Lấy dữ liệu từ arguments
+    final StudentModel studentModel = args['studentModel'] as StudentModel;
+    final String className = args['className'] as String;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -47,43 +63,54 @@ class _StudentInfoState extends State<StudentInfo> {
                     ),
                   ),
                   SizedBox(height: 16),
-                  _buildStudentDetailRow('Mã học sinh:', '123456'),
-                  _buildStudentDetailRow('Lớp học:', '123456'),
                   _buildStudentDetailRow(
-                      'Họ và tên:', '1234dsgdsfgdfsgsdfgdfsgdfgsdfgsdf56'),
-                  _buildStudentDetailRow('Giới tính:', 'NAMNAM'),
-                  _buildStudentDetailRow('Ngày sinh:', '12/34/555556'),
+                      'Mã học sinh:', studentModel.id.toString()),
+                  _buildStudentDetailRow('Lớp học:', className),
+                  _buildStudentDetailRow('Họ và tên:',
+                      studentModel.studentInfoModel.studentName.toString()),
+                  _buildStudentDetailRow('Giới tính:',
+                      studentModel.studentInfoModel.gender.toString()),
+                  _buildStudentDetailRow('Ngày sinh:',
+                      studentModel.studentInfoModel.birthday.toString()),
                   Row(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          'Chức vụ:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
+                        child: Text('Chức vụ:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
                       Radio(
                         value: 'Học sinh',
-                        groupValue: _selectedPosition,
-                        onChanged: onChanged,
+                        groupValue: studentModel.committee.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            studentModel.committee = value; // Cập nhật chức vụ
+                          });
+                        },
                         activeColor: Colors.blueAccent,
                       ),
-                      Text(
-                        'Học sinh',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      Text('Học sinh', style: TextStyle(fontSize: 18)),
                       Radio(
                         value: 'Ban cán sự',
-                        groupValue: _selectedPosition,
-                        onChanged: onChanged,
+                        groupValue: studentModel.committee.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            studentModel.committee = value; // Cập nhật chức vụ
+                          });
+                        },
                         activeColor: Colors.blueAccent,
                       ),
-                      Text(
-                        'Ban cán sự',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      Text('Ban cán sự', style: TextStyle(fontSize: 18)),
                     ],
+                  ),
+                  SizedBox(height: 20),
+                  ButtonN(
+                    ontap: () {
+                      StudentController.updateStudentPositionInDatabase(
+                          studentModel); // Gọi hàm cập nhật khi nhấn nút
+                    },
+                    label: 'Cập nhật',
                   ),
                 ],
               ),

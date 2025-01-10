@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/view/student_info.dart';
 
 class ClassDetailCard extends StatefulWidget {
-  const ClassDetailCard({super.key});
+  const ClassDetailCard({
+    super.key,
+    required this.studentModel,
+    this.className,
+  });
 
+  final StudentModel studentModel;
+  final String? className;
   @override
   State<ClassDetailCard> createState() => _ClassDetailCardState();
 }
 
 class _ClassDetailCardState extends State<ClassDetailCard> {
+  StudentModel get studentModel => widget.studentModel;
+  String? get className => widget.className;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -27,15 +36,22 @@ class _ClassDetailCardState extends State<ClassDetailCard> {
             Expanded(
               child: Column(
                 children: [
-                  _buildClassDetailRow('Mã học sinh:', '13231323'),
-                  _buildClassDetailRow('Họ và tên:', '13231323'),
-                  _buildClassDetailRow('Chức vụ:', '13231323'),
+                  _buildClassDetailRow(
+                      'Mã học sinh:', studentModel.id.toString()),
+                  _buildClassDetailRow('Họ và tên:',
+                      studentModel.studentInfoModel.studentName.toString()),
+                  _buildClassDetailRow(
+                      'Chức vụ:', studentModel.committee.toString()),
                 ],
               ),
             ),
             GestureDetector(
               onTap: () => {
-                Navigator.of(context).pushNamed(StudentInfo.routeName),
+                Navigator.of(context)
+                    .pushNamed(StudentInfo.routeName, arguments: {
+                  'studentModel': studentModel,
+                  'className': className,
+                }),
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 16),
