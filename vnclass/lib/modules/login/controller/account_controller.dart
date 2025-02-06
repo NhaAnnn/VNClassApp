@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 
 class AccountController {
-  Future<AccountModel> fetchMistakeTypes(
+  Future<AccountModel> fetchAccount(
       String username, String passHash) async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
