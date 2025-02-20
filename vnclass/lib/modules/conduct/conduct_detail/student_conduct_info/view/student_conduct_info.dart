@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/widget/student_mistake_card.dart';
+import 'package:vnclass/modules/mistake/models/edit_mistake_model.dart';
 
 class StudentConductInfo extends StatefulWidget {
   const StudentConductInfo({super.key});
@@ -11,6 +13,31 @@ class StudentConductInfo extends StatefulWidget {
 }
 
 class _StudentConductInfoState extends State<StudentConductInfo> {
+  List<EditMistakeModel> listMistake = [];
+
+  Future<List<EditMistakeModel>> getMistake(String studentID) async {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('MISTAKE_MONTH')
+        .where('STD_id', isEqualTo: studentID)
+        .get();
+
+    for (var doc in snapshot.docs) {
+      EditMistakeModel item = EditMistakeModel(
+        acc_name: doc['ACC_name'],
+        m_name: doc['M_name'],
+        mm_time: doc['_time'],
+        mm_subject: doc['_subject'],
+        acc_id: '',
+        m_id: '',
+        mm_id: '',
+        mm_month: '',
+        std_id: '',
+      );
+      listMistake.add(item);
+    }
+    return listMistake;
+  }
+
   @override
   Widget build(BuildContext context) {
     final args =
