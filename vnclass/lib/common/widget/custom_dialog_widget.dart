@@ -83,6 +83,32 @@ class CustomDialogWidget extends StatelessWidget {
     );
   }
 
+  static Future<bool> showConfirmationDialog1(
+      BuildContext context, String title) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false on cancel
+              },
+            ),
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true on confirm
+              },
+            ),
+          ],
+        );
+      },
+    ).then((value) => value ?? false); // Ensure a boolean is returned
+  }
+
   static void showCustomAlert(BuildContext context) {
     QuickAlert.show(
       context: context,

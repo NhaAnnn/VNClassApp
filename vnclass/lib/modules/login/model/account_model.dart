@@ -67,6 +67,7 @@ class AccountModel {
           DocumentSnapshot groupDoc = groupQuery.docs.first;
           groupModel =
               GroupModel.fromFirestore(groupDoc); // Cập nhật groupModel
+          print('Fetching group model for goupID: $groupModel');
         } else {
           print('No group found for goupID: $goupID');
         }

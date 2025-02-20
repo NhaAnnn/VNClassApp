@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
@@ -18,13 +17,8 @@ class UserChangeTypeMistakeScreen extends StatefulWidget {
 class _UserChangeTypeMistakeScreenState
     extends State<UserChangeTypeMistakeScreen> {
   final MistakeController controller = MistakeController();
-
-  Future<void> _reloadData() async {
-    // Logic để tải lại dữ liệu
-    await controller.fetchMistakeTypes();
-// Cập nhật lại giao diện
-  }
-
+  final GlobalKey<ItemTypeMistakeState> itemTypeMistakeKey =
+      GlobalKey<ItemTypeMistakeState>();
   @override
   Widget build(BuildContext context) {
     return AppBarWidget(
@@ -45,17 +39,18 @@ class _UserChangeTypeMistakeScreenState
                           builder: (context) => UserAddTypeMistakeScreen(),
                         ),
                       );
-                      // Sau khi quay lại, bạn cần tìm widget ItemTypeMistake và gọi refreshData
+                      // Gọi refreshData sau khi trở về
+                      await itemTypeMistakeKey.currentState?.refreshData();
                     },
                   ),
                 ),
               ],
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            // Loại bỏ từ khóa const
             Column(
               children: [
                 ItemTypeMistake(
+                  key: itemTypeMistakeKey,
                   controller: controller,
                 ),
               ],

@@ -4,9 +4,14 @@ import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
 import 'package:vnclass/modules/mistake/view/mistake_class_detail_page.dart';
 
 class ItemClassModels extends StatelessWidget {
-  const ItemClassModels({super.key, required this.classMistakeModel});
+  const ItemClassModels({
+    super.key,
+    required this.classMistakeModel,
+    this.hocKy = '1',
+  });
 
   final ClassMistakeModel classMistakeModel;
+  final String? hocKy;
 
   @override
   Widget build(BuildContext context) {
@@ -34,25 +39,31 @@ class ItemClassModels extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 16,
+                horizontal: 1,
                 vertical: 12,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildClassRow('Lớp:', classMistakeModel.className),
-                  _buildClassRow('Học kỳ:', classMistakeModel.className),
-                  _buildClassRow('Niên khóa:', classMistakeModel.className),
-                  _buildClassRow('Sĩ số:', classMistakeModel.className),
-                  _buildClassRow('GVCN:', 'Đổ Văn Sướng'),
-                  _buildClassRow('Số vi phạm:', classMistakeModel.className),
+                  _buildClassRow('Niên khóa:', classMistakeModel.academicYear),
+                  _buildClassRow('Sĩ số:', '${classMistakeModel.classSize}'),
+                  _buildClassRow('GVCN:', classMistakeModel.homeroomTeacher),
+                  _buildClassRow('Học kỳ:', hocKy ?? '1'), // In ra học kỳ
+                  _buildClassRow('Số vi phạm:',
+                      _getNumberOfErrors(hocKy)), // In ra số vi phạm
                 ],
               ),
             ),
           ),
           GestureDetector(
-            onTap: () => Navigator.of(context)
-                .pushNamed(MistakeClassDetailPage.routeName),
+            onTap: () => Navigator.of(context).pushNamed(
+              MistakeClassDetailPage.routeName,
+              arguments: {
+                'classMistakeModel': classMistakeModel,
+                'hocKy': hocKy
+              },
+            ),
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Icon(
@@ -65,6 +76,19 @@ class ItemClassModels extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getNumberOfErrors(String? hocKy) {
+    switch (hocKy) {
+      case 'Học kỳ 1':
+        return classMistakeModel.numberOfErrorS1;
+      case 'Học kỳ 2':
+        return classMistakeModel.numberOfErrorS2;
+      case 'Cả năm':
+        return classMistakeModel.numberOfErrorAll;
+      default:
+        return classMistakeModel.numberOfErrorS1; // Giá trị mặc định
+    }
   }
 
   Widget _buildClassRow(String label, String value) {

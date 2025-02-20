@@ -32,7 +32,11 @@ class _DialogExportAccState extends State<DialogExportAcc> {
                       style: TextStyle(fontWeight: FontWeight.w600)),
                   Expanded(
                     child: RadioButtonWidget(
-                      options: ['Học sinh', 'Giáo viên', 'Ban giám hiệu'],
+                      options: [
+                        'Học sinh - PHHS',
+                        'Giáo viên',
+                        'Ban giám hiệu',
+                      ],
                       onChanged: (value) {
                         setState(() {
                           selectedOption = value;

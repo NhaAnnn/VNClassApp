@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
 import 'package:vnclass/modules/mistake/models/student_mistake_model.dart';
 import 'package:vnclass/modules/mistake/view/mistake_type_mistake_page.dart';
 import 'package:vnclass/modules/mistake/view/mistake_view_mistake_page.dart';
@@ -7,10 +8,13 @@ import 'package:vnclass/modules/mistake/view/mistake_view_mistake_page.dart';
 class ItemClassMistakeStudent extends StatelessWidget {
   const ItemClassMistakeStudent({
     super.key,
-    required this.studentMistakeModel,
+    required this.studentDetailModel,
+    this.month,
+    this.onRefresh, // Thêm dòng này
   });
-  final StudentMistakeModel studentMistakeModel;
-
+  final StudentDetailModel studentDetailModel;
+  final String? month;
+  final VoidCallback? onRefresh;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -43,7 +47,7 @@ class ItemClassMistakeStudent extends StatelessWidget {
             Expanded(
               flex: 2,
               child: Text(
-                studentMistakeModel.idStudent,
+                studentDetailModel.idStudent,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -57,7 +61,7 @@ class ItemClassMistakeStudent extends StatelessWidget {
             Expanded(
               flex: 5,
               child: Text(
-                studentMistakeModel.nameStudent,
+                studentDetailModel.nameStudent,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -71,7 +75,7 @@ class ItemClassMistakeStudent extends StatelessWidget {
             Expanded(
               flex: 1,
               child: Text(
-                studentMistakeModel.numberOfErrors,
+                studentDetailModel.numberOfErrors,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -85,8 +89,20 @@ class ItemClassMistakeStudent extends StatelessWidget {
             Expanded(
               flex: 1,
               child: GestureDetector(
-                onTap: () => Navigator.of(context)
-                    .pushNamed(MistakeViewMistakePage.routeName),
+                onTap: () async {
+                  await Navigator.pushNamed(
+                    context,
+                    MistakeViewMistakePage.routeName,
+                    arguments: {
+                      'studentDetailModel': studentDetailModel,
+                      'month': month,
+                    },
+                  );
+
+                  if (onRefresh != null && context.mounted) {
+                    onRefresh!(); // Gọi callback refresh
+                  }
+                },
                 child: Icon(
                   FontAwesomeIcons.eye,
                 ),
@@ -98,8 +114,10 @@ class ItemClassMistakeStudent extends StatelessWidget {
             Expanded(
               flex: 1,
               child: GestureDetector(
-                onTap: () => Navigator.of(context)
-                    .pushNamed(MistakeTypeMistakePage.routeName),
+                onTap: () => Navigator.of(context).pushNamed(
+                  MistakeTypeMistakePage.routeName,
+                  arguments: studentDetailModel,
+                ),
                 child: Icon(
                   FontAwesomeIcons.pen,
                 ),

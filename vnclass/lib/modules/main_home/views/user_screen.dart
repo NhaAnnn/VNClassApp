@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
+import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/modules/account/view/account_creat_acc_page.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/views/main_home_page.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_type_mistake_screen.dart';
@@ -19,6 +22,8 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
+    final accountProvider = Provider.of<AccountProvider>(context);
+    final account = accountProvider.account;
     return AppBarWidget(
       titleString: 'Thông tin tài khoản',
       child: SingleChildScrollView(
@@ -63,12 +68,12 @@ class _UserScreenState extends State<UserScreen> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.02,
                     ),
-                    _buildClassRow('Họ và tên:', 'Nguyễn trần châu hải đông'),
-                    _buildClassRow('Tên tài khoản:', 'B21035615'),
-                    _buildClassRow('Lớp:', '120a12'),
-                    _buildClassRow('Giới tính', 'Nam'),
-                    _buildClassRow('Ngày sinh:', '12/12/2025'),
-                    _buildClassRow('Chức vụ:', 'Ban giám hiệu')
+                    _buildClassRow('Họ và tên:', account!.accName),
+                    _buildClassRow('Tên tài khoản:', account.userName),
+                    _buildClassRow('Giới tính', account.gender),
+                    _buildClassRow('Ngày sinh:', account.birth),
+                    _buildClassRow(
+                        'Loại tài khoản:', account.groupModel!.groupName)
                   ],
                 ),
               ),
@@ -81,6 +86,14 @@ class _UserScreenState extends State<UserScreen> {
                 routeName: UserChangeTypeMistakeScreen.routeName),
             _buildItemDetail(context, 'Đổi mật khẩu',
                 routeName: UserChangePassScreen.routeName),
+            Row(
+              children: [
+                ButtonWidget(
+                  title: 'Đăng xuất',
+                  color: Colors.red,
+                )
+              ],
+            ),
           ],
         ),
       ),

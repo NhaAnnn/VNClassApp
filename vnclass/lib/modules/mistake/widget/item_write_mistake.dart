@@ -1,23 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
+import 'package:vnclass/modules/mistake/models/package_data.dart';
+import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
+import 'package:vnclass/modules/mistake/view/mistake_write_mistake_page.dart';
 
-class ItemTypeMistake extends StatefulWidget {
-  const ItemTypeMistake({
+class ItemWriteMistake extends StatefulWidget {
+  const ItemWriteMistake({
     super.key,
     required this.controller,
+    this.studentDetailModel,
   });
 
   final MistakeController controller;
+  final StudentDetailModel? studentDetailModel;
 
   @override
-  ItemTypeMistakeState createState() => ItemTypeMistakeState();
+  ItemWriteMistakeState createState() => ItemWriteMistakeState();
 }
 
-class ItemTypeMistakeState extends State<ItemTypeMistake> {
+class ItemWriteMistakeState extends State<ItemWriteMistake> {
   List<TypeMistakeModel>? items;
 
   @override
@@ -65,6 +72,9 @@ class ItemTypeMistakeState extends State<ItemTypeMistake> {
 
   @override
   Widget build(BuildContext context) {
+    final accountProvider = Provider.of<AccountProvider>(context);
+    final account = accountProvider.account;
+
     if (items == null) {
       return Center(child: CircularProgressIndicator());
     }
@@ -82,33 +92,18 @@ class ItemTypeMistakeState extends State<ItemTypeMistake> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: ExpansionTile(
-            leading: GestureDetector(
-              onTap: () => CustomDialogWidget.showConfirmationDialog(
-                context,
-                'title',
-                onTapOK: () {
-                  _updateTypeMistake(item, false);
-                },
-              ),
-              child: Icon(Icons.delete),
-            ),
             title: Text(item.nameType),
             children: item.mistakes!.map((mistake) {
               return ListTile(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return UserDialogEditType(
-                        mistake: mistake,
-                        typeItems: items,
-                        onUpdate: () async {
-                          await refreshData();
-                        },
-                      );
-                    },
-                  );
-                },
+                onTap: () => Navigator.of(context).pushNamed(
+                  MistakeWriteMistakePage.routeName,
+                  arguments: PackageData(
+                    agrReq: mistake.nameMistake,
+                    agr2: mistake,
+                    agr3: widget.studentDetailModel,
+                    agr4: account,
+                  ),
+                ),
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

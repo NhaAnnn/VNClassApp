@@ -1,25 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
+import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
+import 'package:vnclass/modules/main_home/widget/user_dialog_add_mistake.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_add_type.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
-import 'package:vnclass/modules/mistake/widget/item_type_mistake.dart';
+import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 
 class UserAddTypeMistakeScreen extends StatefulWidget {
   const UserAddTypeMistakeScreen({super.key});
-  static const String routeName = 'user_add_type_mistake_screen';
+  static const String routeName = '/user_add_type_mistake_screen';
   @override
   State<UserAddTypeMistakeScreen> createState() =>
       _UserAddTypeMistakeScreenState();
 }
 
 class _UserAddTypeMistakeScreenState extends State<UserAddTypeMistakeScreen> {
+  final MistakeController controller = MistakeController();
+  List<TypeMistakeModel>? items;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMistakeTypes();
+  }
+
+  Future<void> _loadMistakeTypes() async {
+    items = await controller.fetchMistakeTypes();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBarWidget(
-      onback: () {
-        // ItemTypeMistake.loadMistakeTypes(context);
-      },
+      onback: () {},
       implementLeading: true,
       titleString: 'Thêm Loại và Vi Phạm',
       child: SingleChildScrollView(
@@ -69,8 +83,9 @@ class _UserAddTypeMistakeScreenState extends State<UserAddTypeMistakeScreen> {
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
-                      return UserDialogEditType(
+                      return UserDialogAddMistake(
                         showBtnDelete: false,
+                        typeItems: items,
                       );
                     });
               },

@@ -28,7 +28,7 @@ class _AccountCreatAccPageState extends State<AccountCreatAccPage> {
               tabs: [
                 Tab(text: 'Ban giám hiệu'),
                 Tab(text: 'Giáo viên'),
-                Tab(text: 'Học sinh'),
+                Tab(text: 'Học sinh - Phụ huynh'),
               ],
               indicatorColor: Theme.of(context).primaryColor,
             ),

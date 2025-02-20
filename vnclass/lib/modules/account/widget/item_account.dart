@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';
-import 'package:vnclass/modules/account/model/account_model.dart';
+import 'package:vnclass/modules/account/model/account_edit_model.dart';
 import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
 import 'package:vnclass/modules/account/widget/dialog_permisstion.dart';
+import 'package:vnclass/modules/login/model/account_model.dart';
 
 class ItemAccount extends StatelessWidget {
-  const ItemAccount({super.key, required this.accountModel});
+  const ItemAccount({super.key, this.accountModel, this.accountEditModel});
 
-  final AccountModel accountModel;
+  final AccountModel? accountModel;
+  final AccountEditModel? accountEditModel;
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +45,10 @@ class ItemAccount extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildClassRow('Lớp:', accountModel.className),
-                  _buildClassRow('Tài khoản:', accountModel.className),
-                  _buildClassRow('Mật khẩu:', accountModel.className),
+                  _buildClassRow('Tên người dùng:',
+                      accountEditModel!.accountModel.accName),
+                  _buildClassRow(
+                      'Tài khoản:', accountEditModel!.accountModel.accName),
                 ],
               ),
             ),
@@ -55,8 +58,13 @@ class ItemAccount extends StatelessWidget {
             child: GestureDetector(
               // onTap: () => Navigator.of(context)
               //     .pushNamed(MistakeClassDetailPage.routeName),
-              onTap: () =>
-                  Navigator.of(context).pushNamed(AccountEditAccPage.routeName),
+              onTap: () {
+                print('du lieu $accountEditModel');
+                Navigator.of(context).pushNamed(
+                  AccountEditAccPage.routeName,
+                  arguments: accountEditModel,
+                );
+              },
               child: Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Icon(
@@ -78,27 +86,6 @@ class ItemAccount extends StatelessWidget {
                   FontAwesomeIcons.trash,
                   size: 30,
                   color: Colors.red,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return DialogPermisstion();
-                  },
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: Icon(
-                  FontAwesomeIcons.apple,
-                  size: 30,
-                  color: const Color.fromARGB(255, 17, 67, 154),
                 ),
               ),
             ),

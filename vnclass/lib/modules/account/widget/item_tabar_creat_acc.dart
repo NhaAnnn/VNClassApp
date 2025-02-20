@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/design/color.dart';
@@ -18,6 +19,14 @@ class ItemTabarCreatAcc extends StatefulWidget {
 
 class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _employeeCodeController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isShowPass = false;
   bool _isShowPassAgain = false;
 
@@ -48,6 +57,118 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     });
   }
 
+  String? selectedValue = 'Ban giám hiệu'; // Giá trị mặc định
+  String selectedGender = 'Nam'; // Biến để lưu giá trị đã chọn
+
+  Map<String, String> _getFormData() {
+    return {
+      'username': _usernameController.text.trim(),
+      'employeeCode': _employeeCodeController.text.trim(),
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'password': _passwordController.text.trim(),
+      'confirmPassword': _confirmPasswordController.text.trim(),
+      'gender': selectedGender,
+      'position': 'banGH',
+      'date': _dateController.text.trim(),
+    };
+  }
+
+  Future<void> _createAccount() async {
+    final formData = _getFormData();
+    // final errorMessage = _validateForm(formData);
+
+    // if (errorMessage != null) {
+    //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessage)));
+    //   return;
+    // }
+
+    // bool confirm = await CustomDialogWidget.showConfirmationDialog(
+    //   context, 'Xác nhận tạo tài khoản?',
+    // );
+
+    if (true) {
+      await FirebaseFirestore.instance.collection('ACCOUNT').doc('').set({
+        '_accName': formData['username'],
+        '_birth': formData['employeeCode'],
+        '_email': formData['email'],
+        '_gender': formData['gender'], // Sửa thành _gender
+        '_groupID': formData['password'], // Mã hóa mật khẩu nếu cần
+        '_id': formData['gender'], // Sửa thành _id
+        '_pass': formData['date'], // Sửa thành _pass
+        '_permission': [], // Khởi tạo _permission là một mảng rỗng
+        '_phone': formData['phone'], // Sửa thành _phone
+        '_status': formData['date'], // Sửa thành _status
+        '_token': [], // Khởi tạo _token là một mảng rỗng
+        '_userName': formData['username'], // Sửa thành _userName
+      });
+
+      await FirebaseFirestore.instance.collection('TEACHER').doc().set({
+        'ACC_id': formData['username'],
+        '_birthday': formData['employeeCode'],
+        '_gender': formData['email'],
+        '_id': formData['phone'],
+        '_teacherName': formData['gender'],
+      });
+
+// rele hocSinh
+      await FirebaseFirestore.instance.collection('STUDENT').doc('').set({
+        'ACC_id': '',
+        '_birthday': '',
+        '_gender': '',
+        '_id': '',
+        '_phone': '',
+        '_studentName': '',
+      });
+      await FirebaseFirestore.instance
+          .collection('STUDENT_DETAIL')
+          .doc('')
+          .set({
+        'Class_id': '',
+        'Class_name': '',
+        'ST_id': '',
+        '_birthday': '',
+        '_committee': '',
+        '_conductAllYear': '',
+        '_conductTerm1': '',
+        '_conductTerm2': '',
+        '_gender': '',
+        '_id': '',
+        '_phone': '',
+        '_studentName': '',
+      });
+      await FirebaseFirestore.instance.collection('PARENT').doc('').set({
+        'ACC_id': '',
+        '_birthday': '',
+        '_gender': '',
+        '_id': '',
+        '_parentName': '',
+        '_phone': '',
+      });
+
+// Khởi tạo Map cho _month
+      Map<String, List<dynamic>> monthMap = {};
+
+      for (int i = 1; i <= 12; i++) {
+        monthMap['month$i'] = ['100', 'Tốt'];
+      }
+
+      await FirebaseFirestore.instance
+          .collection('CONDUCT_MONTH')
+          .doc('0')
+          .set({
+        'STDL_id': '',
+        '_id': '',
+        '_gender': '',
+        '_month': monthMap,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tài khoản đã được tạo thành công!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -75,11 +196,31 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
-          TextfieldWidget(labelText: 'Tên người dùng'),
+          TextfieldWidget(
+            labelText: 'Tên người dùng',
+            controller: _nameController,
+          ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
-          TextfieldWidget(labelText: 'Mã viên chức'),
+          TextfieldWidget(
+            labelText: 'Mã viên chức',
+            controller: _employeeCodeController,
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.02,
+          ),
+          TextfieldWidget(
+            labelText: 'Email',
+            controller: _emailController,
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.02,
+          ),
+          TextfieldWidget(
+            labelText: 'SĐT',
+            controller: _phoneController,
+          ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
@@ -111,7 +252,13 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
               SizedBox(width: MediaQuery.of(context).size.width * 0.05),
               Expanded(
                   child: RadioButtonWidget(
-                      options: ['Nam', 'Nữ'], onChanged: (value) {})),
+                      options: ['Nam', 'Nữ'],
+                      onChanged: (value) {
+                        setState(() {
+                          selectedGender =
+                              value!; // Cập nhật giá trị khi người dùng chọn
+                        });
+                      })),
             ],
           ),
           SizedBox(
@@ -123,14 +270,22 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
               SizedBox(width: MediaQuery.of(context).size.width * 0.05),
               Expanded(
                 child: RadioButtonWidget(
-                    options: ['Ban giám hiệu'], onChanged: (value) {}),
+                  options: ['Ban giám hiệu'],
+                  onChanged: (value) {
+                    // Xử lý giá trị khi thay đổi
+                  },
+                  selectedValue: 'Ban giám hiệu', // Giá trị mặc định
+                ),
               ),
             ],
           ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
-          TextfieldWidget(labelText: 'Tên tài khoản'),
+          TextfieldWidget(
+            labelText: 'Tên tài khoản',
+            controller: _usernameController,
+          ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
@@ -142,6 +297,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
                   children: [
                     TextField(
                       obscureText: !_isShowPass,
+                      controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: 'Mật khẩu',
                         labelStyle: TextStyle(
@@ -193,6 +349,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
                   children: [
                     TextField(
                       obscureText: !_isShowPassAgain,
+                      controller: _confirmPasswordController,
                       decoration: InputDecoration(
                         labelText: 'Nhập lại mật khẩu',
                         labelStyle: TextStyle(
@@ -241,14 +398,15 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
               Expanded(
                 child: ButtonWidget(
                   title: 'Tạo tài khoản',
-                  ontap: () => CustomDialogWidget.showConfirmationDialog(
-                      context, 'Xác nhận tạo tài khoản?'),
+                  ontap: () {
+                    _createAccount();
+                  },
                 ),
               ),
             ],
           ),
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.02,
+            height: MediaQuery.of(context).size.height * 0.4,
           ),
         ],
       ),
