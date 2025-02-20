@@ -273,6 +273,8 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_month': monthData,
       });
 
+      parentsUp.add({});
+
       return {
         '_id': id,
         'ACC_id': id,
