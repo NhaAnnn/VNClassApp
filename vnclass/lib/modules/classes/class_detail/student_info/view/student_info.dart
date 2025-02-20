@@ -13,22 +13,6 @@ class StudentInfo extends StatefulWidget {
 }
 
 class _StudentInfoState extends State<StudentInfo> {
-  // final ClassModel classModel;
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   // Lấy arguments từ ModalRoute
-  //   final args = ModalRoute.of(context)!.settings.arguments as StudentModel;
-  //    // Lấy arguments từ ModalRoute
-  //   final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-  //   // Lấy đối tượng StudentModel và ClassModel
-  //   final StudentModel studentModel = args['student'] as StudentModel;
-  //   final ClassModel classModel = args['class'] as ClassModel;
-  //   studentModel = args; // Gán giá trị cho classID
-  // }
-
   @override
   Widget build(BuildContext context) {
     final args =
@@ -37,7 +21,7 @@ class _StudentInfoState extends State<StudentInfo> {
     // Lấy dữ liệu từ arguments
     final StudentModel studentModel = args['studentModel'] as StudentModel;
     final String className = args['className'] as String;
-
+    double paddingValue = MediaQuery.of(context).size.width * 1;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -47,12 +31,13 @@ class _StudentInfoState extends State<StudentInfo> {
           ),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(paddingValue * 0.02),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(top: 20.0, left: 20),
+                    padding: EdgeInsets.only(
+                        top: paddingValue * 0.02, left: paddingValue * 0.02),
                     child: Text(
                       'Thông tin học sinh:',
                       style: TextStyle(
@@ -62,20 +47,20 @@ class _StudentInfoState extends State<StudentInfo> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: paddingValue * 0.16),
                   _buildStudentDetailRow(
                       'Mã học sinh:', studentModel.id.toString()),
                   _buildStudentDetailRow('Lớp học:', className),
-                  _buildStudentDetailRow('Họ và tên:',
-                      studentModel.studentInfoModel.studentName.toString()),
-                  _buildStudentDetailRow('Giới tính:',
-                      studentModel.studentInfoModel.gender.toString()),
-                  _buildStudentDetailRow('Ngày sinh:',
-                      studentModel.studentInfoModel.birthday.toString()),
+                  _buildStudentDetailRow(
+                      'Họ và tên:', studentModel.studentName.toString()),
+                  _buildStudentDetailRow(
+                      'Giới tính:', studentModel.gender.toString()),
+                  _buildStudentDetailRow(
+                      'Ngày sinh:', studentModel.birthday.toString()),
                   Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: EdgeInsets.all(paddingValue * 0.03),
                         child: Text('Chức vụ:',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18)),
@@ -104,13 +89,17 @@ class _StudentInfoState extends State<StudentInfo> {
                       Text('Ban cán sự', style: TextStyle(fontSize: 18)),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.02),
                   ButtonN(
+                    color: Colors.blueAccent,
+                    size: Size(MediaQuery.sizeOf(context).width * 0.4,
+                        MediaQuery.sizeOf(context).height * 0.05),
                     ontap: () {
                       StudentController.updateStudentPositionInDatabase(
-                          studentModel); // Gọi hàm cập nhật khi nhấn nút
+                          context, studentModel);
                     },
                     label: 'Cập nhật',
+                    colorText: Colors.white,
                   ),
                 ],
               ),
@@ -125,7 +114,7 @@ class _StudentInfoState extends State<StudentInfo> {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.03),
         child: Row(
           children: [
             Expanded(

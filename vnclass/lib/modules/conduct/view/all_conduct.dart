@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
+import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/conduct/widget/all_conduct_card.dart';
+import 'package:vnclass/modules/search/search_screen.dart';
 
 class AllConduct extends StatefulWidget {
   const AllConduct({super.key});
@@ -13,71 +17,174 @@ class AllConduct extends StatefulWidget {
 }
 
 class _AllConductState extends State<AllConduct> {
+  String selectedMonth = '';
+  String selectedTerm = '';
+  List<String> validMonths = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Determine the initial term and month based on the current month
+    String currentMonth = Getmonthnow.currentMonth();
+    selectedTerm = _getTermFromMonth(currentMonth);
+    validMonths = _getValidMonths(selectedTerm);
+
+    // Set selectedMonth to the current month if it's valid, otherwise, use the first valid month
+    selectedMonth = validMonths.contains(currentMonth)
+        ? currentMonth
+        : (validMonths.isNotEmpty ? validMonths.first : '');
+  }
+
+  String _getTermFromMonth(String month) {
+    if (month.contains('Tháng 1') ||
+        month.contains('Tháng 2') ||
+        month.contains('Tháng 3') ||
+        month.contains('Tháng 4') ||
+        month.contains('Tháng 5')) {
+      return 'Học kỳ 2';
+    } else if (month.contains('Tháng 9') ||
+        month.contains('Tháng 10') ||
+        month.contains('Tháng 11') ||
+        month.contains('Tháng 12')) {
+      return 'Học kỳ 1';
+    }
+    return 'Cả năm';
+  }
+
+  void _updateTermAndMonths(String newTerm) {
+    setState(() {
+      selectedTerm = newTerm;
+      validMonths = _getValidMonths(selectedTerm);
+
+      // Prioritize current month, if available, otherwise default to the first valid month
+      String currentMonth = Getmonthnow.currentMonth();
+      selectedMonth = validMonths.contains(currentMonth)
+          ? currentMonth
+          : (validMonths.isNotEmpty ? validMonths.first : '');
+    });
+  }
+
+  List<String> _getValidMonths(String term) {
+    if (term == 'Học kỳ 2') {
+      return [
+        'Tất cả tháng HK2',
+        'Tháng 1',
+        'Tháng 2',
+        'Tháng 3',
+        'Tháng 4',
+        'Tháng 5'
+      ];
+    } else if (term == 'Học kỳ 1') {
+      return [
+        'Tất cả tháng HK1',
+        'Tháng 9',
+        'Tháng 10',
+        'Tháng 11',
+        'Tháng 12'
+      ];
+    }
+    return ['Cả năm'];
+  }
+
+  int _getMonthKey(String selectedMonth) {
+    if (selectedMonth.contains('Tất cả tháng HK1')) {
+      return 100;
+    } else if (selectedMonth.contains('Tất cả tháng HK2')) {
+      return 200;
+    } else if (selectedMonth.contains('Cả năm')) {
+      return 300;
+    } else {
+      return Getmonthnow.getMonthNumber(selectedMonth);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double paddingValue = MediaQuery.of(context).size.width * 1;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    // Truy cập các tham số
+    final year = args['year'];
     return Scaffold(
-      persistentFooterAlignment: AlignmentDirectional.center,
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          BackBar(
-            title: 'Danh sách các lớp',
-          ),
+          BackBar(title: 'Danh sách các lớp $selectedTerm'),
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropMenuWidget(
-                          items: ['Học kỳ 1', 'Học kỳ 2'],
-                          hintText: 'Học kỳ',
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(paddingValue * 0.02),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropMenuWidget(
+                            items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+                            hintText: 'Học kỳ',
+                            selectedItem: selectedTerm,
+                            onChanged: (termValue) {
+                              // Call _updateTermAndMonths to update both term and months
+                              _updateTermAndMonths(termValue!);
+                            },
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        child: DropMenuWidget(
-                          items: ['Học kỳ 1', 'Học kỳ 2'],
-                          hintText: 'Tháng',
+                        SizedBox(width: paddingValue * 0.02),
+                        Expanded(
+                          child: DropMenuWidget(
+                            items: validMonths,
+                            key: ValueKey(validMonths), // Add a ValueKey
+                            selectedItem: selectedMonth,
+                            hintText: 'Tháng',
+                            onChanged: (value) {
+                              setState(() {
+                                selectedMonth = value!;
+                              });
+                            },
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        child: DropMenuWidget(
-                          items: ['2023-2024'],
-                          hintText: 'Năm học',
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: SearchBar(
-                      hintText: 'Search...',
-                      leading: Icon(FontAwesomeIcons.searchengin),
+                      ],
                     ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                          AllConductCard(),
-                        ],
+                    Padding(
+                      padding: EdgeInsets.all(paddingValue * 0.03),
+                      child: SearchBar(
+                        hintText: 'Search...',
+                        leading: Icon(FontAwesomeIcons.searchengin),
+                        onTap: () {
+                          Navigator.pushNamed(context, SearchScreen.routeName);
+                        },
                       ),
                     ),
-                  ),
-                ],
+                    FutureBuilder<List<ClassModel>>(
+                      future: ClassController.fetchAllClassesByYear(year),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Center(child: Text('Không có lớp học'));
+                        }
+
+                        List<ClassModel> classes = snapshot.data!;
+
+                        return Column(
+                          children: classes.map((classModel) {
+                            int monthKey = _getMonthKey(selectedMonth);
+                            return AllConductCard(
+                              classModel: classModel,
+                              monthKey: monthKey,
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           )

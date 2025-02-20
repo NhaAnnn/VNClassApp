@@ -38,8 +38,8 @@ class _ClassDetailCardState extends State<ClassDetailCard> {
                 children: [
                   _buildClassDetailRow(
                       'Mã học sinh:', studentModel.id.toString()),
-                  _buildClassDetailRow('Họ và tên:',
-                      studentModel.studentInfoModel.studentName.toString()),
+                  _buildClassDetailRow(
+                      'Họ và tên:', studentModel.studentName.toString()),
                   _buildClassDetailRow(
                       'Chức vụ:', studentModel.committee.toString()),
                 ],

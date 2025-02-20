@@ -1,28 +1,65 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ConductMonthModel {
-  final String? id;
-  final Map<String, List<String>>? months;
+  String? id;
+  String? studentID;
+  Map<String, List<dynamic>>? months;
 
   ConductMonthModel({
     this.id,
+    this.studentID,
     this.months,
   });
 
   factory ConductMonthModel.fromFirestore(DocumentSnapshot doc) {
-    Map data = doc.data() as Map;
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw Exception("Document data is null");
+    }
+
+    // String stuID = data['STDL_id'] ?? '';
+
     return ConductMonthModel(
+      studentID: data['STDL_id'] ?? '',
       id: data['_id'] ?? '',
       months: {
-        'month1': List<String>.from(data['_month']['month1'] ?? []),
-        'month2': List<String>.from(data['_month']['month2'] ?? []),
-        'month3': List<String>.from(data['_month']['month3'] ?? []),
-        'month4': List<String>.from(data['_month']['month4'] ?? []),
-        'month5': List<String>.from(data['_month']['month5'] ?? []),
-        'month9': List<String>.from(data['_month']['month9'] ?? []),
-        'month10': List<String>.from(data['_month']['month10'] ?? []),
-        'month11': List<String>.from(data['_month']['month11'] ?? []),
-        'month12': List<String>.from(data['_month']['month12'] ?? []),
+        'Tháng 1': [
+          data['_month']['month1'][0] ?? '', // Điểm rèn luyện
+          data['_month']['month1'][1] ?? '', // Hành kiểm
+        ],
+        'Tháng 2': [
+          data['_month']['month2'][0] ?? '',
+          data['_month']['month2'][1] ?? '',
+        ],
+        'Tháng 3': [
+          data['_month']['month3'][0] ?? '',
+          data['_month']['month3'][1] ?? '',
+        ],
+        'Tháng 4': [
+          data['_month']['month4'][0] ?? '',
+          data['_month']['month4'][1] ?? '',
+        ],
+        'Tháng 5': [
+          data['_month']['month5'][0] ?? '',
+          data['_month']['month5'][1] ?? '',
+        ],
+        'Tháng 9': [
+          data['_month']['month9'][0] ?? '',
+          data['_month']['month9'][1] ?? '',
+        ],
+        'Tháng 10': [
+          data['_month']['month10'][0] ?? '',
+          data['_month']['month10'][1] ?? '',
+        ],
+        'Tháng 11': [
+          data['_month']['month11'][0] ?? '',
+          data['_month']['month11'][1] ?? '',
+        ],
+        'Tháng 12': [
+          data['_month']['month12'][0] ?? '',
+          data['_month']['month12'][1] ?? '',
+        ],
       },
     );
   }

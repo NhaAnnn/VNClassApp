@@ -13,10 +13,19 @@ class StudentConductInfo extends StatefulWidget {
 class _StudentConductInfoState extends State<StudentConductInfo> {
   @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
+    // Truy cập các tham số
+    final studentID = args['studentID'];
+    final studentName = args['studentName'];
+    final trainingScore = args['trainingScore'];
+    final conduct = args['conduct'];
+
     return Scaffold(
       body: Column(
         children: [
-          BackBar(title: 'Hạnh kiểm của.......'),
+          BackBar(title: 'Hạnh kiểm của $studentName'),
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(20),
@@ -38,10 +47,11 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                         child: Column(
                           children: [
                             _buildStudentInfoRow(
-                                'Họ và tên:', 'ỳgiysddiushsifdsi'),
-                            _buildStudentInfoRow('Điểm rèn luyện:', '1231'),
+                                'Họ và tên:', studentName.toString()),
                             _buildStudentInfoRow(
-                                'Hạnh kiểm:', 'ídjbsdufnskdnídjbsdufn'),
+                                'Điểm rèn luyện:', trainingScore.toString()),
+                            _buildStudentInfoRow(
+                                'Hạnh kiểm:', conduct.toString()),
                           ],
                         ),
                       ),

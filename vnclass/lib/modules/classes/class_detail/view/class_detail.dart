@@ -18,17 +18,6 @@ class ClassDetail extends StatefulWidget {
 }
 
 class _ClassDetailState extends State<ClassDetail> {
-  // String? classID;
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   // Lấy arguments từ ModalRoute
-
-  //   final args =
-  //       ModalRoute.of(context)!.settings.arguments as Map<String, String>;
-  //   classID = args; // Gán giá trị cho classID
-  // }
-
   @override
   Widget build(BuildContext context) {
     final args =
@@ -37,7 +26,7 @@ class _ClassDetailState extends State<ClassDetail> {
     // Lấy dữ liệu từ arguments
     final String classID = args['classID'] as String;
     final String className = args['className'] as String;
-
+    double paddingValue = MediaQuery.of(context).size.width * 1;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -47,11 +36,11 @@ class _ClassDetailState extends State<ClassDetail> {
           ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(paddingValue * 0.02),
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(paddingValue * 0.02),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -64,7 +53,7 @@ class _ClassDetailState extends State<ClassDetail> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: EdgeInsets.only(bottom: paddingValue * 0.02),
                     child: SearchBar(
                       hintText: 'Search...',
                       leading: Icon(FontAwesomeIcons.searchengin),

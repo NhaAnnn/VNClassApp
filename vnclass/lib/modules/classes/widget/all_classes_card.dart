@@ -9,8 +9,14 @@ class AllClassesCard extends StatefulWidget {
   const AllClassesCard({
     super.key,
     required this.classModel,
+    this.onUpdate, // Callback để load lại dữ liệu
+    // required this.onDelete, // Callback để load lại dữ liệu
   });
+
   final ClassModel classModel;
+  final VoidCallback? onUpdate;
+  // final VoidCallback onDelete;
+
   @override
   State<AllClassesCard> createState() => _AllClassesCardState();
 }
@@ -18,8 +24,8 @@ class AllClassesCard extends StatefulWidget {
 class _AllClassesCardState extends State<AllClassesCard> {
   bool _isVisible = false;
   bool _isRotated = false;
+
   ClassModel get classModel => widget.classModel;
-  // String classID = ;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +47,7 @@ class _AllClassesCardState extends State<AllClassesCard> {
                   _buildClassRow('Lớp:', classModel.className.toString()),
                   _buildClassRow('Niên khóa:', classModel.year.toString()),
                   _buildClassRow('Sỉ số:', classModel.amount.toString()),
-                  _buildClassRow('GVCN', classModel.teacherName.toString()),
+                  _buildClassRow('GVCN:', classModel.teacherName.toString()),
                   if (_isVisible) _buildControlRow(),
                 ],
               ),
@@ -55,11 +61,11 @@ class _AllClassesCardState extends State<AllClassesCard> {
                   color: Colors.black,
                 ),
               ),
-              onTap: () => {
+              onTap: () {
                 setState(() {
                   _isRotated = !_isRotated;
                   _isVisible = !_isVisible;
-                }),
+                });
               },
             ),
           ],
@@ -94,7 +100,7 @@ class _AllClassesCardState extends State<AllClassesCard> {
 
   Widget _buildControlButton(String label, IconData icon, Color color) {
     return Row(
-      mainAxisSize: MainAxisSize.min, // Avoid infinite width
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: color),
         SizedBox(width: 10),
@@ -115,38 +121,44 @@ class _AllClassesCardState extends State<AllClassesCard> {
           GestureDetector(
             child: _buildControlButton(
                 'Xem', FontAwesomeIcons.solidEye, Colors.black),
-            onTap: () => {
-              Navigator.of(context).pushNamed(ClassDetail.routeName,
-                  arguments: {
-                    'classID': classModel.id,
-                    'className': classModel.className
-                  }),
+            onTap: () {
+              Navigator.of(context)
+                  .pushNamed(ClassDetail.routeName, arguments: {
+                'classID': classModel.id,
+                'className': classModel.className,
+              });
             },
           ),
           GestureDetector(
             child: _buildControlButton(
                 'Sửa', FontAwesomeIcons.pencil, Colors.blueAccent),
-            onTap: () => {
-              showDialog(
+            onTap: () async {
+              await showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return UpdateClassDialog();
+                  return UpdateClassDialog(
+                    classModel: classModel,
+                    onUpdate: widget.onUpdate!, // Gọi callback load lại dữ liệu
+                  );
                 },
-              )
+              );
             },
           ),
           GestureDetector(
             child: _buildControlButton(
                 'Xóa', FontAwesomeIcons.solidTrashCan, Colors.redAccent),
-            onTap: () => {
-              showDialog(
+            onTap: () async {
+              await showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return DeleteClassDialog();
+                  return DeleteClassDialog(
+                    classId: classModel.id.toString(),
+                    onDelete: widget.onUpdate!, // Gọi callback load lại dữ liệu
+                  );
                 },
-              )
+              );
             },
-          )
+          ),
         ],
       ),
     );
