@@ -6,9 +6,13 @@ class TextfieldWidget extends StatelessWidget {
     super.key,
     this.controller,
     required this.labelText,
-    this.obscureText = false, // cho mật khẩu
-    this.onChanged, // callback khi giá trị thay đổi
-    this.enabled = true, // thêm tham số enabled (mặc định là true)
+    this.obscureText = false,
+    this.onChanged,
+    this.enabled = true,
+    this.textStyle = const TextStyle(
+      fontSize: 16,
+      color: Colors.black87,
+    ),
   });
 
   final TextEditingController? controller;
@@ -16,6 +20,7 @@ class TextfieldWidget extends StatelessWidget {
   final bool obscureText;
   final ValueChanged<String>? onChanged;
   final bool enabled;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +28,53 @@ class TextfieldWidget extends StatelessWidget {
       controller: controller,
       obscureText: obscureText,
       onChanged: onChanged,
-      enabled: enabled, // kiểm soát trạng thái chỉnh sửa
+      enabled: enabled,
+      style: textStyle, // Áp dụng kiểu chữ tùy chỉnh
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
-        contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+        labelStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color:
+              Colors.grey.shade600, // Nhẹ nhàng hơn khi label ở trạng thái nghỉ
+        ),
+        floatingLabelStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: enabled
+              ? const Color(0xFF1976D2)
+              : Colors.grey.shade400, // Màu khi focus
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        filled: true, // Thêm nền nhẹ
+        fillColor: enabled
+            ? Colors.white
+            : Colors.grey.shade100, // Nền thay đổi theo enabled
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: ColorApp.primaryColor),
+          borderRadius: BorderRadius.circular(12), // Bo góc mềm mại hơn
+          borderSide: BorderSide.none, // Loại bỏ viền mặc định
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(
-              color: Color.fromARGB(255, 29, 92, 252), width: 2),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Colors.grey.shade300, // Viền nhạt khi không focus
+            width: 1.5,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: ColorApp.primaryColor, width: 2.0),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Color(0xFF1976D2), // Xanh đậm khi focus
+            width: 2,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: Colors.grey.shade200, // Viền mờ hơn khi disabled
+            width: 1.5,
+          ),
         ),
       ),
     );

@@ -19,7 +19,7 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
   ClassMistakeModel? classMistakeModel;
   String? selectedMonth;
   String? hocKy;
-  bool _isInitialized = false; // Thêm biến cờ kiểm tra
+  bool _isInitialized = false;
 
   @override
   void didChangeDependencies() {
@@ -31,19 +31,10 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
       classMistakeModel = arguments['classMistakeModel'];
       hocKy = arguments['hocKy'];
 
-      // Lấy danh sách tháng dựa trên học kỳ
       final List<String> monthList = getThangList(hocKy ?? '');
-
-      // Xác định tháng hiện tại
       final String currentMonth = 'Tháng ${DateTime.now().month}';
-
-      // Logic chọn giá trị mặc định
-      if (monthList.isNotEmpty) {
-        selectedMonth =
-            monthList.contains(currentMonth) ? currentMonth : monthList.first;
-      } else {
-        selectedMonth = null; // Hoặc xử lý theo trường hợp của bạn
-      }
+      selectedMonth =
+          monthList.contains(currentMonth) ? currentMonth : monthList.first;
 
       if (classMistakeModel != null) {
         futureMistakeClass = fetchMistakeClasses();
@@ -53,25 +44,16 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
   }
 
   Future<List<StudentDetailModel>> fetchMistakeClasses() async {
-    print('fetchMistakeClasses được gọi với tháng: $selectedMonth');
-
-    // Thêm kiểm tra null
-    if (classMistakeModel == null || selectedMonth == null) {
-      return [];
-    }
+    if (classMistakeModel == null || selectedMonth == null) return [];
 
     String monthToSearch = selectedMonth!.replaceFirst('Tháng ', '');
-
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('STUDENT_DETAIL')
         .where('Class_id', isEqualTo: classMistakeModel!.idClass)
         .get();
 
-    print('Số lượng tài liệu nhận được: ${snapshot.docs.length}');
-
-    return Future.wait(snapshot.docs.map((doc) async {
-      return await StudentDetailModel.fromFirestore(doc, monthToSearch);
-    }));
+    return Future.wait(snapshot.docs
+        .map((doc) => StudentDetailModel.fromFirestore(doc, monthToSearch)));
   }
 
   List<String> getThangList(String hocKy) {
@@ -97,7 +79,6 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
     }
   }
 
-// Thêm hàm refresh
   void _refreshData() {
     setState(() {
       futureMistakeClass = fetchMistakeClasses();
@@ -109,144 +90,164 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
     return AppBarWidget(
       titleString: 'Cập nhật vi phạm lớp ${classMistakeModel?.className ?? ""}',
       implementLeading: true,
-      child: Column(
-        children: [
-          SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Tháng',
-                    items: getThangList(hocKy ?? ''),
-                    selectedItem: selectedMonth,
-                    onChanged: (newValue) {
-                      if (newValue != null && newValue != selectedMonth) {
-                        setState(() {
-                          selectedMonth = newValue;
-                        });
-                        futureMistakeClass = fetchMistakeClasses();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 20),
-          TextField(
-            style: TextStyle(fontSize: 18),
-            decoration: InputDecoration(
-              hintText: 'Tìm kiếm...',
-              prefixIcon: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Icon(
-                  Icons.search_outlined,
-                  color: Colors.black,
-                  size: 28,
-                ),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.blueAccent, width: 2.0),
-                borderRadius: const BorderRadius.all(Radius.circular(10)),
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.black.withAlpha(50), width: 2),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Center(
-                    child: Text(
-                      'Mã HS',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 4,
-                  child: Center(
-                    child: Text(
-                      'Họ và Tên',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Center(
-                    child: Text(
-                      'Số lần vi phạm',
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text(
-                      'Xem',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  flex: 1,
-                  child: Center(
-                    child: Text(
-                      'Cập nhật',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder<List<StudentDetailModel>>(
-              future: futureMistakeClass,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            DropMenuWidget<String>(
+              hintText: 'Chọn tháng',
+              items: getThangList(hocKy ?? ''),
+              selectedItem: selectedMonth,
+              onChanged: (newValue) {
+                if (newValue != null && newValue != selectedMonth) {
+                  setState(() {
+                    selectedMonth = newValue;
+                    futureMistakeClass = fetchMistakeClasses();
+                  });
                 }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                return ListView(
-                  children: snapshot.data
-                          ?.map((e) => ItemClassMistakeStudent(
-                                studentDetailModel: e,
-                                month: selectedMonth,
-                                onRefresh: _refreshData, // Thêm callback này
-                              ))
-                          .toList() ??
-                      [],
-                );
               },
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            TextField(
+              style: const TextStyle(fontSize: 16),
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm học sinh...',
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                filled: true,
+                fillColor: Colors.grey.shade100,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Header
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              color: Colors.grey.shade100,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 100),
+                      child: Text(
+                        'Mã HS',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 150),
+                      child: Text(
+                        'Họ và Tên',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 40),
+                      child: Text(
+                        'Lần VP',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 36),
+                      child: Text(
+                        'Xem',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 36),
+                      child: Text(
+                        'Sửa',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // const SizedBox(height: 6),
+            Expanded(
+              child: FutureBuilder<List<StudentDetailModel>>(
+                future: futureMistakeClass,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Lỗi: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Không có dữ liệu'));
+                  }
+                  return ListView.separated(
+                    itemCount: snapshot.data!.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 6),
+                    itemBuilder: (context, index) {
+                      return ItemClassMistakeStudent(
+                        studentDetailModel: snapshot.data![index],
+                        month: selectedMonth,
+                        onRefresh: _refreshData,
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

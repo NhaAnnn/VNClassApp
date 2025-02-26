@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'package:vnclass/common/design/color.dart';
-import 'package:vnclass/modules/login/controller/provider.dart';
-import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/main_home/views/help_screen.dart';
 import 'package:vnclass/modules/main_home/views/home_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_screen.dart';
@@ -19,69 +16,60 @@ class MainHomePage extends StatefulWidget {
 
 class _MainHomePageState extends State<MainHomePage> {
   int _currentIndex = 0;
-  // Khai báo biến để lưu thông tin account
 
   @override
   Widget build(BuildContext context) {
-    // Nhận tham số từ navigator
     return Scaffold(
-      backgroundColor: const Color.fromARGB(253, 255, 255, 255),
+      backgroundColor: Colors.white, // Match HomeScreen’s white background
       body: IndexedStack(
         index: _currentIndex,
-        children: [
-          HomeScreen(), // Truyền account vào HomeScreen
+        children: const [
+          HomeScreen(),
           HelpScreen(),
           UserScreen(),
         ],
       ),
-      bottomNavigationBar: SalomonBottomBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        selectedItemColor: ColorApp.primaryColor,
-        unselectedItemColor: ColorApp.primaryColor.withAlpha(200),
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        items: [
-          SalomonBottomBarItem(
-            icon: Icon(
-              FontAwesomeIcons.house,
-              size: 28,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.shade200.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
             ),
-            title: const Text(
-              'Home',
-              style: TextStyle(
-                fontSize: 16,
-              ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: SalomonBottomBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          selectedItemColor: Colors.blue.shade700, // Sky-blue primary color
+          unselectedItemColor:
+              Colors.blue.shade300.withOpacity(0.7), // Softer blue
+          itemPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          items: [
+            SalomonBottomBarItem(
+              icon: const Icon(FontAwesomeIcons.house, size: 24),
+              title: const Text('Home',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              selectedColor: Colors.blue.shade700,
             ),
-          ),
-          SalomonBottomBarItem(
-            icon: Icon(
-              FontAwesomeIcons.circleQuestion,
-              size: 28,
+            SalomonBottomBarItem(
+              icon: const Icon(FontAwesomeIcons.circleQuestion, size: 24),
+              title: const Text('Help',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              selectedColor: Colors.blue.shade700,
             ),
-            title: const Text(
-              'Help',
-              style: TextStyle(
-                fontSize: 16,
-              ),
+            SalomonBottomBarItem(
+              icon: const Icon(FontAwesomeIcons.user, size: 24),
+              title: const Text('User',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              selectedColor: Colors.blue.shade700,
             ),
-          ),
-          SalomonBottomBarItem(
-            icon: Icon(
-              FontAwesomeIcons.user,
-              size: 28,
-            ),
-            title: const Text(
-              'User',
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

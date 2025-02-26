@@ -128,6 +128,57 @@ class AccountRepository {
     }
   }
 
+  Future<List<AccountEditModel>> fetchAccountsEditByGroup3(
+      String idGroup) async {
+    try {
+      final accountSnapshot = await firestore
+          .collection('ACCOUNT')
+          .where('_groupID', isEqualTo: idGroup)
+          .get();
+
+      if (accountSnapshot.docs.isEmpty) return [];
+
+      final accountIds = accountSnapshot.docs
+          .map((doc) => doc.get('_id') as String)
+          .toSet()
+          .toList();
+      final groupIds = accountSnapshot.docs
+          .map((doc) => doc.get('_groupID') as String)
+          .toSet()
+          .toList();
+
+      final futures = await Future.wait([
+        _getParent(accountIds),
+        _getGroups(groupIds),
+      ]);
+
+      final parentMap = futures[0] as Map<String, ParentModel>;
+      final groupsMap = futures[1] as Map<String, GroupModel>;
+
+      // Lọc các teacherID hợp lệ và không trùng lặp
+      // final teachIDs = teacherMap.values
+      //     .where((teacher) => teacher.id.isNotEmpty)
+      //     .map((teacher) => teacher.id)
+      //     .toSet()
+      //     .toList();
+
+      // final classMap = await _getClass(teachIDs);
+
+      return accountSnapshot.docs.map((accountDoc) {
+        final account = AccountModel.fromFirestore(accountDoc);
+        // final teach = teacherMap[account.idAcc];
+        return AccountEditModel(
+          accountModel: account,
+          parentModel: parentMap[account.idAcc],
+          groupModel: groupsMap[account.goupID],
+        );
+      }).toList();
+    } catch (e) {
+      print('Error fetching data: $e');
+      return [];
+    }
+  }
+
   Future<Map<String, ClassMistakeModel>> _getClass(
       List<String> teachIDs) async {
     if (teachIDs.isEmpty) return {};

@@ -15,65 +15,65 @@ class ItemClassModels extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
-        border: Border.all(
-          color: Colors.black.withAlpha(50), // Border color
-          width: 2, // Border width
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(20), // Shadow color
-            spreadRadius: 2, // Spread radius
-            blurRadius: 5, // Blur radius
-            offset: Offset(0, 3), // Changes the position of the shadow
-          ),
-        ],
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed(
+        MistakeClassDetailPage.routeName,
+        arguments: {
+          'classMistakeModel': classMistakeModel,
+          'hocKy': hocKy,
+        },
       ),
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 1,
-                vertical: 12,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildClassRow('Lớp:', classMistakeModel.className),
-                  _buildClassRow('Niên khóa:', classMistakeModel.academicYear),
-                  _buildClassRow('Sĩ số:', '${classMistakeModel.classSize}'),
-                  _buildClassRow('GVCN:', classMistakeModel.homeroomTeacher),
-                  _buildClassRow('Học kỳ:', hocKy ?? '1'), // In ra học kỳ
-                  _buildClassRow('Số vi phạm:',
-                      _getNumberOfErrors(hocKy)), // In ra số vi phạm
-                ],
-              ),
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12), // Bo góc mềm mại hơn
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.grey.shade200, // Viền nhạt, tinh tế
+            width: 1,
           ),
-          GestureDetector(
-            onTap: () => Navigator.of(context).pushNamed(
-              MistakeClassDetailPage.routeName,
-              arguments: {
-                'classMistakeModel': classMistakeModel,
-                'hocKy': hocKy
-              },
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05), // Bóng đổ nhẹ
+              spreadRadius: 1,
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Icon(
-                FontAwesomeIcons.arrowRight,
-                size: 36,
-                color: Colors.black,
+          ],
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildClassRow('Lớp:', classMistakeModel.className),
+                    const SizedBox(height: 8),
+                    _buildClassRow(
+                        'Niên khóa:', classMistakeModel.academicYear),
+                    const SizedBox(height: 8),
+                    _buildClassRow('Sĩ số:', '${classMistakeModel.classSize}'),
+                    const SizedBox(height: 8),
+                    _buildClassRow('GVCN:', classMistakeModel.homeroomTeacher),
+                    const SizedBox(height: 8),
+                    _buildClassRow('Học kỳ:', hocKy ?? '1'),
+                    const SizedBox(height: 8),
+                    _buildClassRow('Số vi phạm:', _getNumberOfErrors(hocKy)),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Icon(
+                FontAwesomeIcons.chevronRight, // Icon nhẹ nhàng hơn
+                size: 24, // Giảm kích thước cho tinh tế
+                color: Colors.grey.shade600, // Màu nhạt hơn
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -87,40 +87,37 @@ class ItemClassModels extends StatelessWidget {
       case 'Cả năm':
         return classMistakeModel.numberOfErrorAll;
       default:
-        return classMistakeModel.numberOfErrorS1; // Giá trị mặc định
+        return classMistakeModel.numberOfErrorS1;
     }
   }
 
   Widget _buildClassRow(String label, String value) {
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                ),
-              ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90, // Độ rộng cố định cho label để căn đều
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: Colors.black87,
             ),
-            Expanded(
-              flex: 6,
-              child: Text(
-                value,
-                style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade800,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }

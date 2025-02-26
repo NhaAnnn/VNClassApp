@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
-import 'package:vnclass/modules/mistake/models/student_mistake_model.dart';
 import 'package:vnclass/modules/mistake/view/mistake_type_mistake_page.dart';
 import 'package:vnclass/modules/mistake/view/mistake_view_mistake_page.dart';
 
@@ -10,84 +9,85 @@ class ItemClassMistakeStudent extends StatelessWidget {
     super.key,
     required this.studentDetailModel,
     this.month,
-    this.onRefresh, // Thêm dòng này
+    this.onRefresh,
   });
+
   final StudentDetailModel studentDetailModel;
   final String? month;
   final VoidCallback? onRefresh;
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      // margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
         color: Colors.white,
-        border: Border.all(
-          color: Colors.black.withAlpha(50), // Border color
-          width: 2, // Border width
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(20), // Shadow color
-            spreadRadius: 2, // Spread radius
-            blurRadius: 5, // Blur radius
-            offset: Offset(0, 3), // Changes the position of the shadow
-          ),
-        ],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200, width: 1),
       ),
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 4,
-          right: 4,
-          top: 16,
-          bottom: 16,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
+      child: Row(
+        children: [
+          // Mã học sinh (căn trái)
+          Expanded(
+            flex: 3,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 100),
               child: Text(
                 studentDetailModel.idStudent,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                textAlign: TextAlign.left, // Căn trái
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
               ),
             ),
-            SizedBox(
-              width: 12,
-            ),
-            Expanded(
-              flex: 5,
+          ),
+          // Tên học sinh (căn trái)
+          Expanded(
+            flex: 5,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 150),
               child: Text(
                 studentDetailModel.nameStudent,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+                textAlign: TextAlign.left, // Căn trái
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
               ),
             ),
-            SizedBox(
-              width: 12,
-            ),
-            Expanded(
-              flex: 1,
-              child: Text(
-                studentDetailModel.numberOfErrors,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black,
+          ),
+          // Số lỗi (giữ căn giữa)
+          Expanded(
+            flex: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 40),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  studentDetailModel.numberOfErrors,
+                  textAlign: TextAlign.center, // Giữ căn giữa
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.redAccent,
+                  ),
                 ),
               ),
             ),
-            SizedBox(
-              width: 12,
-            ),
-            Expanded(
-              flex: 1,
+          ),
+          // Icon Xem (giữ căn giữa)
+          Expanded(
+            flex: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 36),
               child: GestureDetector(
                 onTap: () async {
                   await Navigator.pushNamed(
@@ -98,33 +98,56 @@ class ItemClassMistakeStudent extends StatelessWidget {
                       'month': month,
                     },
                   );
-
                   if (onRefresh != null && context.mounted) {
-                    onRefresh!(); // Gọi callback refresh
+                    onRefresh!();
                   }
                 },
-                child: Icon(
-                  FontAwesomeIcons.eye,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      FontAwesomeIcons.eye,
+                      size: 16,
+                      color: Colors.blue,
+                    ),
+                  ),
                 ),
               ),
             ),
-            SizedBox(
-              width: 12,
-            ),
-            Expanded(
-              flex: 1,
+          ),
+          // Icon Sửa (giữ căn giữa)
+          Expanded(
+            flex: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 36),
               child: GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed(
+                onTap: () => Navigator.pushNamed(
+                  context,
                   MistakeTypeMistakePage.routeName,
                   arguments: studentDetailModel,
                 ),
-                child: Icon(
-                  FontAwesomeIcons.pen,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Icon(
+                      FontAwesomeIcons.pen,
+                      size: 16,
+                      color: Colors.green,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

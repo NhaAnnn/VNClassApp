@@ -31,7 +31,7 @@ class ClassMistakeModel {
       idClass: data['_id'] ?? '',
       idTeacher: data['T_id'] ?? '',
       academicYear: data['_year'] ?? '',
-      classSize: data['_amount'] ?? '',
+      classSize: data['_amount'] is int ? data['_amount'] : 0, // Sửa ở đây
       homeroomTeacher: data['T_name'] ?? '',
       numberOfErrorAll: data['_numberOfMisAll'] ?? '3',
       numberOfErrorS1: data['_numberOfMisS1'] ?? '1',

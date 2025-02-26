@@ -36,13 +36,22 @@ class _AccountCreatAccPageState extends State<AccountCreatAccPage> {
               child: TabBarView(
                 children: [
                   SingleChildScrollView(
-                    child: ItemTabarCreatAcc(show: false),
+                    child: ItemTabarCreatAcc(
+                      show: false,
+                      typeAcc: 'Ban Giám Hiệu',
+                    ),
                   ),
                   SingleChildScrollView(
-                    child: ItemTabarCreatAcc(show: true),
+                    child: ItemTabarCreatAcc(
+                      show: true,
+                      typeAcc: 'Giáo Viên',
+                    ),
                   ),
                   SingleChildScrollView(
-                    child: ItemTabarCreatAcc(show: true),
+                    child: ItemTabarCreatAcc(
+                      show: true,
+                      typeAcc: 'Học sinh',
+                    ),
                   ),
                 ],
               ),

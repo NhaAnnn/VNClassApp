@@ -9,7 +9,6 @@ import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/views/main_home_page.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_type_mistake_screen.dart';
-
 import '../../../common/helper/asset_helper.dart';
 
 class UserScreen extends StatefulWidget {
@@ -24,158 +23,169 @@ class _UserScreenState extends State<UserScreen> {
   Widget build(BuildContext context) {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
+
     return AppBarWidget(
       titleString: 'Thông tin tài khoản',
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center, // Căn giữa theo chiều dọc
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              alignment: Alignment.center,
-              child: ImageHelper.loadFromAsset(
-                AssetHelper.imageLogoSplashScreen,
-                width: 120,
-                height: 120,
-                alignment: Alignment.center,
-              ),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.white,
-                border: Border.all(
-                  color: Colors.black.withAlpha(50), // Border color
-                  width: 2, // Border width
+      implementLeading: true,
+      child: Container(
+        color: Colors.grey.shade50, // Subtle, light background
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade200,
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: ImageHelper.loadFromAsset(
+                    AssetHelper.imageLogoSplashScreen,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200, width: 1),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Thông tin tài khoản',
-                          style: TextStyle(),
+                    Center(
+                      child: Text(
+                        'Thông tin tài khoản',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
                         ),
-                      ],
+                      ),
                     ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.02,
-                    ),
+                    const SizedBox(height: 16),
                     _buildClassRow('Họ và tên:', account!.accName),
                     _buildClassRow('Tên tài khoản:', account.userName),
-                    _buildClassRow('Giới tính', account.gender),
+                    _buildClassRow('Giới tính:', account.gender),
                     _buildClassRow('Ngày sinh:', account.birth),
                     _buildClassRow(
-                        'Loại tài khoản:', account.groupModel!.groupName)
+                        'Loại tài khoản:', account.groupModel!.groupName),
                   ],
                 ),
               ),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.03,
-            ),
-            _buildItemDetail(context, 'Chinh sách'),
-            _buildItemDetail(context, 'Tùy chỉnh vi phạm',
-                routeName: UserChangeTypeMistakeScreen.routeName),
-            _buildItemDetail(context, 'Đổi mật khẩu',
-                routeName: UserChangePassScreen.routeName),
-            Row(
-              children: [
-                ButtonWidget(
+              const SizedBox(height: 24),
+              _buildItemDetail(context, 'Chính sách'),
+              _buildItemDetail(context, 'Tùy chỉnh vi phạm',
+                  routeName: UserChangeTypeMistakeScreen.routeName),
+              _buildItemDetail(context, 'Đổi mật khẩu',
+                  routeName: UserChangePassScreen.routeName),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ButtonWidget(
                   title: 'Đăng xuất',
-                  color: Colors.red,
-                )
-              ],
-            ),
-          ],
+                  color: Colors.red.shade700,
+                  ontap: () {
+                    Navigator.pop(context); // Add logout logic if needed
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildClassRow(String label, String value) {
-    return SizedBox(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.all(3.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
               ),
             ),
-            Expanded(
-              flex: 6,
-              child: Text(
-                value,
-                style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87),
+          ),
+          Expanded(
+            flex: 6,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildItemDetail<T>(BuildContext context, String title,
+  Widget _buildItemDetail(BuildContext context, String title,
       {String? routeName}) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
-          border: Border.all(
-            color: Colors.black.withAlpha(50), // Border color
-            width: 2, // Border width
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: GestureDetector(
+        onTap: routeName != null
+            ? () => Navigator.of(context).pushNamed(routeName)
+            : null,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade100,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ),
-        child: GestureDetector(
-          onTap: routeName != null
-              ? () => Navigator.of(context).pushNamed(routeName)
-              : null, // Không làm gì nếu routeName là null
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-                vertical: 16.0, horizontal: 8.0), // Thêm padding
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Căn giữa
-              children: [
-                Expanded(
-                  flex: 8,
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 24,
-                    ),
-                  ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
                 ),
-                // Chỉ hiển thị Icon nếu có routeName
-                Expanded(
-                  flex: 2,
-                  child: Icon(
-                    FontAwesomeIcons.arrowRight,
-                    size: 30,
-                  ),
+              ),
+              if (routeName != null)
+                Icon(
+                  FontAwesomeIcons.chevronRight,
+                  size: 16,
+                  color: Colors.grey.shade600,
                 ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

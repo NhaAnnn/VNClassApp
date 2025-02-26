@@ -12,8 +12,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserChangePassScreen extends StatefulWidget {
   const UserChangePassScreen({super.key});
-
   static const String routeName = '/user_change_pass_screen';
+
   @override
   State<UserChangePassScreen> createState() => _UserChangePassScreenState();
 }
@@ -22,90 +22,65 @@ class _UserChangePassScreenState extends State<UserChangePassScreen> {
   bool _isShowPass = false;
   bool _isShowPassNew = false;
   bool _isShowPassAgain = false;
-  bool _isLoading = false; // Biến trạng thái cho ProgressBar
+  bool _isLoading = false;
 
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  void onToggleShowPass() {
-    setState(() {
-      _isShowPass = !_isShowPass;
-    });
-  }
+  void onToggleShowPass() => setState(() => _isShowPass = !_isShowPass);
+  void onToggleShowPassNew() =>
+      setState(() => _isShowPassNew = !_isShowPassNew);
+  void onToggleShowPassAgain() =>
+      setState(() => _isShowPassAgain = !_isShowPassAgain);
 
-  void onToggleShowPassNew() {
-    setState(() {
-      _isShowPassNew = !_isShowPassNew;
-    });
-  }
-
-  void onToggleShowPassAgain() {
-    setState(() {
-      _isShowPassAgain = !_isShowPassAgain;
-    });
-  }
-
-  // Hàm băm mật khẩu
   String _hashPassword(String password) {
     final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
 
-  // Hàm thay đổi mật khẩu
   Future<void> _changePassword() async {
-    setState(() {
-      _isLoading = true; // Hiện ProgressBar
-    });
+    setState(() => _isLoading = true);
 
     String oldPassword = _oldPasswordController.text;
     String newPassword = _newPasswordController.text;
     String confirmPassword = _confirmPasswordController.text;
-
-    // Băm mật khẩu cũ
     String hashedOldPassword = _hashPassword(oldPassword);
 
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
     final account = accountProvider.account;
 
-    // Kiểm tra mật khẩu cũ
     if (hashedOldPassword == account!.passWord) {
       if (newPassword == confirmPassword) {
-        // Cập nhật mật khẩu mới vào Firestore
         String hashedNewPassword = _hashPassword(newPassword);
-
         var snapshot = await FirebaseFirestore.instance
             .collection('ACCOUNT')
             .where('_id', isEqualTo: account.idAcc)
             .get();
         if (snapshot.docs.isNotEmpty) {
-          // Cập nhật tài liệu đầu tiên tìm thấy
           await snapshot.docs.first.reference
               .update({'_pass': hashedNewPassword});
+          CustomDialogWidget.showConfirmationDialog(
+              context, 'Mật khẩu đã được cập nhật!');
+          Future.delayed(
+              const Duration(seconds: 2), () => Navigator.pop(context));
         } else {
-          print('No document found with the provided ID.');
+          CustomDialogWidget.showConfirmationDialog(
+              context, 'Không tìm thấy tài khoản!');
         }
-
-        // Hiển thị thông báo thành công
-        CustomDialogWidget.showConfirmationDialog(
-            context, 'Mật khẩu đã được cập nhật!');
       } else {
-        // Hiển thị thông báo mật khẩu không khớp
         CustomDialogWidget.showConfirmationDialog(
             context, 'Mật khẩu mới không khớp!');
       }
     } else {
-      // Hiển thị thông báo mật khẩu cũ không đúng
       CustomDialogWidget.showConfirmationDialog(
           context, 'Mật khẩu cũ không đúng!');
     }
 
-    setState(() {
-      _isLoading = false; // Ẩn ProgressBar
-    });
+    setState(() => _isLoading = false);
   }
 
   @override
@@ -113,199 +88,117 @@ class _UserChangePassScreenState extends State<UserChangePassScreen> {
     return AppBarWidget(
       implementLeading: true,
       titleString: 'Đổi mật khẩu',
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        alignment: AlignmentDirectional.centerEnd,
-                        children: [
-                          TextField(
-                            controller: _oldPasswordController,
-                            obscureText: !_isShowPass,
-                            decoration: InputDecoration(
-                              labelText: 'Mật khẩu cũ',
-                              labelStyle: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w300),
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 8),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide:
-                                    BorderSide(color: ColorApp.primaryColor),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        const Color.fromARGB(255, 29, 92, 252),
-                                    width: 2),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: ColorApp.primaryColor, width: 2.0),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                            child: GestureDetector(
-                              onTap: onToggleShowPass,
-                              child: Icon(
-                                _isShowPass
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          )
-                        ],
+      child: Container(
+        color: Colors.grey.shade50, // Light, professional background
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 16),
+                  _buildPasswordField(
+                    controller: _oldPasswordController,
+                    label: 'Mật khẩu cũ',
+                    isVisible: _isShowPass,
+                    onToggle: onToggleShowPass,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPasswordField(
+                    controller: _newPasswordController,
+                    label: 'Mật khẩu mới',
+                    isVisible: _isShowPassNew,
+                    onToggle: onToggleShowPassNew,
+                  ),
+                  const SizedBox(height: 20),
+                  _buildPasswordField(
+                    controller: _confirmPasswordController,
+                    label: 'Nhập lại mật khẩu',
+                    isVisible: _isShowPassAgain,
+                    onToggle: onToggleShowPassAgain,
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ButtonWidget(
+                          title: 'Lưu thay đổi',
+                          color: Colors.green.shade700, // Green for save
+                          ontap: () {
+                            CustomDialogWidget.showConfirmationDialog(
+                              context,
+                              'Xác nhận thay đổi mật khẩu?',
+                              onTapOK: _changePassword,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        alignment: AlignmentDirectional.centerEnd,
-                        children: [
-                          TextField(
-                            controller: _newPasswordController,
-                            obscureText: !_isShowPassNew,
-                            decoration: InputDecoration(
-                              labelText: 'Mật khẩu mới',
-                              labelStyle: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w300),
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 8),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide:
-                                    BorderSide(color: ColorApp.primaryColor),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        const Color.fromARGB(255, 29, 92, 252),
-                                    width: 2),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: ColorApp.primaryColor, width: 2.0),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                            child: GestureDetector(
-                              onTap: onToggleShowPassNew,
-                              child: Icon(
-                                _isShowPassNew
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          )
-                        ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ButtonWidget(
+                          title: 'Thoát',
+                          color: Colors.red.shade700,
+                          ontap: () => Navigator.pop(context),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        alignment: AlignmentDirectional.centerEnd,
-                        children: [
-                          TextField(
-                            controller: _confirmPasswordController,
-                            obscureText: !_isShowPassAgain,
-                            decoration: InputDecoration(
-                              labelText: 'Nhập lại mật khẩu',
-                              labelStyle: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w300),
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 8),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide:
-                                    BorderSide(color: ColorApp.primaryColor),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color:
-                                        const Color.fromARGB(255, 29, 92, 252),
-                                    width: 2),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: ColorApp.primaryColor, width: 2.0),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                            child: GestureDetector(
-                              onTap: onToggleShowPassAgain,
-                              child: Icon(
-                                _isShowPassAgain
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ButtonWidget(
-                        title: 'Lưu Thay Đổi',
-                        ontap: () {
-                          CustomDialogWidget.showConfirmationDialog(
-                            context,
-                            'Xác nhận thay đổi mật khẩu?',
-                            onTapOK: () {
-                              _changePassword();
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    Expanded(
-                      child: ButtonWidget(
-                        title: 'Thoát',
-                        color: Colors.red,
-                        ontap: () => Navigator.of(context).pop(),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blueGrey),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required TextEditingController controller,
+    required String label,
+    required bool isVisible,
+    required VoidCallback onToggle,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: !isVisible,
+      style: const TextStyle(fontSize: 16, color: Colors.black87),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blueGrey.shade400, width: 2),
+        ),
+        suffixIcon: GestureDetector(
+          onTap: onToggle,
+          child: Icon(
+            isVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
+            size: 20,
+            color: Colors.blueGrey.shade400,
           ),
-          if (_isLoading) // Hiện ProgressBar khi đang tải
-            Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
+        ),
       ),
     );
   }

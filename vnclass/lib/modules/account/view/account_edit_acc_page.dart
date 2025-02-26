@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -37,21 +36,16 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
 
   bool _isShowPass = false;
   bool _isShowPassAgain = false;
-  bool _isInit = true; // dùng để khởi tạo một lần
-
-  // Biến trạng thái cho giới tính, năm học và chế độ chỉnh sửa
+  bool _isInit = true;
   String? _selectedGender;
   String? _selectedAcademicYear;
-  bool _isEditing =
-      false; // false: không cho phép chỉnh sửa, true: cho phép chỉnh sửa
+  bool _isEditing = false;
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
       final AccountEditModel accountEditModel =
           ModalRoute.of(context)!.settings.arguments as AccountEditModel;
-
-      // Gán dữ liệu cho các trường thông tin tài khoản
       _accountTypeController.text =
           accountEditModel.groupModel?.groupName ?? '';
       _accountNameController.text =
@@ -65,17 +59,12 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
       _phoneController.text = accountEditModel.accountModel.phone ?? '';
       _classController.text =
           accountEditModel.classMistakeModel?.className ?? '';
-
-      // Khởi tạo giá trị cho giới tính từ studentMistakeModel
       _selectedGender = accountEditModel.studentMistakeModel?.gender ??
           accountEditModel.teacherModel?.gender ??
           accountEditModel.parentModel?.gender ??
           'Nam';
-
-      // Khởi tạo giá trị cho năm học từ classMistakeModel
       _selectedAcademicYear =
           accountEditModel.classMistakeModel?.academicYear ?? '';
-
       _isInit = false;
     }
     super.didChangeDependencies();
@@ -88,7 +77,6 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-
     if (picked != null) {
       setState(() {
         _dateController.text = picked.toString().split(" ")[0];
@@ -97,15 +85,11 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
   }
 
   void onToggleShowPass() {
-    setState(() {
-      _isShowPass = !_isShowPass;
-    });
+    setState(() => _isShowPass = !_isShowPass);
   }
 
   void onToggleShowPassAgain() {
-    setState(() {
-      _isShowPassAgain = !_isShowPassAgain;
-    });
+    setState(() => _isShowPassAgain = !_isShowPassAgain);
   }
 
   final String apiToken = '28118374-7d32-42fd-bf28-5f574262087e';
@@ -124,7 +108,6 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
         'TextBody': 'Mật khẩu mới của bạn là: 123',
       }),
     );
-
     if (response.statusCode == 200) {
       print('Email sent successfully!');
     } else {
@@ -142,19 +125,12 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
       String accountId, String newPassword) async {
     String newPassHash = _hashPassword(newPassword);
     try {
-      // Lấy tham chiếu tới collection ACCOUNT
       CollectionReference accounts =
           FirebaseFirestore.instance.collection('ACCOUNT');
-
-      // Tìm tài liệu có trường _id = accountId
       QuerySnapshot querySnapshot =
           await accounts.where('_id', isEqualTo: accountId).get();
-
       if (querySnapshot.docs.isNotEmpty) {
-        // Nếu tìm thấy tài liệu, lấy doc đầu tiên
         DocumentSnapshot document = querySnapshot.docs.first;
-
-        // Cập nhật trường pass
         await accounts.doc(document.id).update({'_pass': newPassHash});
         print('Cập nhật mật khẩu thành công');
         return true;
@@ -168,238 +144,220 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
     }
   }
 
-  /// Tab 1: Cập nhật thông tin tài khoản
   Widget _buildInfoTab(BuildContext context, List years) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Widget chuyển đổi chế độ chỉnh sửa
+          // Chế độ chỉnh sửa
           Container(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8.0),
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  "Chế độ chỉnh sửa",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  'Chế độ chỉnh sửa',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
                 Switch(
                   value: _isEditing,
-                  onChanged: (value) {
-                    setState(() {
-                      _isEditing = value;
-                    });
-                  },
+                  activeColor: const Color(0xFF1976D2),
+                  onChanged: (value) => setState(() => _isEditing = value),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Loại tài khoản (luôn không cho chỉnh sửa)
-          TextfieldWidget(
-            labelText: 'Loại tài khoản',
-            controller: _accountTypeController,
-            enabled: false, // luôn không cho chỉnh sửa
-          ),
-          const SizedBox(height: 16),
-          // Tên tài khoản (luôn không cho chỉnh sửa)
-          TextfieldWidget(
-            labelText: 'Tên tài khoản',
-            controller: _accountNameController,
-            enabled: false,
-          ),
-          const SizedBox(height: 16),
-          // Tên người dùng (cho chỉnh sửa khi _isEditing == true)
-          TextfieldWidget(
-            labelText: 'Tên người dùng',
-            controller: _userNameController,
-            enabled: _isEditing,
-          ),
-          const SizedBox(height: 16),
-          // Ngày (sử dụng TextField gốc, chỉ cho chọn ngày khi _isEditing)
-          TextField(
-            controller: _dateController,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-            decoration: InputDecoration(
-              labelText: 'Date',
-              suffixIcon: Icon(
-                FontAwesomeIcons.calendar,
-                color: _isEditing ? ColorApp.primaryColor : Colors.grey,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: _isEditing
-                        ? ColorApp.primaryColor
-                        : Colors.grey.shade400),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: _isEditing ? Colors.blue : Colors.grey.shade400),
-              ),
-            ),
-            readOnly: !_isEditing, // chỉ cho chọn khi đang chỉnh sửa
-            onTap: _isEditing ? _selectDate : null,
-          ),
-          const SizedBox(height: 16),
-          // Email
-          TextfieldWidget(
-            labelText: 'Email',
-            controller: _emailController,
-            enabled: _isEditing,
-          ),
-          const SizedBox(height: 16),
-          // SĐT
-          TextfieldWidget(
-            labelText: 'SĐT',
-            controller: _phoneController,
-            enabled: _isEditing,
-          ),
-          const SizedBox(height: 16),
-          // Lớp
-          TextfieldWidget(
-            labelText: 'Lớp',
-            controller: _classController,
-            enabled: _isEditing,
-          ),
-          const SizedBox(height: 16),
-          // Năm học
-          Row(
-            children: [
-              const Text('Năm học:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(width: 16),
-              Expanded(
-                child: DropMenuWidget(
-                  items: years,
-                  selectedItem: _selectedAcademicYear,
-                  enabled: _isEditing,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedAcademicYear = value;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Giới tính
-          Row(
-            children: [
-              const Text('Giới tính:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(width: 16),
-              Expanded(
-                child: RadioButtonWidget(
-                  options: const ['Nam', 'Nữ'],
-                  selectedValue: _selectedGender,
-                  enabled: _isEditing,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedGender = value;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 24),
-          // Nút Lưu thay đổi
+          // Các trường thông tin
+          _buildTextField('Loại tài khoản', _accountTypeController,
+              enabled: false),
+          _buildTextField('Tên tài khoản', _accountNameController,
+              enabled: false),
+          _buildTextField('Tên người dùng', _userNameController,
+              enabled: _isEditing),
+          _buildDateField(),
+          _buildTextField('Email', _emailController, enabled: _isEditing),
+          _buildTextField('SĐT', _phoneController, enabled: _isEditing),
+          _buildTextField('Lớp', _classController, enabled: _isEditing),
+          _buildDropdownField(
+              'Năm học',
+              years,
+              _selectedAcademicYear,
+              _isEditing,
+              (value) => setState(() => _selectedAcademicYear = value)),
+          _buildRadioField('Giới tính', ['Nam', 'Nữ'], _selectedGender,
+              _isEditing, (value) => setState(() => _selectedGender = value)),
+          const SizedBox(height: 32),
+          // Nút hành động
           Row(
             children: [
               Expanded(
-                child: ButtonWidget(
-                  title: 'Lưu Thay Đổi',
-                  ontap: () {
-                    // In thông tin ra terminal khi lưu
-                    print("Loại tài khoản: ${_accountTypeController.text}");
-                    print("Tên tài khoản: ${_accountNameController.text}");
-                    print("Tên người dùng: ${_userNameController.text}");
-                    print("Ngày: ${_dateController.text}");
-                    print("Email: ${_emailController.text}");
-                    print("SĐT: ${_phoneController.text}");
-                    print("Lớp: ${_classController.text}");
-                    print("Năm học: $_selectedAcademicYear");
-                    print("Giới tính: $_selectedGender");
-
-                    // Có thể hiển thị dialog xác nhận hoặc xử lý lưu thay đổi ở đây
-                    CustomDialogWidget.showConfirmationDialog(
-                      context,
-                      'Xác nhận tạo tài khoản?',
-                    );
-                  },
+                child: ElevatedButton(
+                  onPressed: _isEditing
+                      ? () {
+                          print(
+                              "Loại tài khoản: ${_accountTypeController.text}");
+                          print(
+                              "Tên tài khoản: ${_accountNameController.text}");
+                          print("Tên người dùng: ${_userNameController.text}");
+                          print("Ngày: ${_dateController.text}");
+                          print("Email: ${_emailController.text}");
+                          print("SĐT: ${_phoneController.text}");
+                          print("Lớp: ${_classController.text}");
+                          print("Năm học: $_selectedAcademicYear");
+                          print("Giới tính: $_selectedGender");
+                          CustomDialogWidget.showConfirmationDialog(
+                            context,
+                            'Xác nhận lưu thay đổi?',
+                          );
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: const Text(
+                    'Lưu thay đổi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: ButtonWidget(
-                  title: 'Thoát',
-                  color: Colors.red,
-                  ontap: () => Navigator.of(context).pop(),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: const Text(
+                    'Thoát',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              )
+              ),
             ],
           ),
-          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  /// Tab 2: Cập nhật quyền
   Widget _buildPermissionTab(List<String> permissionList) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ChecklistTab(
-        listA: permissionList,
-        listB: permissionList,
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Quyền truy cập',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ChecklistTab(
+                listA: permissionList,
+                listB: permissionList,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// Tab 3: Khôi phục mật khẩu
   Widget _buildResetPasswordTab(
       BuildContext context, AccountEditModel accountEditModel) {
     return Center(
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "Khôi phục mật khẩu",
+                'Khôi phục mật khẩu',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Nhấn nút bên dưới để nhận hướng dẫn khôi phục mật khẩu qua email.",
+              Text(
+                'Nhấn nút bên dưới để gửi mật khẩu mới qua email.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                ),
               ),
               const SizedBox(height: 24),
-              ButtonWidget(
-                title: "Reset pass",
-                ontap: () async {
-                  print("Reset pass button tapped");
+              ElevatedButton(
+                onPressed: () async {
                   bool success = await updateAccountPassword(
                       accountEditModel.accountModel.idAcc, '123');
-
-                  // Hiển thị SnackBar thông báo thành công hoặc lỗi
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(success
@@ -408,12 +366,25 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
                       duration: const Duration(seconds: 2),
                     ),
                   );
-
-                  // Gửi email khôi phục mật khẩu
-                  if (success) {
-                    sendEmail();
-                  }
+                  if (success) sendEmail();
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF388E3C),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 4,
+                ),
+                child: const Text(
+                  'Gửi mật khẩu mới',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ],
           ),
@@ -426,21 +397,18 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
   Widget build(BuildContext context) {
     final yearProvider = Provider.of<YearProvider>(context);
     final years = yearProvider.years;
+    final AccountEditModel accountEditModel =
+        ModalRoute.of(context)!.settings.arguments as AccountEditModel;
 
-    // Xử lý danh sách quyền
     List<String> permissionList = [];
     void addSecondElementsFromPermissions(
         Map<String, List<dynamic>> permissions) {
       for (var entry in permissions.entries) {
         var value = entry.value;
-        if (value.length > 1) {
-          permissionList.add(value[1]);
-        }
+        if (value.length > 1) permissionList.add(value[1]);
       }
     }
 
-    final AccountEditModel accountEditModel =
-        ModalRoute.of(context)!.settings.arguments as AccountEditModel;
     addSecondElementsFromPermissions(accountEditModel.groupModel!.permission);
     permissionList.addAll(accountEditModel.accountModel.permission);
 
@@ -451,41 +419,27 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
         length: 3,
         child: Column(
           children: [
-            TabBar(
-              isScrollable: false, // Các tab sẽ chia đều chiều ngang màn hình
-              indicatorColor: Theme.of(context).primaryColor,
-              tabs: [
-                Tab(
-                  child: Center(
-                    child: Text(
-                      'Cập nhật thông tin',
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      maxLines: 2, // hoặc bỏ qua nếu muốn không giới hạn
-                    ),
-                  ),
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                labelColor: const Color(0xFF1976D2),
+                unselectedLabelColor: Colors.grey.shade600,
+                indicatorColor: const Color(0xFF1976D2),
+                labelStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
-                Tab(
-                  child: Center(
-                    child: Text(
-                      'Cập nhật quyền',
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      maxLines: 2,
-                    ),
-                  ),
+                unselectedLabelStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
                 ),
-                Tab(
-                  child: Center(
-                    child: Text(
-                      'Khôi phục mật khẩu',
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      maxLines: 2,
-                    ),
-                  ),
-                ),
-              ],
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                tabs: const [
+                  Tab(text: 'Thông tin'),
+                  Tab(text: 'Quyền'),
+                  Tab(text: 'Mật khẩu'),
+                ],
+              ),
             ),
             Expanded(
               child: TabBarView(
@@ -498,6 +452,112 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Helper methods
+  Widget _buildTextField(String label, TextEditingController controller,
+      {bool enabled = true}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextfieldWidget(
+        labelText: label,
+        controller: controller,
+        enabled: enabled,
+        textStyle: TextStyle(
+          fontSize: 16,
+          color: enabled ? Colors.black87 : Colors.grey.shade600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextField(
+        controller: _dateController,
+        style: const TextStyle(fontSize: 16, color: Colors.black87),
+        decoration: InputDecoration(
+          labelText: 'Ngày sinh',
+          labelStyle: TextStyle(color: Colors.grey.shade600),
+          suffixIcon: Icon(
+            FontAwesomeIcons.calendar,
+            color: _isEditing ? const Color(0xFF1976D2) : Colors.grey.shade400,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+        ),
+        readOnly: true,
+        onTap: _isEditing ? _selectDate : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdownField(String label, List items, String? selectedItem,
+      bool enabled, ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: DropMenuWidget(
+              items: items,
+              selectedItem: selectedItem,
+              enabled: enabled,
+              hintText: 'Chọn $label',
+              // onChanged: onChanged,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRadioField(String label, List<String> options,
+      String? selectedValue, bool enabled, ValueChanged<String?> onChanged) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Text(
+            '$label:',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: RadioButtonWidget(
+              options: options,
+              selectedValue: selectedValue,
+              enabled: enabled,
+              onChanged: onChanged,
+            ),
+          ),
+        ],
       ),
     );
   }

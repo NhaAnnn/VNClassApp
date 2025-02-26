@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
@@ -11,11 +10,9 @@ import 'package:excel/excel.dart' as excel;
 import 'dart:io';
 
 class ItemTabarListAcc extends StatefulWidget {
-  const ItemTabarListAcc({
-    super.key,
-    required this.title,
-  });
+  const ItemTabarListAcc({super.key, required this.title, this.typeAcc});
   final String title;
+  final String? typeAcc;
 
   @override
   _ItemTabarListAccState createState() => _ItemTabarListAccState();
@@ -24,8 +21,10 @@ class ItemTabarListAcc extends StatefulWidget {
 class _ItemTabarListAccState extends State<ItemTabarListAcc> {
   String fileName = '';
   List<Map<String, dynamic>> students = [];
+  List<Map<String, dynamic>> teachers = [];
 
-  Future<void> pickFile() async {
+  // [Giữ nguyên toàn bộ logic của bạn từ pickFile đến setFormDataTeacher]
+  Future<void> pickFile(String typeAcc) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx'],
@@ -35,48 +34,37 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         fileName = path.basename(result.files.single.path!);
       });
       print('Đường dẫn file: ${result.files.single.path}');
-      await readExcel(result.files.single.path!);
+      if (typeAcc == 'hs') {
+        await readExcel(result.files.single.path!);
+      } else {
+        await readExcelTeacher(result.files.single.path!);
+      }
     }
   }
 
   void countStudentsByClassAndAcademicYear() {
-    // Tạo một Map để lưu trữ số lượng sinh viên theo cặp class + academicYear
     Map<String, int> countMap = {};
-
     for (var student in students) {
       String? className = student['class'].toString().toLowerCase();
       String? academicYear = student['academicYear'];
-
-      // Kiểm tra nếu cả class và academicYear đều không null
       if (academicYear != null) {
-        // Tạo key cho cặp class + academicYear
         String key = '$className$academicYear';
-
-        // Tăng số lượng cho cặp này
         countMap[key] = (countMap[key] ?? 0) + 1;
       }
     }
-
-    // In ra số lượng sinh viên theo từng cặp class + academicYear
     countMap.forEach((key, count) {
       print('Cặp $key có $count sinh viên');
     });
+    updateClassAmounts(countMap);
   }
 
   void updateClassAmounts(Map<String, int> countMap) async {
-    // Lấy reference tới collection CLASS
     CollectionReference classCollection =
         FirebaseFirestore.instance.collection('CLASS');
-
-    // Lặp qua từng cặp key-value trong countMap
     for (var entry in countMap.entries) {
       String key = entry.key;
       int count = entry.value;
-
-      // Tìm document có id tương ứng với key
       DocumentReference classDoc = classCollection.doc(key);
-
-      // Cập nhật trường _amount
       await classDoc.update({'_amount': count}).catchError((error) {
         print('Error updating document $key: $error');
       });
@@ -168,9 +156,88 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         students.add(student);
       }
     }
-
     setState(() {});
     print('Danh sách sinh viên: $students');
+  }
+
+  Future<void> readExcelTeacher(String filePath) async {
+    var bytes = File(filePath).readAsBytesSync();
+    var excelFile = excel.Excel.decodeBytes(bytes);
+    teachers.clear();
+
+    List<String> requiredHeaders = [
+      'STT',
+      'Mã GV',
+      'Họ và tên',
+      'Ngày sinh',
+      'Giới tính',
+      'Email',
+      'SĐT',
+    ];
+
+    for (var table in excelFile.tables.keys) {
+      var rows = excelFile.tables[table]!.rows;
+      if (rows.isEmpty) continue;
+
+      int headerRowIndex = -1;
+      for (int i = 0; i < rows.length; i++) {
+        var rowValues = rows[i]
+            .map((cell) => cell?.value?.toString().trim() ?? '')
+            .toList();
+        bool isHeader =
+            requiredHeaders.every((header) => rowValues.contains(header));
+        if (isHeader) {
+          headerRowIndex = i;
+          break;
+        }
+      }
+
+      if (headerRowIndex == -1) {
+        print("Không tìm thấy dòng header trong sheet: $table");
+        continue;
+      }
+
+      List<String> headers = rows[headerRowIndex]
+          .map((cell) => cell?.value?.toString().trim() ?? '')
+          .toList();
+      print('Header row: $headers');
+
+      for (int i = headerRowIndex + 1; i < rows.length; i++) {
+        var row = rows[i];
+        if (row.isEmpty ||
+            row.every((cell) =>
+                cell?.value == null || cell?.value.toString().trim() == '')) {
+          continue;
+        }
+        List<String> persionList = [];
+        Map<String, dynamic> teacher = {
+          'stt': headers.contains('STT')
+              ? row[headers.indexOf('STT')]?.value?.toString()
+              : null,
+          'idteacher': headers.contains('Mã GV')
+              ? row[headers.indexOf('Mã GV')]?.value?.toString()
+              : null,
+          'fullName': headers.contains('Họ và tên')
+              ? row[headers.indexOf('Họ và tên')]?.value?.toString()
+              : null,
+          'birthDate': headers.contains('Ngày sinh')
+              ? row[headers.indexOf('Ngày sinh')]?.value?.toString()
+              : null,
+          'gender': headers.contains('Giới tính')
+              ? row[headers.indexOf('Giới tính')]?.value?.toString()
+              : null,
+          'email': headers.contains('Email')
+              ? row[headers.indexOf('Email')]?.value?.toString()
+              : null,
+          'phone': headers.contains('SĐT')
+              ? row[headers.indexOf('SĐT')]?.value?.toString()
+              : null,
+        };
+        teachers.add(teacher);
+      }
+    }
+    setState(() {});
+    print('Danh sách GV: $teachers');
   }
 
   String _hashPassword(String password) {
@@ -180,7 +247,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
   }
 
   Future<void> setFormData() async {
-    // Flatten monthData into a simple map
     Map<String, Set<String>> monthData = {
       'month1': {'100', 'Tốt'},
       'month2': {'100', 'Tốt'},
@@ -202,36 +268,23 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     List<Map<String, dynamic>> accountsUp = [];
     List<Map<String, dynamic>> conductsUp = [];
     List<Map<String, dynamic>> parentsUp = [];
-
+    List<Map<String, dynamic>> accParentsUp = [];
     List<String> init = [];
 
-    // Tạo danh sách studentsUp
     studentsUp = students.map((student) {
-      // Chuyển birthDate về String và kiểm tra độ dài
       String birth = student['birthDate']?.toString() ?? '';
       String ddmm = '';
-
       if (birth.length >= 10) {
-        // Lấy 2 ký tự đầu cho ngày và tháng
-        ddmm = birth.substring(0, 2) + birth.substring(3, 5); // Lấy dd và mm
+        ddmm = birth.substring(0, 2) + birth.substring(3, 5);
       }
-
-      // Tạo 3 chữ số ngẫu nhiên
       Random random = Random();
-      String xxx = random
-          .nextInt(1000)
-          .toString()
-          .padLeft(3, '0'); // Đảm bảo là 3 chữ số
-
-      // Kết hợp để tạo ID
+      String xxx = random.nextInt(1000).toString().padLeft(3, '0');
       String id = 'H$ddmm$xxx';
-      // Các trường khác
       String gender = student['gender']?.toString() ?? '';
       String phone = student['phone']?.toString() ?? '';
       String email = student['email']?.toString() ?? '';
       String studentName = student['fullName']?.toString() ?? '';
       String parentID = student['phoneParent'].toString() ?? '';
-      // Tạo đối tượng cho studentDetailsUp
       String classN = student['class']?.toString().toLowerCase() ?? '';
       String academicYear = student['academicYear']?.toString() ?? '';
       String classID = '$classN$academicYear';
@@ -239,7 +292,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       studentDetailsUp.add({
         'Class_id': classID,
         'Class_name': classN,
-        'ST_id': id, // Gán ST_id bằng id
+        'ST_id': id,
         '_birthday': birth,
         '_committee': 'Học sinh',
         '_conductAllYear': 'Tốt',
@@ -249,7 +302,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_id': idstudentdetail,
         '_phone': phone,
         '_studentName': studentName,
-        // Bạn có thể thêm các trường khác nếu cần
       });
 
       accountsUp.add({
@@ -267,13 +319,35 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_userName': id,
       });
 
+      accParentsUp.add({
+        '_accName': 'PHHS $studentName - $id',
+        '_birth': '',
+        '_email': '',
+        '_gender': '',
+        '_groupID': 'phuHuynh',
+        '_id': parentID,
+        '_pass': _hashPassword('123'),
+        '_permission': init,
+        '_phone': parentID,
+        '_status': 'true',
+        '_token': init,
+        '_userName': parentID,
+      });
+
       conductsUp.add({
         'STDL_id': idstudentdetail,
         '_id': idstudentdetail,
         '_month': monthData,
       });
 
-      parentsUp.add({});
+      parentsUp.add({
+        'ACC_id': parentID,
+        '_birthday': '',
+        '_gender': '',
+        '_id': parentID,
+        '_parentName': 'PHHS $studentName',
+        '_phone': parentID,
+      });
 
       return {
         '_id': id,
@@ -283,24 +357,120 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_gender': gender,
         '_phone': phone,
         '_studentName': studentName,
-        // Bạn có thể thêm các trường khác nếu cần
       };
     }).toList();
 
-    // print('Dữ liệu studentUp: $studentsUp');
-    // print('Dữ liệu studentDetailsUp: $studentDetailsUp');
-    // print('Dữ liệu conductsUp: $conductsUp');
-    // print('Dữ liệu accountsUp: $accountsUp');
     countStudentsByClassAndAcademicYear();
-    // await Future.wait([
-    //   Future.wait(studentsUp.map((studentup) {
-    //     String docId = studentup['_id'];
-    //     return FirebaseFirestore.instance
-    //         .collection('STUDENT')
-    //         .doc(docId)
-    //         .set(studentup);
-    //   })),
-    // ]);
+    await Future.wait([
+      Future.wait(studentsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('STUDENT')
+            .doc(docId)
+            .set(studentup);
+      })),
+      Future.wait(studentDetailsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('STUDENT_DETAIL')
+            .doc(docId)
+            .set(studentup);
+      })),
+      Future.wait(conductsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('CONDUCT_MONTH')
+            .doc(docId)
+            .set(studentup);
+      })),
+      Future.wait(accountsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('ACCOUNT')
+            .doc(docId)
+            .set(studentup);
+      })),
+      Future.wait(accParentsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('ACCOUNT')
+            .doc(docId)
+            .set(studentup);
+      })),
+      Future.wait(parentsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('PARENT')
+            .doc(docId)
+            .set(studentup);
+      })),
+    ]);
+  }
+
+  Map<String, dynamic>? getTeacherIfUnique(String teacherId) {
+    final foundTeachers =
+        teachers.where((teacher) => teacher['idteacher'] == teacherId).toList();
+    if (foundTeachers.length == 1) {
+      return foundTeachers.first;
+    }
+    return null;
+  }
+
+  Future<void> setFormDataTeacher() async {
+    print('Dữ liệu giáo viên trước khi tải lên: ${teachers.length}');
+    List<Map<String, dynamic>> teachersUp = [];
+    List<Map<String, dynamic>> accountsUp = [];
+    List<String> init = [];
+
+    teachersUp = teachers.map((teacher) {
+      String birth = teacher['birthDate']?.toString() ?? '';
+      String gender = teacher['gender']?.toString() ?? '';
+      String id = teacher['idteacher']?.toString() ?? '';
+      String phone = teacher['phone']?.toString() ?? '';
+      String email = teacher['email']?.toString() ?? '';
+      String teacherName = teacher['fullName']?.toString() ?? '';
+
+      accountsUp.add({
+        '_accName': teacherName,
+        '_birth': birth,
+        '_email': email,
+        '_gender': gender,
+        '_groupID': 'giaoVien',
+        '_id': id,
+        '_pass': _hashPassword('123'),
+        '_permission': init,
+        '_phone': phone,
+        '_status': 'true',
+        '_token': init,
+        '_userName': id,
+      });
+
+      return {
+        '_id': id,
+        'ACC_id': id,
+        '_birthday': birth,
+        '_gender': gender,
+        '_phone': phone,
+        '_teacherName': teacherName,
+      };
+    }).toList();
+
+    await Future.wait([
+      Future.wait(teachersUp.map((teacher) {
+        String docId = teacher['_id'];
+        return FirebaseFirestore.instance
+            .collection('TEACHER')
+            .doc(docId)
+            .set(teacher);
+      })),
+      Future.wait(accountsUp.map((studentup) {
+        String docId = studentup['_id'];
+        return FirebaseFirestore.instance
+            .collection('ACCOUNT')
+            .doc(docId)
+            .set(studentup);
+      })),
+    ]);
   }
 
   Future<void> uploadData() async {
@@ -309,13 +479,12 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       for (var student in students) {
         await FirebaseFirestore.instance.collection('STUDENT').add(student);
       }
-
       setState(() {
         students.clear();
         fileName = '';
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tải lên thành công!')),
+        const SnackBar(content: Text('Tải lên thành công!')),
       );
     } catch (e) {
       print('Lỗi khi tải lên: $e');
@@ -324,71 +493,157 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
+    final size = MediaQuery.of(context).size;
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.02),
-            Text(widget.title),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+            // Tiêu đề
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blueAccent,
+              ),
+            ),
+            const SizedBox(height: 20),
+            // Khu vực chọn file
             Container(
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.red, width: 1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.grey.shade400, // Viền rõ hơn với màu xám nhạt
+                  width: 1.5, // Độ dày viền tăng lên để rõ hơn
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(30),
-                    spreadRadius: 4,
-                    blurRadius: 7,
-                    offset: Offset(0, 3),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      flex: 6,
-                      child: Text(
-                        fileName.isNotEmpty ? fileName : 'Chưa chọn file',
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 6,
+                    child: Text(
+                      fileName.isNotEmpty ? fileName : 'Chưa chọn file',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: fileName.isNotEmpty
+                            ? Colors.black87
+                            : Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 4,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        pickFile(widget.typeAcc ?? '');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: const Text(
+                        'Chọn file',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 14,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      flex: 4,
-                      child: ButtonWidget(
-                        title: 'Chọn file',
-                        ontap: pickFile,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+            const SizedBox(height: 24),
+            // Nút điều khiển
             Row(
               children: [
-                ButtonWidget(
-                  title: 'Tải lên',
-                  ontap: () {
-                    setFormData();
-                    // uploadData();
-                  },
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: fileName.isNotEmpty
+                        ? () {
+                            if (widget.typeAcc == 'bgh' ||
+                                widget.typeAcc == 'gv') {
+                              setFormDataTeacher();
+                            } else {
+                              setFormData();
+                            }
+                          }
+                        : null, // Vô hiệu hóa nếu chưa chọn file
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      'Tải lên',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                ButtonWidget(
-                  title: 'Thoát',
-                  color: Colors.red,
-                  ontap: () => Navigator.of(context).pop(),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                    ),
+                    child: const Text(
+                      'Thoát',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
+            // Hiển thị số lượng dữ liệu (tùy chọn)
+            if (fileName.isNotEmpty &&
+                (students.isNotEmpty || teachers.isNotEmpty))
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  'Số lượng: ${widget.typeAcc == 'hs' ? students.length : teachers.length} bản ghi',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

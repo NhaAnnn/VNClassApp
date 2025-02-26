@@ -3,11 +3,10 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
-import 'package:vnclass/modules/login/controller/account_controller.dart'; // Import AccountController
+import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/main_home/views/main_home_page.dart';
@@ -24,21 +23,19 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isChecked = false;
   bool _isShowPass = false;
+  bool _isLoading = false;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final AccountController _accountController =
-      AccountController(); // Tạo instance
+  final AccountController _accountController = AccountController();
 
-  void _onChanged(bool? newValue) {
-    setState(() {
-      _isChecked = newValue ?? false;
-    });
-  }
+  void _onChanged(bool? newValue) =>
+      setState(() => _isChecked = newValue ?? false);
+  void _toggleShowPass() => setState(() => _isShowPass = !_isShowPass);
 
-  void _toggleShowPass() {
-    setState(() {
-      _isShowPass = !_isShowPass;
-    });
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   void _login() async {
@@ -51,8 +48,8 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    setState(() => _isLoading = true);
     try {
-      // Sử dụng AccountController để lấy thông tin tài khoản
       AccountModel account =
           await _accountController.fetchAccount(username, passHash);
       await account.fetchGroupModel();
@@ -61,143 +58,186 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       _showMessage('Đã xảy ra lỗi, vui lòng thử lại');
     }
+    setState(() => _isLoading = false);
   }
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message,
+            style: const TextStyle(fontSize: 16, color: Colors.white)),
+        backgroundColor: Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(seconds: 2),
+      ),
     );
-  }
-
-  String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(height: 50),
-            ImageHelper.loadFromAsset(
-              AssetHelper.imageLogoSplashScreen,
-              width: 180,
-              height: 180,
-              alignment: Alignment.center,
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _userNameController,
-              decoration: InputDecoration(
-                labelText: 'Tên Đăng Nhập',
-                labelStyle:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
-                contentPadding: const EdgeInsets.symmetric(vertical: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: ColorApp.primaryColor),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 29, 92, 252), width: 2),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      BorderSide(color: ColorApp.primaryColor, width: 2.0),
-                ),
-                prefixIcon: const Icon(
-                  Icons.person_outline_outlined,
-                  size: 28,
-                  color: Color.fromARGB(255, 29, 92, 252),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Stack(
-              alignment: AlignmentDirectional.centerEnd,
+      backgroundColor: Colors.blue.shade50, // Light sky-blue background
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 40),
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.shade200.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: ImageHelper.loadFromAsset(
+                      AssetHelper.imageLogoSplashScreen,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: _userNameController,
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                  decoration: InputDecoration(
+                    labelText: 'Tên đăng nhập',
+                    labelStyle:
+                        TextStyle(fontSize: 16, color: Colors.blue.shade600),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 18, horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.blue.shade100),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          BorderSide(color: Colors.blue.shade700, width: 2),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      size: 24,
+                      color: Colors.blue.shade600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 TextField(
                   controller: _passwordController,
                   obscureText: !_isShowPass,
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
                   decoration: InputDecoration(
-                    labelText: 'Mật Khẩu',
-                    labelStyle: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w300),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 20),
+                    labelText: 'Mật khẩu',
+                    labelStyle:
+                        TextStyle(fontSize: 16, color: Colors.blue.shade600),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 18, horizontal: 16),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: ColorApp.primaryColor),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                          color: Color.fromARGB(255, 29, 92, 252), width: 2),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.blue.shade100),
                     ),
                     focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
                       borderSide:
-                          BorderSide(color: ColorApp.primaryColor, width: 2.0),
+                          BorderSide(color: Colors.blue.shade700, width: 2),
                     ),
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.lock_outline,
-                      size: 28,
-                      color: Color.fromARGB(255, 29, 92, 252),
+                      size: 24,
+                      color: Colors.blue.shade600,
+                    ),
+                    suffixIcon: GestureDetector(
+                      onTap: _toggleShowPass,
+                      child: Icon(
+                        _isShowPass
+                            ? FontAwesomeIcons.eye
+                            : FontAwesomeIcons.eyeSlash,
+                        size: 20,
+                        color: Colors.blue.shade600,
+                      ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                  child: GestureDetector(
-                    onTap: _toggleShowPass,
-                    child: Icon(
-                      _isShowPass
-                          ? FontAwesomeIcons.eye
-                          : FontAwesomeIcons.eyeSlash,
-                      size: 20,
-                      color: Colors.blue,
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _isChecked,
+                      onChanged: _onChanged,
+                      activeColor: Colors.blue.shade700,
+                      checkColor: Colors.white,
+                    ),
+                    Text(
+                      'Ghi nhớ đăng nhập',
+                      style:
+                          TextStyle(fontSize: 15, color: Colors.grey.shade800),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonWidget(
+                    title: 'Đăng nhập',
+                    color: Colors.blue.shade700,
+                    ontap: _login,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    // Add forgot password logic here if needed
+                  },
+                  child: Text(
+                    'Quên mật khẩu?',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.blue.shade600,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
                 ),
+                const SizedBox(height: 40),
               ],
             ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Checkbox(
-                  value: _isChecked,
-                  onChanged: _onChanged,
-                ),
-                const Text(
-                  'Ghi Nhớ Đăng Nhập',
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-            ButtonWidget(
-              title: 'Đăng Nhập',
-              ontap: _login,
-            ),
-            const SizedBox(height: 20),
+          ),
+          if (_isLoading)
             Container(
-              alignment: Alignment.centerRight,
-              child: const Text(
-                'Quên mật khẩu ?',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Color.fromARGB(255, 11, 155, 239),
-                  decoration: TextDecoration.underline,
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
                 ),
               ),
             ),
-            const SizedBox(height: 50),
-          ],
-        ),
+        ],
       ),
     );
   }

@@ -19,67 +19,50 @@ class AccountMainPage extends StatefulWidget {
 
 class _AccountMainPageState extends State<AccountMainPage> {
   late Future<List<AccountModel>> futureMistakeClass;
+  final accountRepository = AccountRepository();
 
   @override
   void initState() {
     super.initState();
-    futureMistakeClass = fetchAccountsByGroup();
   }
 
-  Future<List<AccountModel>> fetchAccountsByGroup() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('ACCOUNT')
-        .where('_groupID', isEqualTo: '001')
-        .get();
-    return snapshot.docs.map((doc) => AccountModel.fromFirestore(doc)).toList();
-  }
-
-  final accountRepository = AccountRepository();
-
-  Future<List<AccountEditModel>> fetchDatatttt(String idGroup) async {
+  Future<List<AccountEditModel>> fetchDatatttt() async {
     try {
-      return await accountRepository.fetchAccountsEditByGroup1(idGroup);
+      return await accountRepository.fetchAccountsEditByGroup1('hocSinh');
     } catch (e) {
       print('Có lỗi xảy ra: $e');
-      return []; // Trả về danh sách rỗng nếu có lỗi
+      return [];
     }
   }
 
-  Future<List<AccountEditModel>> fetchDatatttt2(String idGroup) async {
+  Future<List<AccountEditModel>> fetchDatatttt2() async {
     try {
-      return await accountRepository.fetchAccountsEditByGroup2(idGroup);
+      return await accountRepository.fetchAccountsEditByGroup2('giaoVien');
     } catch (e) {
       print('Có lỗi xảy ra: $e');
-      return []; // Trả về danh sách rỗng nếu có lỗi
+      return [];
     }
   }
 
-  Widget _buildAccountList(String groupId) {
+  Future<List<AccountEditModel>> fetchDatatttt3() async {
+    try {
+      return await accountRepository.fetchAccountsEditByGroup3('phuHuynh');
+    } catch (e) {
+      print('Có lỗi xảy ra: $e');
+      return [];
+    }
+  }
+
+  Widget _buildAccountList(
+      String groupId, Future<List<AccountEditModel>> Function() fetchData) {
     return FutureBuilder<List<AccountEditModel>>(
-      future: fetchDatatttt(groupId),
+      future: fetchData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('Không có tài khoản.'));
-        }
-        return ListView.builder(
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) => ItemAccount(
-            accountEditModel: snapshot.data![index],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildAccountList1(String groupId) {
-    return FutureBuilder<List<AccountEditModel>>(
-      future: fetchDatatttt2(groupId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+        if (snapshot.hasError) {
+          return const Center(child: Text('Đã xảy ra lỗi.'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('Không có tài khoản.'));
@@ -105,9 +88,8 @@ class _AccountMainPageState extends State<AccountMainPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nút tạo tài khoản (nhiều / 1)
+              // Header với các nút hành động
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: ElevatedButton(
@@ -116,10 +98,13 @@ class _AccountMainPageState extends State<AccountMainPage> {
                           context: context,
                           builder: (BuildContext context) {
                             return Dialog(
+                              backgroundColor: Colors.transparent,
+                              insetPadding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                width: MediaQuery.of(context).size.width * 0.85,
                                 height:
-                                    MediaQuery.of(context).size.height * 0.5,
+                                    MediaQuery.of(context).size.height * 0.55,
                                 child: const TabarListAcc(),
                               ),
                             );
@@ -127,127 +112,170 @@ class _AccountMainPageState extends State<AccountMainPage> {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: const Color(0xFF1976D2), // Xanh đậm
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 4,
                       ),
                       child: const Text(
                         'Tạo nhiều tài khoản',
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context)
-                          .pushNamed(AccountCreatAccPage.routeName),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const DialogExportAcc();
+                        },
+                      );
+                    },
+                    icon: const Icon(Icons.file_download, color: Colors.white),
+                    label: const Text('Xuất DS'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF388E3C), // Xanh lá đậm
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Tạo 1 tài khoản',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      elevation: 4,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              // Nút xuất DS tài khoản
-              ElevatedButton.icon(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const DialogExportAcc();
-                    },
-                  );
-                },
-                icon: const Icon(Icons.file_download),
-                label: const Text('Xuất DS tài khoản'),
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context)
+                          .pushNamed(AccountCreatAccPage.routeName),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFF0288D1), // Xanh nhạt hơn
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: const Text(
+                        'Tạo 1 tài khoản',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(height: 16),
-              // TextField tìm kiếm
+              const SizedBox(height: 20),
+              // Thanh tìm kiếm
               TextField(
                 style: const TextStyle(fontSize: 16),
                 decoration: InputDecoration(
-                  hintText: 'Tìm kiếm...',
-                  prefixIcon: const Icon(
+                  hintText: 'Tìm kiếm tài khoản...',
+                  hintStyle: TextStyle(color: Colors.grey.shade500),
+                  prefixIcon: Icon(
                     Icons.search_outlined,
+                    color: Colors.grey.shade600,
                     size: 24,
                   ),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
                   contentPadding:
                       const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 2.0,
-                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: const BorderSide(
-                      color: Colors.blueAccent,
-                      width: 2.0,
+                      color: Color(0xFF1976D2),
+                      width: 2,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              // Tab hiển thị danh sách tài khoản theo nhóm
+              const SizedBox(height: 20),
+              // Tab hiển thị danh sách tài khoản
               Expanded(
                 child: DefaultTabController(
                   length: 4,
                   child: Column(
                     children: [
-                      TabBar(
-                        labelColor: Theme.of(context).primaryColor,
-                        unselectedLabelColor: Colors.grey,
-                        indicatorColor: Theme.of(context).primaryColor,
-                        tabs: const [
-                          Tab(
-                              child: Text('BGH',
-                                  maxLines: 2, overflow: TextOverflow.visible)),
-                          Tab(
-                              child: Text('Giáo viên',
-                                  maxLines: 2, overflow: TextOverflow.visible)),
-                          Tab(
-                              child: Text('Học sinh',
-                                  maxLines: 2, overflow: TextOverflow.visible)),
-                          Tab(
-                              child: Text('PHHS',
-                                  maxLines: 2, overflow: TextOverflow.visible)),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildAccountList('001'),
-                            _buildAccountList('002'),
-                            _buildAccountList('003'),
-                            _buildAccountList('004'),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
+                        ),
+                        child: TabBar(
+                          labelColor: const Color(0xFF1976D2),
+                          unselectedLabelColor: Colors.grey.shade600,
+                          indicatorColor: const Color(0xFF1976D2),
+                          labelStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          unselectedLabelStyle: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          tabs: const [
+                            Tab(text: 'BGH'),
+                            Tab(text: 'Giáo viên'),
+                            Tab(text: 'Học sinh'),
+                            Tab(text: 'PHHS'),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TabBarView(
+                            children: [
+                              _buildAccountList('banGH', fetchDatatttt2),
+                              _buildAccountList('giaoVien', fetchDatatttt2),
+                              _buildAccountList('hocSinh', fetchDatatttt),
+                              _buildAccountList('phuHuynh', fetchDatatttt3),
+                            ],
+                          ),
                         ),
                       ),
                     ],
