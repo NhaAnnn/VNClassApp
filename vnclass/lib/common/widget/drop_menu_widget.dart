@@ -8,7 +8,7 @@ class DropMenuWidget<T> extends StatefulWidget {
     this.onChanged,
     this.hintText,
     this.fillColor = Colors.white, // Nền trắng mặc định
-    this.borderColor = const Color(0xFFE0E0E0), // Viền nhạt mặc định
+    this.borderColor = const Color(0xFF666666), // Viền xám đen đậm hơn
     this.textStyle = const TextStyle(
       fontSize: 16,
       color: Colors.black87,
@@ -55,13 +55,13 @@ class _DropMenuWidgetState<T> extends State<DropMenuWidget<T>> {
       decoration: BoxDecoration(
         color: widget.enabled
             ? widget.fillColor
-            : Colors.grey.shade100, // Nền thay đổi khi disabled
+            : Colors.grey.shade600, // Nền thay đổi khi disabled
         borderRadius: BorderRadius.circular(12), // Bo góc mềm mại
         border: Border.all(
           color: widget.enabled
-              ? widget.borderColor ?? const Color(0xFFE0E0E0)
-              : Colors.grey.shade300, // Viền nhạt hơn khi disabled
-          width: 1.2, // Viền mỏng nhưng rõ hơn chút
+              ? widget.borderColor ?? const Color(0xFF666666) // Viền xám đen
+              : Colors.grey.shade600, // Viền nhạt hơn khi disabled
+          width: 1.0, // Mảnh hơn
         ),
         boxShadow: [
           BoxShadow(

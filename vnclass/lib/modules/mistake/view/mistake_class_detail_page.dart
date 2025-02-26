@@ -20,6 +20,7 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
   String? selectedMonth;
   String? hocKy;
   bool _isInitialized = false;
+  List<StudentDetailModel>? cachedData; // Cache dữ liệu cục bộ
 
   @override
   void didChangeDependencies() {
@@ -27,7 +28,6 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
     if (!_isInitialized) {
       final Map<String, dynamic> arguments =
           ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
       classMistakeModel = arguments['classMistakeModel'];
       hocKy = arguments['hocKy'];
 
@@ -52,8 +52,16 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
         .where('Class_id', isEqualTo: classMistakeModel!.idClass)
         .get();
 
-    return Future.wait(snapshot.docs
-        .map((doc) => StudentDetailModel.fromFirestore(doc, monthToSearch)));
+    final data = await Future.wait(
+      snapshot.docs
+          .map((doc) => StudentDetailModel.fromFirestore(doc, monthToSearch)),
+    );
+
+    // Cập nhật cache sau khi fetch thành công
+    setState(() {
+      cachedData = data;
+    });
+    return data;
   }
 
   List<String> getThangList(String hocKy) {
@@ -79,10 +87,11 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
     }
   }
 
-  void _refreshData() {
+  Future<void> _refreshData() async {
     setState(() {
       futureMistakeClass = fetchMistakeClasses();
     });
+    await futureMistakeClass; // Đợi fetch hoàn tất
   }
 
   @override
@@ -91,11 +100,11 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
       titleString: 'Cập nhật vi phạm lớp ${classMistakeModel?.className ?? ""}',
       implementLeading: true,
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             DropMenuWidget<String>(
               hintText: 'Chọn tháng',
               items: getThangList(hocKy ?? ''),
@@ -109,145 +118,141 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
                 }
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             TextField(
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
               decoration: InputDecoration(
-                hintText: 'Tìm kiếm học sinh...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                hintText: 'Tìm kiếm...',
+                hintStyle: const TextStyle(
+                    color: Color(0xFF696969),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(Icons.search_outlined,
+                      color: Color(0xFF1E90FF), size: 24),
                 ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide:
+                      const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1E90FF), width: 2.0),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            // Header
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               color: Colors.grey.shade100,
               child: Row(
                 children: [
-                  Expanded(
-                    flex: 3,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 100),
-                      child: Text(
-                        'Mã HS',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 5,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 150),
-                      child: Text(
-                        'Họ và Tên',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 40),
-                      child: Text(
-                        'Lần VP',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 36),
-                      child: Text(
-                        'Xem',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 1,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 36),
-                      child: Text(
-                        'Sửa',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ),
-                  ),
+                  Expanded(flex: 3, child: _buildHeaderText('Mã HS')),
+                  Expanded(flex: 5, child: _buildHeaderText('Họ và Tên')),
+                  Expanded(flex: 1, child: _buildHeaderText('Lần VP')),
+                  Expanded(flex: 1, child: _buildHeaderText('Xem')),
+                  Expanded(flex: 1, child: _buildHeaderText('Sửa')),
                 ],
               ),
             ),
-            // const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Expanded(
-              child: FutureBuilder<List<StudentDetailModel>>(
-                future: futureMistakeClass,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Lỗi: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('Không có dữ liệu'));
-                  }
-                  return ListView.separated(
-                    itemCount: snapshot.data!.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 6),
-                    itemBuilder: (context, index) {
-                      return ItemClassMistakeStudent(
-                        studentDetailModel: snapshot.data![index],
-                        month: selectedMonth,
-                        onRefresh: _refreshData,
-                      );
-                    },
-                  );
-                },
+              child: RefreshIndicator(
+                onRefresh: _refreshData,
+                child: FutureBuilder<List<StudentDetailModel>>(
+                  future: futureMistakeClass,
+                  builder: (context, snapshot) {
+                    // Hiển thị dữ liệu cache nếu có trong khi chờ fetch mới
+                    final displayData =
+                        snapshot.connectionState == ConnectionState.waiting &&
+                                cachedData != null
+                            ? cachedData
+                            : snapshot.data;
+
+                    if (snapshot.connectionState == ConnectionState.waiting &&
+                        cachedData == null) {
+                      return _buildLoadingSkeleton();
+                    }
+                    if (snapshot.hasError) {
+                      return _buildErrorWidget(snapshot.error.toString());
+                    }
+                    if (displayData == null || displayData.isEmpty) {
+                      return const Center(child: Text('Không có dữ liệu'));
+                    }
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: displayData.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        return ItemClassMistakeStudent(
+                          studentDetailModel: displayData[index],
+                          month: selectedMonth,
+                          onRefresh: _refreshData,
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderText(String text) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 36),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: Colors.grey.shade800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 5,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      itemBuilder: (context, index) => Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(String error) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+          const SizedBox(height: 16),
+          Text('Lỗi: $error', style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _refreshData,
+            child: const Text('Thử lại'),
+          ),
+        ],
       ),
     );
   }

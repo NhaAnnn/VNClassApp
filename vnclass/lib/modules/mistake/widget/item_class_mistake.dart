@@ -8,37 +8,37 @@ class ItemClassModels extends StatelessWidget {
     super.key,
     required this.classMistakeModel,
     this.hocKy = '1',
+    this.onRefresh, // Thêm callback
   });
 
   final ClassMistakeModel classMistakeModel;
   final String? hocKy;
+  final Future<void> Function()? onRefresh; // Callback để làm mới dữ liệu
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.of(context).pushNamed(
-        MistakeClassDetailPage.routeName,
-        arguments: {
-          'classMistakeModel': classMistakeModel,
-          'hocKy': hocKy,
-        },
-      ),
+      onTap: () async {
+        await Navigator.pushNamed(
+          context,
+          MistakeClassDetailPage.routeName,
+          arguments: {
+            'classMistakeModel': classMistakeModel,
+            'hocKy': hocKy,
+          },
+        );
+        if (onRefresh != null && context.mounted) {
+          await onRefresh!(); // Gọi callback khi quay lại
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12), // Bo góc mềm mại hơn
+          borderRadius: BorderRadius.circular(12),
           color: Colors.white,
           border: Border.all(
-            color: Colors.grey.shade200, // Viền nhạt, tinh tế
-            width: 1,
+            color: const Color(0xFF1976D2),
+            width: 0.8,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05), // Bóng đổ nhẹ
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         child: Padding(
@@ -66,10 +66,10 @@ class ItemClassModels extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Icon(
-                FontAwesomeIcons.chevronRight, // Icon nhẹ nhàng hơn
-                size: 24, // Giảm kích thước cho tinh tế
-                color: Colors.grey.shade600, // Màu nhạt hơn
+              const Icon(
+                FontAwesomeIcons.chevronRight,
+                size: 24,
+                color: Colors.black,
               ),
             ],
           ),
@@ -96,7 +96,7 @@ class ItemClassModels extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 90, // Độ rộng cố định cho label để căn đều
+          width: 90,
           child: Text(
             label,
             style: const TextStyle(
@@ -109,10 +109,10 @@ class ItemClassModels extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade800,
+              color: Colors.black87,
             ),
             overflow: TextOverflow.ellipsis,
           ),

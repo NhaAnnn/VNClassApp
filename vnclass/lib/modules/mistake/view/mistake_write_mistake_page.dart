@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
-import 'package:vnclass/common/widget/custom_snack_bar.dart'; // Assuming this is your custom SnackBar
+import 'package:vnclass/common/widget/custom_snack_bar.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/mistake/models/mistake_model.dart';
@@ -22,6 +22,7 @@ class MistakeWriteMistakePage extends StatefulWidget {
 class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
   String? selectedItem;
   final TextEditingController _dateController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -40,47 +41,53 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
       titleString: studentDetailModel.nameStudent,
       implementLeading: true,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               'Tên vi phạm',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: Color(0xFF424242),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.redAccent.withOpacity(0.1),
+                color: const Color(0xFFFFEBEE),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.redAccent.shade100),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Text(
                 mistakeModel.nameMistake,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.redAccent,
+                  color: Color(0xFFE53935),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Text(
               'Môn học',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: Color(0xFF424242),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             DropMenuWidget<String>(
               hintText: 'Chọn môn học',
               items: ['Lớp 10', 'Lớp 11', 'Lớp 12'],
@@ -91,26 +98,26 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Text(
               'Thời gian vi phạm',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: Color(0xFF424242),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             TextField(
               controller: _dateController,
               style: const TextStyle(fontSize: 16, color: Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Chọn ngày',
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: const Color(0xFFF5F5F5),
                 suffixIcon: const Icon(
                   FontAwesomeIcons.calendar,
-                  color: Colors.blueGrey,
+                  color: Color(0xFF78909C),
                   size: 20,
                 ),
                 border: OutlineInputBorder(
@@ -119,41 +126,46 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  borderSide:
+                      const BorderSide(color: Color(0xFF1976D2), width: 2),
                 ),
               ),
               readOnly: true,
               onTap: _selectDate,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 40),
             Row(
               children: [
                 Expanded(
                   child: ButtonWidget(
                     title: 'Lưu',
-                    color: Colors.green.shade700, // Green for save
-                    ontap: () async {
-                      await saveMistakeData(
-                        studentDetailModel.classID,
-                        mistakeModel,
-                        studentDetailModel,
-                        accountModel,
-                      );
-                    },
+                    color: const Color(0xFF43A047),
+                    ontap: isLoading
+                        ? null
+                        : () => _saveMistakeData(
+                            studentDetailModel, mistakeModel, accountModel),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : null,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: ButtonWidget(
                     title: 'Thoát',
-                    color: Colors.red.shade600,
-                    ontap: () {
-                      Navigator.pop(context);
-                    },
+                    color: const Color(0xFFE53935),
+                    ontap: () => Navigator.pop(context),
                   ),
                 ),
               ],
@@ -170,6 +182,20 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF1976D2),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF424242),
+            ),
+            dialogBackgroundColor: Colors.white,
+          ),
+          child: child!,
+        );
+      },
     );
 
     if (picked != null) {
@@ -179,15 +205,19 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
     }
   }
 
-  Future<void> saveMistakeData(
-    String idClass,
-    MistakeModel mistakeModel,
+  Future<void> _saveMistakeData(
     StudentDetailModel studentDetailModel,
+    MistakeModel mistakeModel,
     AccountModel accountModel,
   ) async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      final classDocRef =
-          FirebaseFirestore.instance.collection('CLASS').doc(idClass);
+      final classDocRef = FirebaseFirestore.instance
+          .collection('CLASS')
+          .doc(studentDetailModel.classID);
       final classSnapshot = await classDocRef.get();
 
       if (classSnapshot.exists) {
@@ -271,6 +301,10 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
           message: 'Lỗi: $e',
           isError: true,
           duration: const Duration(seconds: 3));
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 }

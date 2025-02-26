@@ -20,14 +20,13 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
   final MistakeRepository mistakeRepository = MistakeRepository();
   String? selectedYear;
   String? selectedHocKy;
+  Map<String, List<ClassMistakeModel>> cachedData = {};
 
   @override
   void initState() {
     super.initState();
-    // Initialize with class 10 by default
     futureMistakeClass = fetchFilteredMistakeClassesByK('10');
     int currentMonth = DateTime.now().month;
-
     if (currentMonth >= 9 && currentMonth <= 12) {
       selectedHocKy = 'Học kỳ 1';
     } else {
@@ -36,25 +35,38 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
   }
 
   Future<List<ClassMistakeModel>> fetchFilteredMistakeClassesByK(
-      String classFilter) {
+      String classFilter) async {
+    List<ClassMistakeModel> mistakes;
     if (selectedYear != null) {
-      return mistakeRepository
+      mistakes = await mistakeRepository
           .fetchFilteredMistakeClassesByK(classFilter: classFilter)
-          .then((mistakes) {
-        return mistakes
-            .where((mistake) => mistake.academicYear == selectedYear)
-            .toList();
-      });
+          .then(
+            (mistakes) => mistakes
+                .where((mistake) => mistake.academicYear == selectedYear)
+                .toList(),
+          );
     } else {
-      return mistakeRepository.fetchFilteredMistakeClassesByK(
+      mistakes = await mistakeRepository.fetchFilteredMistakeClassesByK(
           classFilter: classFilter);
     }
+
+    setState(() {
+      cachedData[classFilter] = mistakes;
+    });
+    return mistakes;
   }
 
   void updateClass(String classFilter) {
     setState(() {
       futureMistakeClass = fetchFilteredMistakeClassesByK(classFilter);
     });
+  }
+
+  Future<void> _refreshData(String classFilter) async {
+    setState(() {
+      futureMistakeClass = fetchFilteredMistakeClassesByK(classFilter);
+    });
+    await futureMistakeClass;
   }
 
   @override
@@ -67,7 +79,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
       implementLeading: true,
       child: Column(
         children: [
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -78,11 +90,12 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                   onChanged: (newValue) {
                     setState(() {
                       selectedHocKy = newValue;
+                      updateClass('10');
                     });
                   },
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
                 child: DropMenuWidget<String>(
                   hintText: 'Năm học',
@@ -91,73 +104,58 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                   onChanged: (newValue) {
                     setState(() {
                       selectedYear = newValue;
-                      // Update data when year is changed
-                      updateClass(selectedHocKy ??
-                          '10'); // Default to class 10 if hocKy is null
+                      updateClass('10');
                     });
                   },
                 ),
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           TextField(
-            style: TextStyle(
-              fontSize: 18,
-            ),
+            style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
             decoration: InputDecoration(
               hintText: 'Tìm kiếm...',
-              prefixIcon: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Icon(
-                  Icons.search_outlined,
-                  color: Colors.black,
-                  size: 28,
-                ),
+              hintStyle: const TextStyle(
+                  color: Color(0xFF696969),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400),
+              prefixIcon: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Icon(Icons.search_outlined,
+                    color: Color(0xFF1E90FF), size: 24),
               ),
               filled: true,
               fillColor: Colors.white,
-
-              // Thêm viền bên ngoài
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.blue, // Màu viền
-                  width: 2.0, // Độ dày viền
-                ),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(10),
-                ),
+                borderSide:
+                    const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
+                borderRadius: BorderRadius.circular(12),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Colors.blueAccent, // Màu viền khi focus
-                  width: 2.0, // Độ dày viền
-                ),
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(10),
-                ),
+                borderSide:
+                    const BorderSide(color: Color(0xFF1E90FF), width: 2.0),
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
           ),
-          SizedBox(
-            height: 20,
-          ),
+          const SizedBox(height: 20),
           Expanded(
             child: DefaultTabController(
-              length: 3, // Number of tabs
+              length: 3,
               child: Column(
                 children: [
                   TabBar(
-                    tabs: [
+                    tabs: const [
                       Tab(text: 'Lớp 10'),
                       Tab(text: 'Lớp 11'),
                       Tab(text: 'Lớp 12'),
                     ],
                     indicatorColor: Theme.of(context).primaryColor,
                     onTap: (index) {
-                      // Fetch data based on selected tab
-                      String classFilter =
-                          (index + 10).toString(); // '10', '11', '12'
+                      String classFilter = (index + 10).toString();
                       updateClass(classFilter);
                     },
                   ),
@@ -180,29 +178,74 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
   }
 
   Widget buildFutureBuilder({required String classFilter}) {
-    return Center(
+    return RefreshIndicator(
+      onRefresh: () => _refreshData(classFilter),
       child: FutureBuilder<List<ClassMistakeModel>>(
         future: fetchFilteredMistakeClassesByK(classFilter),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+          final displayData =
+              snapshot.connectionState == ConnectionState.waiting &&
+                      cachedData[classFilter] != null
+                  ? cachedData[classFilter]
+                  : snapshot.data;
+
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              cachedData[classFilter] == null) {
+            return _buildLoadingSkeleton();
           }
           if (snapshot.hasError) {
-            return Text('Có lỗi xảy ra: ${snapshot.error}');
+            return _buildErrorWidget(snapshot.error.toString(), classFilter);
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Text('Không có dữ liệu');
+          if (displayData == null || displayData.isEmpty) {
+            return const Center(child: Text('Không có dữ liệu'));
           }
 
-          return ListView(
-            children: snapshot.data!
-                .map((e) => ItemClassModels(
-                      classMistakeModel: e,
-                      hocKy: selectedHocKy ?? '1',
-                    ))
-                .toList(),
+          return ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: displayData.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              return ItemClassModels(
+                classMistakeModel: displayData[index],
+                hocKy: selectedHocKy ?? 'Học kỳ 1',
+                onRefresh: () => _refreshData(classFilter), // Truyền callback
+              );
+            },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 5,
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
+      itemBuilder: (context, index) => Container(
+        height: 60,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(String error, String classFilter) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+          const SizedBox(height: 16),
+          Text('Có lỗi xảy ra: $error', style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => _refreshData(classFilter),
+            child: const Text('Thử lại'),
+          ),
+        ],
       ),
     );
   }

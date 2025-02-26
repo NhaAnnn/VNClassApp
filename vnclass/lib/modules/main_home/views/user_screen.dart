@@ -4,11 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
-import 'package:vnclass/modules/account/view/account_creat_acc_page.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
-import 'package:vnclass/modules/main_home/views/main_home_page.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_type_mistake_screen.dart';
+import 'package:vnclass/modules/main_home/views/user_set_points_screen.dart';
 import '../../../common/helper/asset_helper.dart';
 
 class UserScreen extends StatefulWidget {
@@ -23,47 +22,56 @@ class _UserScreenState extends State<UserScreen> {
   Widget build(BuildContext context) {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
+    final theme = Theme.of(context);
 
     return AppBarWidget(
       titleString: 'Thông tin tài khoản',
       implementLeading: true,
       child: Container(
-        color: Colors.grey.shade50, // Subtle, light background
+        color: const Color(0xFFF5F7FA),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Avatar
               Container(
-                width: 100,
-                height: 100,
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  shape: BoxShape.circle,
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.shade200,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                child: ClipOval(
                   child: ImageHelper.loadFromAsset(
                     AssetHelper.imageLogoSplashScreen,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+              // Informations du compte
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200, width: 1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,37 +79,40 @@ class _UserScreenState extends State<UserScreen> {
                     Center(
                       child: Text(
                         'Thông tin tài khoản',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF263238),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildClassRow('Họ và tên:', account!.accName),
-                    _buildClassRow('Tên tài khoản:', account.userName),
-                    _buildClassRow('Giới tính:', account.gender),
-                    _buildClassRow('Ngày sinh:', account.birth),
-                    _buildClassRow(
+                    const SizedBox(height: 20),
+                    _buildInfoRow('Họ và tên:', account!.accName),
+                    _buildInfoRow('Tên tài khoản:', account.userName),
+                    _buildInfoRow('Giới tính:', account.gender),
+                    _buildInfoRow('Ngày sinh:', account.birth),
+                    _buildInfoRow(
                         'Loại tài khoản:', account.groupModel!.groupName),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              _buildItemDetail(context, 'Chính sách'),
-              _buildItemDetail(context, 'Tùy chỉnh vi phạm',
-                  routeName: UserChangeTypeMistakeScreen.routeName),
-              _buildItemDetail(context, 'Đổi mật khẩu',
-                  routeName: UserChangePassScreen.routeName),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
+              // Options
+              _buildMenuItem(context, 'Chính sách', null),
+              _buildMenuItem(context, 'Tùy chỉnh vi phạm',
+                  UserChangeTypeMistakeScreen.routeName),
+              _buildMenuItem(
+                  context, 'Đổi mật khẩu', UserChangePassScreen.routeName),
+              _buildMenuItem(
+                  context, 'Thiết lập mức điểm', UserSetPointsScreen.routeName),
+              const SizedBox(height: 32),
+              // Bouton
               SizedBox(
                 width: double.infinity,
                 child: ButtonWidget(
                   title: 'Đăng xuất',
-                  color: Colors.red.shade700,
+                  color: const Color(0xFFD32F2F),
                   ontap: () {
-                    Navigator.pop(context); // Add logout logic if needed
+                    Navigator.pop(context);
                   },
                 ),
               ),
@@ -112,9 +123,9 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
-  Widget _buildClassRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -122,10 +133,10 @@ class _UserScreenState extends State<UserScreen> {
             flex: 4,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+                color: Color(0xFF455A64),
               ),
             ),
           ),
@@ -133,10 +144,10 @@ class _UserScreenState extends State<UserScreen> {
             flex: 6,
             child: Text(
               value,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: Color(0xFF263238),
               ),
             ),
           ),
@@ -145,25 +156,24 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
-  Widget _buildItemDetail(BuildContext context, String title,
-      {String? routeName}) {
+  Widget _buildMenuItem(BuildContext context, String title, String? routeName) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 10.0),
       child: GestureDetector(
         onTap: routeName != null
             ? () => Navigator.of(context).pushNamed(routeName)
             : null,
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.shade100,
-                blurRadius: 4,
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -173,17 +183,17 @@ class _UserScreenState extends State<UserScreen> {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 17,
+                style: const TextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: Color(0xFF263238),
                 ),
               ),
               if (routeName != null)
                 Icon(
                   FontAwesomeIcons.chevronRight,
                   size: 16,
-                  color: Colors.grey.shade600,
+                  color: const Color(0xFF78909C),
                 ),
             ],
           ),

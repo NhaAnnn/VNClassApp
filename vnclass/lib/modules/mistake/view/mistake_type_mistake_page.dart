@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
-import 'package:vnclass/modules/mistake/widget/item_type_mistake.dart';
 import 'package:vnclass/modules/mistake/widget/item_write_mistake.dart';
 
 class MistakeTypeMistakePage extends StatefulWidget {
@@ -20,7 +19,6 @@ class _MistakeTypeMistakePageState extends State<MistakeTypeMistakePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Nhận tham số
     studentDetailModel =
         ModalRoute.of(context)!.settings.arguments as StudentDetailModel?;
   }
@@ -30,20 +28,14 @@ class _MistakeTypeMistakePageState extends State<MistakeTypeMistakePage> {
     return AppBarWidget(
       titleString: studentDetailModel!.nameStudent,
       implementLeading: true,
-      child: Column(
-        children: [
-          // Dùng Expanded để cho phép ListView cuộn
-          SizedBox(
-            height: MediaQuery.of(context).size.height *
-                0.8, // Chiều cao của ListView
-            child: SingleChildScrollView(
-              child: ItemWriteMistake(
-                controller: controller,
-                studentDetailModel: studentDetailModel,
-              ),
-            ),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: SingleChildScrollView(
+          child: ItemWriteMistake(
+            controller: controller,
+            studentDetailModel: studentDetailModel,
           ),
-        ],
+        ),
       ),
     );
   }

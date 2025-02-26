@@ -5,7 +5,6 @@ import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
-import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
@@ -29,30 +28,41 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white, // White background
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Background Image Area with White Background
+          // Phần nền trên cùng với gradient và ảnh tròn
           Positioned(
             top: 0,
             left: 0,
             right: 0,
             child: Container(
               height: MediaQuery.of(context).size.height * 0.25,
-              color: Colors.white, // White background for image
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color(0xFF42A5F5), // Xanh dương nhạt
+                    Color(0xFF1976D2), // Xanh dương đậm
+                  ],
+                ),
+              ),
               child: Stack(
                 children: [
                   Center(
-                    child: ImageHelper.loadFromAsset(
-                      AssetHelper.imageLogoSplashScreen,
-                      width: 140,
-                      height: 140,
-                      fit: BoxFit.contain,
+                    child: ClipOval(
+                      child: ImageHelper.loadFromAsset(
+                        AssetHelper.imageLogoSplashScreen,
+                        width: 120, // Giảm kích thước để cân đối
+                        height: 120,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  // Notification Bell Icon
                   Positioned(
                     top: 40,
                     right: 16,
@@ -60,19 +70,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                                  Text('Chức năng thông báo đang phát triển')),
+                            content:
+                                Text('Chức năng thông báo đang phát triển'),
+                          ),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.shade200.withOpacity(0.3),
-                              blurRadius: 6,
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -80,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Icon(
                           FontAwesomeIcons.bell,
                           size: 24,
-                          color: Colors.blue.shade700,
+                          color: const Color(0xFF1976D2),
                         ),
                       ),
                     ),
@@ -89,34 +100,34 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Content with Bolder Divider and Softer Shadow
+          // Phần nội dung chính
           Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.20),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.22),
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(24)),
+                        const BorderRadius.vertical(top: Radius.circular(28)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.shade200.withOpacity(0.05),
-                        blurRadius: 10,
-                        spreadRadius: 0,
-                        offset: const Offset(0, -4),
+                        color: Colors.grey.withOpacity(0.1),
+                        blurRadius: 12,
+                        spreadRadius: -2,
+                        offset: const Offset(0, -6),
                       ),
                     ],
                     border: Border(
                       top: BorderSide(
-                        color: Colors.blue.shade300,
-                        width: 2,
+                        color: Colors.blue.shade200,
+                        width: 1.5,
                       ),
                     ),
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 24),
+                        horizontal: 24, vertical: 28),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -127,10 +138,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 account != null
                                     ? 'Xin chào, ${account.accName}'
                                     : 'Xin chào',
-                                style: const TextStyle(
-                                  fontSize: 24,
+                                style: theme.textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: const Color(0xFF263238),
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -140,13 +150,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 8),
                         Text(
                           account?.groupModel?.groupName ?? 'Chưa có nhóm',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey.shade700,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
                         _buildHomeItem(
                           context,
                           icon: FontAwesomeIcons.penToSquare,
@@ -193,22 +202,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomeItem(BuildContext context,
       {required IconData icon, required String title, String? route}) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap:
           route != null ? () => Navigator.of(context).pushNamed(route) : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: Colors.blue.shade500,
-            width: 1.95,
+            color: Colors.blue.shade300,
+            width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.shade50.withOpacity(0.5),
-              blurRadius: 6,
+              color: Colors.blue.shade50.withOpacity(0.3),
+              blurRadius: 8,
               offset: const Offset(0, 2),
             ),
           ],
@@ -217,17 +227,16 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(
               icon,
-              size: 36,
-              color: Colors.blue.shade700,
+              size: 32, // Giảm kích thước icon để cân đối
+              color: const Color(0xFF1976D2),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 20),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 18,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue.shade700,
+                  color: const Color(0xFF263238),
                 ),
               ),
             ),
@@ -235,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Icon(
                 Icons.chevron_right,
                 size: 24,
-                color: Colors.blue.shade600,
+                color: Colors.blue.shade400,
               ),
           ],
         ),

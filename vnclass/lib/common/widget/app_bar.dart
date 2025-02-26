@@ -21,28 +21,20 @@ class AppBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: Colors.white, // Consistent white background
+      backgroundColor:
+          const Color(0xFFF5F7FA), // Nền tổng thể xám nhạt hơi xanh
       body: Stack(
         children: [
-          // AppBar Section
           Container(
-            height: 90, // Adjusted height
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.blue.shade700,
-                  Colors.blue.shade500
-                ], // Sky-blue gradient
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius:
-                  const BorderRadius.vertical(bottom: Radius.circular(20)),
+            height: 90,
+            decoration: const BoxDecoration(
+              color: Color(0xFF1E90FF), // Xanh da trời đơn sắc
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.shade300.withOpacity(0.2),
+                  color: Color(0x331E90FF), // Bóng xanh nhạt
                   blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  offset: Offset(0, 4),
                 ),
               ],
             ),
@@ -66,60 +58,53 @@ class AppBarWidget extends StatelessWidget {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                    8), // Slightly smaller radius
+                                borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        Colors.blue.shade200.withOpacity(0.3),
+                                    color: Colors.black.withOpacity(0.1),
                                     blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
-                              padding:
-                                  const EdgeInsets.all(8), // Reduced padding
-                              child: Icon(
-                                FontAwesomeIcons.arrowLeft, // Original icon
-                                color: Colors.blue.shade700,
-                                size: 16, // Smaller size
+                              padding: const EdgeInsets.all(8),
+                              child: const Icon(
+                                FontAwesomeIcons.arrowLeft,
+                                color: Color(0xFF1E90FF), // Xanh da trời
+                                size: 16,
                               ),
                             ),
                           ),
-                        if (implementLeading)
-                          const SizedBox(width: 12), // Adjusted spacing
+                        if (implementLeading) const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             titleString ?? '',
                             style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18, // Kept smaller size
-                              color: Colors.white, // Professional white
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              color: Colors.white,
                             ),
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        if (implementLeading)
-                          const SizedBox(width: 28), // Adjusted spacing
+                        if (implementLeading) const SizedBox(width: 28),
                       ],
                     ),
               ),
             ),
           ),
-          // Content Section
           Container(
             margin: const EdgeInsets.only(top: 90),
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.shade100.withOpacity(0.1),
+                  color: Color(0x1A1E90FF), // Bóng xanh nhạt
                   blurRadius: 8,
-                  offset: const Offset(0, -2),
+                  offset: Offset(0, -2),
                 ),
               ],
             ),
