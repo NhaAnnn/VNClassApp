@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 
@@ -12,20 +13,109 @@ class SetConditionsDialogTerm3 extends StatefulWidget {
 }
 
 class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
-  bool isEnabled = false; // Trạng thái bật/tắt của switch
-
-  // Danh sách các trường hợp cho từng loại xếp loại
+  bool isEnabled = false;
   List<Map<String, String>> goodConditions = [];
   List<Map<String, String>> fairConditions = [];
   List<Map<String, String>> passConditions = [];
   List<Map<String, String>> failConditions = [];
+  String? errorMessage;
 
-  // Danh sách tùy chọn cho DropMenuWidget
   final List<String> rankOptions = ['Tốt', 'Khá', 'Đạt', 'Chưa Đạt'];
+  final CollectionReference _setUpCollection =
+      FirebaseFirestore.instance.collection('SET_UP');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // Tải dữ liệu từ Firestore
+  Future<void> _loadData() async {
+    try {
+      DocumentSnapshot doc = await _setUpCollection.doc('setTerm3').get();
+      if (doc.exists) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        setState(() {
+          isEnabled = false;
+          goodConditions = _loadConditions(data['conditions']['good']);
+          fairConditions = _loadConditions(data['conditions']['fair']);
+          passConditions = _loadConditions(data['conditions']['pass']);
+          failConditions = _loadConditions(data['conditions']['fail']);
+        });
+      }
+    } catch (e) {
+      print('Lỗi khi tải dữ liệu: $e');
+    }
+  }
+
+  // Hàm hỗ trợ để tải danh sách điều kiện
+  List<Map<String, String>> _loadConditions(dynamic conditions) {
+    if (conditions == null || conditions is! List) return [];
+    return conditions.map<Map<String, String>>((condition) {
+      return {
+        'hki': condition['hki'] ?? 'Tốt',
+        'hkii': condition['hkii'] ?? 'Tốt',
+      };
+    }).toList();
+  }
+
+  // Lưu dữ liệu vào Firestore
+  Future<void> _saveData() async {
+    setState(() {
+      errorMessage = null;
+    });
+
+    try {
+      await _setUpCollection.doc('setTerm3').set({
+        'isEnabled': isEnabled,
+        'conditions': {
+          'good': goodConditions
+              .map((c) => {
+                    'hki': c['hki'],
+                    'hkii': c['hkii'],
+                  })
+              .toList(),
+          'fair': fairConditions
+              .map((c) => {
+                    'hki': c['hki'],
+                    'hkii': c['hkii'],
+                  })
+              .toList(),
+          'pass': passConditions
+              .map((c) => {
+                    'hki': c['hki'],
+                    'hkii': c['hkii'],
+                  })
+              .toList(),
+          'fail': failConditions
+              .map((c) => {
+                    'hki': c['hki'],
+                    'hkii': c['hkii'],
+                  })
+              .toList(),
+        },
+      });
+      setState(() {
+        errorMessage = 'Đã lưu dữ liệu thành công';
+      });
+      if (mounted) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Lỗi khi lưu dữ liệu: $e';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Lấy theme từ context trong build
+    final theme = Theme.of(context);
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -38,7 +128,7 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
           'Thiết lập điều kiện xếp loại rèn luyện học kỳ cả năm',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: const Color(0xFFD81B60), // Hồng đậm cho cả năm
+            color: const Color(0xFFD81B60),
           ),
           textAlign: TextAlign.center,
         ),
@@ -48,7 +138,6 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Switch bật/tắt
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -72,7 +161,6 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
               ),
             ),
             const SizedBox(height: 20),
-            // Các trường hợp xếp loại
             _buildConditionSection(theme, 'Trường hợp "Tốt"', goodConditions),
             const SizedBox(height: 16),
             _buildConditionSection(theme, 'Trường hợp "Khá"', fairConditions),
@@ -82,7 +170,6 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
             _buildConditionSection(
                 theme, 'Trường hợp "Chưa Đạt"', failConditions),
             const SizedBox(height: 24),
-            // Nút Lưu và Thoát
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -90,14 +177,9 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
                   child: ButtonWidget(
                     title: 'Lưu',
                     color: const Color(0xFFD81B60),
-                    ontap: isEnabled
-                        ? () {
-                            // In tất cả các trường hợp đã nhập
-                            _printConditions();
-                            // TODO: Thêm logic lưu dữ liệu nếu cần
-                            Navigator.pop(context);
-                          }
-                        : null,
+                    ontap: () async {
+                      await _saveData();
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -110,54 +192,37 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
                 ),
               ],
             ),
+            if (errorMessage != null) ...[
+              const SizedBox(height: 10),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: errorMessage!.contains('thành công')
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  errorMessage!,
+                  style: TextStyle(
+                    color: errorMessage!.contains('thành công')
+                        ? Colors.green[900]
+                        : Colors.red[900],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  // Hàm in tất cả các trường hợp đã nhập
-  void _printConditions() {
-    print('--- Các trường hợp xếp loại rèn luyện học kỳ cả năm ---');
-
-    if (goodConditions.isNotEmpty) {
-      print('Trường hợp "Tốt":');
-      for (var condition in goodConditions) {
-        print('  HKI: ${condition['hki']}, HKII: ${condition['hkii']}');
-      }
-    }
-
-    if (fairConditions.isNotEmpty) {
-      print('Trường hợp "Khá":');
-      for (var condition in fairConditions) {
-        print('  HKI: ${condition['hki']}, HKII: ${condition['hkii']}');
-      }
-    }
-
-    if (passConditions.isNotEmpty) {
-      print('Trường hợp "Đạt":');
-      for (var condition in passConditions) {
-        print('  HKI: ${condition['hki']}, HKII: ${condition['hkii']}');
-      }
-    }
-
-    if (failConditions.isNotEmpty) {
-      print('Trường hợp "Chưa Đạt":');
-      for (var condition in failConditions) {
-        print('  HKI: ${condition['hki']}, HKII: ${condition['hkii']}');
-      }
-    }
-
-    if (goodConditions.isEmpty &&
-        fairConditions.isEmpty &&
-        passConditions.isEmpty &&
-        failConditions.isEmpty) {
-      print('Chưa có trường hợp nào được nhập.');
-    }
-    print('---------------------------------------------');
-  }
-
-  // Hàm xây dựng phần điều kiện cho từng loại xếp loại
+  // Hàm xây dựng phần điều kiện
   Widget _buildConditionSection(
       ThemeData theme, String title, List<Map<String, String>> conditions) {
     return Column(
@@ -181,8 +246,8 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
                   ? () {
                       setState(() {
                         conditions.add({
-                          'hki': 'Tốt', // Giá trị mặc định
-                          'hkii': 'Tốt', // Giá trị mặc định
+                          'hki': 'Tốt',
+                          'hkii': 'Tốt',
                         });
                       });
                     }
@@ -191,7 +256,7 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
           ],
         ),
         const SizedBox(height: 8),
-        if (conditions.isEmpty && !isEnabled)
+        if (conditions.isEmpty)
           const Text(
             'Chưa có trường hợp nào',
             style: TextStyle(fontSize: 14, color: Color(0xFF78909C)),
@@ -266,8 +331,7 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
             onPressed: isEnabled
                 ? () {
                     setState(() {
-                      conditions
-                          .remove(condition); // Xóa trường hợp từ danh sách
+                      conditions.remove(condition);
                     });
                   }
                 : null,
@@ -277,3 +341,20 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
     );
   }
 }
+// {
+//   "isEnabled": true,
+//   "conditions": {
+//     "good": [
+//       {"hki": "Tốt", "hkii": "Tốt"}
+//     ],
+//     "fair": [
+//       {"hki": "Tốt", "hkii": "Khá"}
+//     ],
+//     "pass": [
+//       {"hki": "Khá", "hkii": "Đạt"}
+//     ],
+//     "fail": [
+//       {"hki": "Chưa Đạt", "hkii": "Chưa Đạt"}
+//     ]
+//   }
+// }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 
 class SetPointsDialog extends StatefulWidget {
@@ -9,7 +10,7 @@ class SetPointsDialog extends StatefulWidget {
 }
 
 class _SetPointsDialogState extends State<SetPointsDialog> {
-  bool isEnabled = false; // Trạng thái bật/tắt của switch
+  bool isEnabled = false;
   final TextEditingController _goodFromController = TextEditingController();
   final TextEditingController _goodToController = TextEditingController();
   final TextEditingController _fairFromController = TextEditingController();
@@ -18,6 +19,103 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
   final TextEditingController _passToController = TextEditingController();
   final TextEditingController _failFromController = TextEditingController();
   final TextEditingController _failToController = TextEditingController();
+
+  final CollectionReference _setUpCollection =
+      FirebaseFirestore.instance.collection('SET_UP');
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // Tải dữ liệu từ Firestore
+  Future<void> _loadData() async {
+    try {
+      DocumentSnapshot doc = await _setUpCollection.doc('setPoint').get();
+      if (doc.exists) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        setState(() {
+          isEnabled = false;
+          _goodFromController.text = data['points']['good']['from'] ?? '';
+          _goodToController.text = data['points']['good']['to'] ?? '';
+          _fairFromController.text = data['points']['fair']['from'] ?? '';
+          _fairToController.text = data['points']['fair']['to'] ?? '';
+          _passFromController.text = data['points']['pass']['from'] ?? '';
+          _passToController.text = data['points']['pass']['to'] ?? '';
+          _failFromController.text = data['points']['fail']['from'] ?? '';
+          _failToController.text = data['points']['fail']['to'] ?? '';
+        });
+      }
+    } catch (e) {
+      print('Lỗi khi tải dữ liệu: $e');
+    }
+  }
+
+  // Lưu dữ liệu vào Firestore với kiểm tra dữ liệu
+  Future<void> _saveData() async {
+    // Kiểm tra xem các ô nhập có trống không
+    if (_goodFromController.text.isEmpty ||
+        _goodToController.text.isEmpty ||
+        _fairFromController.text.isEmpty ||
+        _fairToController.text.isEmpty ||
+        _passFromController.text.isEmpty ||
+        _passToController.text.isEmpty ||
+        _failFromController.text.isEmpty ||
+        _failToController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập đầy đủ các khoảng điểm')),
+      );
+      return;
+    }
+
+    // Kiểm tra dữ liệu có phải là số hợp lệ không
+    try {
+      int.parse(_goodFromController.text);
+      int.parse(_goodToController.text);
+      int.parse(_fairFromController.text);
+      int.parse(_fairToController.text);
+      int.parse(_passFromController.text);
+      int.parse(_passToController.text);
+      int.parse(_failFromController.text);
+      int.parse(_failToController.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Dữ liệu phải là số nguyên hợp lệ')),
+      );
+      return;
+    }
+
+    try {
+      await _setUpCollection.doc('setPoint').set({
+        'points': {
+          'good': {
+            'from': _goodFromController.text,
+            'to': _goodToController.text,
+          },
+          'fair': {
+            'from': _fairFromController.text,
+            'to': _fairToController.text,
+          },
+          'pass': {
+            'from': _passFromController.text,
+            'to': _passToController.text,
+          },
+          'fail': {
+            'from': _failFromController.text,
+            'to': _failToController.text,
+          },
+        },
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã lưu dữ liệu thành công')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi lưu dữ liệu: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +142,6 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Switch bật/tắt
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -68,7 +165,6 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
               ),
             ),
             const SizedBox(height: 20),
-            // Các mức điểm
             _buildPointRangeRow(
                 'Mức "Tốt"', _goodFromController, _goodToController),
             const SizedBox(height: 16),
@@ -81,7 +177,6 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
             _buildPointRangeRow(
                 'Mức "Chưa Đạt"', _failFromController, _failToController),
             const SizedBox(height: 24),
-            // Nút Lưu và Thoát
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -90,10 +185,12 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
                     title: 'Lưu',
                     color: const Color(0xFF1976D2),
                     ontap: isEnabled
-                        ? () {
-                            // TODO: Thêm logic lưu dữ liệu
-                            print('Lưu dữ liệu mức điểm');
-                            Navigator.pop(context);
+                        ? () async {
+                            await _saveData(); // Gọi hàm lưu dữ liệu
+                            if (mounted) {
+                              Navigator.pop(
+                                  context); // Chỉ đóng dialog nếu thành công và widget còn tồn tại
+                            }
                           }
                         : null,
                   ),
@@ -222,5 +319,18 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _goodFromController.dispose();
+    _goodToController.dispose();
+    _fairFromController.dispose();
+    _fairToController.dispose();
+    _passFromController.dispose();
+    _passToController.dispose();
+    _failFromController.dispose();
+    _failToController.dispose();
+    super.dispose();
   }
 }

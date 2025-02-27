@@ -78,6 +78,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
     List<String> requiredHeaders = [
       'STT',
+      'Mã HS',
       'Lớp',
       'Niên Khóa',
       'Họ và tên',
@@ -129,6 +130,9 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
               : null,
           'class': headers.contains('Lớp')
               ? row[headers.indexOf('Lớp')]?.value?.toString()
+              : null,
+          'idstudent': headers.contains('Mã HS')
+              ? row[headers.indexOf('Mã HS')]?.value?.toString()
               : null,
           'academicYear': headers.contains('Niên Khóa')
               ? row[headers.indexOf('Niên Khóa')]?.value?.toString()
@@ -273,13 +277,13 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
     studentsUp = students.map((student) {
       String birth = student['birthDate']?.toString() ?? '';
-      String ddmm = '';
-      if (birth.length >= 10) {
-        ddmm = birth.substring(0, 2) + birth.substring(3, 5);
-      }
-      Random random = Random();
-      String xxx = random.nextInt(1000).toString().padLeft(3, '0');
-      String id = 'H$ddmm$xxx';
+      // String ddmm = '';
+      // if (birth.length >= 10) {
+      //   ddmm = birth.substring(0, 2) + birth.substring(3, 5);
+      // }
+      // Random random = Random();
+      // String xxx = random.nextInt(1000).toString().padLeft(3, '0');
+      String id = student['idstudent']?.toString() ?? '';
       String gender = student['gender']?.toString() ?? '';
       String phone = student['phone']?.toString() ?? '';
       String email = student['email']?.toString() ?? '';

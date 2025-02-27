@@ -100,7 +100,7 @@ class _AccountMainPageState extends State<AccountMainPage> {
                             return Dialog(
                               backgroundColor: Colors.transparent,
                               insetPadding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
+                                  const EdgeInsets.symmetric(horizontal: 6),
                               child: SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.85,
                                 height:
