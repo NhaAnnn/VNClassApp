@@ -189,7 +189,7 @@ class _SetConditionsDialogTerm1State extends State<SetConditionsDialogTerm1> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               decoration: BoxDecoration(
                 color: const Color(0xFFF5F7FA),
                 borderRadius: BorderRadius.circular(12),
@@ -226,7 +226,7 @@ class _SetConditionsDialogTerm1State extends State<SetConditionsDialogTerm1> {
             const SizedBox(height: 16),
             _buildConditionSection('Trường hợp HK "Đạt"', passConditions),
             const SizedBox(height: 16),
-            _buildConditionSection('Trường hợp HK "Chưa Đạt"', failConditions),
+            _buildConditionSection('TH HK "Chưa Đạt"', failConditions),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -338,7 +338,7 @@ class _SetConditionsDialogTerm1State extends State<SetConditionsDialogTerm1> {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: _buildNumberField('SL Chưa Đạt', condition['fail']!),
+            child: _buildNumberField('C.Đạt', condition['fail']!),
           ),
           const SizedBox(width: 8),
           IconButton(
@@ -439,7 +439,7 @@ class _SetConditionsDialogTerm1State extends State<SetConditionsDialogTerm1> {
   }
 }
 // {
-//   "isEnabled": true,
+
 //   "conditions": {
 //     "good": [
 //       {"good": "4", "fair": "0", "pass": "0", "fail": "0"},

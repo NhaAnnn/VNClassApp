@@ -10,15 +10,24 @@ class LocalStorageHelper {
 
   Box<dynamic>? hiveBox;
 
-  static initLocalStorageHelper() async {
-    _shared.hiveBox = await Hive.openBox('StuApp');
+  static Future<void> initLocalStorageHelper() async {
+    await Hive.initFlutter(); // Chỉ khởi tạo Hive
   }
 
-  static dynamic getValue(String key) {
+  static Future<void> openBoxIfNeeded() async {
+    if (_shared.hiveBox == null || !_shared.hiveBox!.isOpen) {
+      _shared.hiveBox = await Hive.openBox('StuApp');
+      print('Box StuApp size: ${Hive.box('StuApp').length} keys');
+    }
+  }
+
+  static Future<dynamic> getValue(String key) async {
+    await openBoxIfNeeded();
     return _shared.hiveBox?.get(key);
   }
 
-  static setValue(String key, dynamic val) {
-    _shared.hiveBox?.put(key, val);
+  static Future<void> setValue(String key, dynamic val) async {
+    await openBoxIfNeeded();
+    await _shared.hiveBox?.put(key, val);
   }
 }

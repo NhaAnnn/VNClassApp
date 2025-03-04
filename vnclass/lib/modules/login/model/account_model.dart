@@ -34,48 +34,74 @@ class AccountModel {
 
   // Factory method to create an instance from DocumentSnapshot
   factory AccountModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>?; // Kiểm tra null cho data
 
     return AccountModel(
-      email: data['_email'] ?? '',
-      accName: data['_accName'] ?? '',
-      goupID: data['_groupID'] ?? '',
-      idAcc: data['_id'] ?? '',
-      passWord: data['_pass'] ?? '',
-      permission: List<String>.from(data['_permission'] ?? []),
-      phone: data['_phone'] ?? '',
-      status: data['_status'] ?? '',
-      userName: data['_userName'] ?? '',
-      birth: data['_birth'] ?? '',
-      gender: data['_gender'] ?? '',
+      email: data?['_email']?.toString() ?? '',
+      accName: data?['_accName']?.toString() ?? '',
+      goupID: data?['_groupID']?.toString() ?? '',
+      idAcc: data?['_id']?.toString() ?? '',
+      passWord: data?['_pass']?.toString() ?? '',
+      permission: List<String>.from(data?['_permission'] ?? []),
+      phone: data?['_phone']?.toString() ?? '',
+      status: data?['_status']?.toString() ?? '',
+      userName: data?['_userName']?.toString() ?? '',
+      birth: data?['_birth']?.toString() ?? '',
+      gender: data?['_gender']?.toString() ?? '',
       groupModel: null, // Khởi tạo với null, sẽ cập nhật sau
-      token: List<String>.from(data['_token'] ?? []),
+      token: data?['_token'] != null ? List<String>.from(data!['_token']) : [],
     );
   }
 
-  // Fetch the GroupModel using goupID
-  Future<void> fetchGroupModel() async {
+  // Fetch the GroupModel using goupID with optimization
+  Future<void> fetchGroupModel({int retries = 2}) async {
+    if (goupID.isEmpty || groupModel != null)
+      return; // Tránh fetch không cần thiết
+
     print('Fetching group model for goupID: $goupID');
-    if (goupID.isNotEmpty) {
+    for (int i = 0; i <= retries; i++) {
       try {
         QuerySnapshot groupQuery = await FirebaseFirestore.instance
             .collection('GROUP')
             .where('_id', isEqualTo: goupID)
-            .get();
+            .limit(1) // Chỉ lấy 1 document để tăng tốc
+            .get(
+                GetOptions(source: Source.serverAndCache)); // Dùng cache nếu có
 
         if (groupQuery.docs.isNotEmpty) {
-          DocumentSnapshot groupDoc = groupQuery.docs.first;
-          groupModel =
-              GroupModel.fromFirestore(groupDoc); // Cập nhật groupModel
-          print('Fetching group model for goupID: $groupModel');
+          groupModel = GroupModel.fromFirestore(groupQuery.docs.first);
+          print('Fetched group model: $groupModel');
+          break;
         } else {
           print('No group found for goupID: $goupID');
+          break;
         }
       } catch (e) {
-        print('Error fetching group model: $e');
+        print('Error fetching group model (attempt ${i + 1}): $e');
+        if (i == retries)
+          throw Exception(
+              'Failed to fetch group model after $retries attempts');
+        await Future.delayed(
+            Duration(milliseconds: 300 * (i + 1))); // Delay tăng dần
       }
     }
   }
+
+  // Thêm toJson để hỗ trợ lưu trữ
+  Map<String, dynamic> toJson() => {
+        '_email': email.isNotEmpty ? email : null,
+        '_groupID': goupID.isNotEmpty ? goupID : null, // Giữ tên field cũ
+        '_id': idAcc.isNotEmpty ? idAcc : null,
+        '_pass': passWord.isNotEmpty ? passWord : null,
+        '_permission': permission.isNotEmpty ? permission : [],
+        '_phone': phone.isNotEmpty ? phone : null,
+        '_status': status.isNotEmpty ? status : null,
+        '_accName': accName.isNotEmpty ? accName : null,
+        '_userName': userName.isNotEmpty ? userName : null,
+        '_birth': birth.isNotEmpty ? birth : null,
+        '_gender': gender.isNotEmpty ? gender : null,
+        '_token': token?.isNotEmpty ?? false ? token : null,
+      };
 
   @override
   String toString() {
@@ -88,8 +114,8 @@ class AccountModel {
         'phone: $phone, '
         'status: $status, '
         'userName: $userName, '
-        'groupModel: ${groupModel != null ? groupModel.toString() : "No Group"}'
-        'token:$token'
+        'groupModel: ${groupModel != null ? groupModel.toString() : "No Group"}, '
+        'token: $token'
         '}';
   }
 }

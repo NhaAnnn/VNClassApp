@@ -2,24 +2,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 
 class AccountController {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<AccountModel> fetchAccount(String username, String passHash) async {
     try {
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+      print(
+          'Fetching account with username: "$username", passHash: "$passHash"');
+      final QuerySnapshot snapshot = await _firestore
           .collection('ACCOUNT')
           .where('_userName', isEqualTo: username)
           .where('_pass', isEqualTo: passHash)
-          .get();
+          .limit(1)
+          .get(GetOptions(source: Source.serverAndCache));
 
+      print('Snapshot size: ${snapshot.docs.length}');
       if (snapshot.docs.isNotEmpty) {
-        DocumentSnapshot doc = snapshot.docs.first;
-        AccountModel account = AccountModel.fromFirestore(doc);
+        final DocumentSnapshot doc = snapshot.docs.first;
+        print('Found document: ${doc.data()}');
+        final AccountModel account = AccountModel.fromFirestore(doc);
         return account;
       } else {
         throw Exception('No account found for the given credentials.');
       }
     } catch (e) {
-      print('Failed to fetch mistake types: $e');
-      rethrow; // Ném lại lỗi để xử lý ở nơi khác nếu cần
+      print('Failed to fetch account: $e');
+      rethrow;
     }
   }
 
@@ -46,7 +53,6 @@ class AccountController {
 
   static Future<void> updateToken(String id, String newToken) async {
     try {
-      // Tìm tài liệu theo ACC_id hoặc _id
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('ACCOUNT')
           .where('_id', isEqualTo: id)
@@ -55,11 +61,9 @@ class AccountController {
       if (snapshot.docs.isNotEmpty) {
         DocumentSnapshot doc = snapshot.docs.first;
 
-        // Cập nhật hoặc thêm token vào danh sách token
         List<String> currentTokens = List<String>.from(doc['tokens'] ?? []);
-        currentTokens.add(newToken); // Thêm token mới vào danh sách
+        currentTokens.add(newToken);
 
-        // Cập nhật tài liệu
         await doc.reference.update({'tokens': currentTokens});
         print('Token đã được cập nhật thành công.');
       } else {

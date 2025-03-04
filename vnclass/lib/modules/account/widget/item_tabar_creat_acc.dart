@@ -14,9 +14,9 @@ import 'package:vnclass/modules/account/widget/textfield_widget.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 
 class ItemTabarCreatAcc extends StatefulWidget {
-  final bool show; // Hiển thị phần lớp và năm học nếu true
-  final String typeAcc; // Loại tài khoản
-  final bool? student; // Là học sinh hay không
+  final bool show;
+  final String typeAcc;
+  final bool? student;
   const ItemTabarCreatAcc({
     super.key,
     required this.show,
@@ -39,10 +39,11 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   final TextEditingController _phoneParentController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+
   bool _isShowPass = false;
   bool _isShowPassAgain = false;
 
-  String selectedClass = '10A1'; // Giá trị mặc định cho lớp
+  String selectedClass = '10A1';
   final List<String> classOptions = [
     '10A1',
     '10A2',
@@ -53,11 +54,9 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     '12A1',
     '12A2',
     '12A3'
-  ]; // Danh sách lớp mẫu
+  ];
 
-  // Thêm ScrollController để điều khiển cuộn
   final ScrollController _scrollController = ScrollController();
-  // Thêm FocusNode cho các trường nhập liệu để theo dõi focus
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
 
@@ -101,8 +100,9 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   void initState() {
     super.initState();
     selectedValue = widget.typeAcc;
-
-    // Lắng nghe sự kiện focus để cuộn tới trường đang nhập
+    _usernameController.text = _employeeCodeController.text;
+    _passwordController.text = '123';
+    _confirmPasswordController.text = '123';
     _passwordFocusNode.addListener(() {
       if (_passwordFocusNode.hasFocus) {
         _scrollToField(_passwordFocusNode);
@@ -123,7 +123,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     super.dispose();
   }
 
-  // Hàm cuộn tới trường đang focus
   void _scrollToField(FocusNode focusNode) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox renderBox = context.findRenderObject() as RenderBox;
@@ -131,9 +130,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
       final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
       _scrollController.animateTo(
-        position.dy -
-            keyboardHeight +
-            50, // Cuộn lên trên bàn phím với khoảng cách 50px
+        position.dy - keyboardHeight + 50,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
@@ -150,7 +147,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
       type = 'banGH';
     }
     return {
-      'username': _usernameController.text.trim(),
+      'username': _nameController.text.trim(),
       'employeeCode': _employeeCodeController.text.trim(),
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
@@ -173,8 +170,242 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
 
   Future<void> _createAccount(String typeAcc) async {
     final formData = _getFormData();
-    // Logique de création de compte reste inchangée
-    // (Giữ nguyên logic của bạn ở đây)
+    Map<String, Set<String>> monthData = {
+      'month1': {'100', 'Tốt'},
+      'month2': {'100', 'Tốt'},
+      'month3': {'100', 'Tốt'},
+      'month4': {'100', 'Tốt'},
+      'month5': {'100', 'Tốt'},
+      'month6': {'100', 'Tốt'},
+      'month7': {'100', 'Tốt'},
+      'month8': {'100', 'Tốt'},
+      'month9': {'100', 'Tốt'},
+      'month10': {'100', 'Tốt'},
+      'month11': {'100', 'Tốt'},
+      'month12': {'100', 'Tốt'},
+    };
+    List<Map<String, dynamic>> teacherUp = [];
+    List<Map<String, dynamic>> accountStudentUp = [];
+    List<Map<String, dynamic>> studentUp = [];
+    List<Map<String, dynamic>> studentDetailsUp = [];
+    List<Map<String, dynamic>> accountParentUp = [];
+    List<Map<String, dynamic>> parentUp = [];
+    List<Map<String, dynamic>> conductMonthUp = [];
+
+    String username = formData['username'] ?? '';
+    String employeeCode = formData['employeeCode'] ?? '';
+    String email = formData['email'] ?? '';
+    String phone = formData['phone'] ?? '';
+    String phoneParent = formData['phoneParent'] ?? '';
+    String password = formData['password'] ?? '';
+    String gender = formData['gender'] ?? '';
+    String position = formData['position'] ?? '';
+    String date = formData['date'] ?? '';
+    String classs = formData['class'] ?? '';
+    String year = formData['year'] ?? '';
+
+    List<String> init = [];
+
+    try {
+      if (position == 'banGH' || position == 'giaoVien') {
+        accountStudentUp.add({
+          '_accName': username,
+          '_birth': date,
+          '_email': email,
+          '_gender': gender,
+          '_groupID': position,
+          '_id': employeeCode,
+          '_pass': _hashPassword('123'),
+          '_permission': init,
+          '_phone': phone,
+          '_status': 'true',
+          '_token': init,
+          '_userName': employeeCode,
+        });
+
+        teacherUp.add({
+          '_id': employeeCode,
+          'ACC_id': employeeCode,
+          '_birthday': date,
+          '_gender': gender,
+          '_phone': phone,
+          '_teacherName': username,
+        });
+
+        await Future.wait([
+          Future.wait(teacherUp.map((teacher) {
+            String docId = teacher['_id'];
+            return FirebaseFirestore.instance
+                .collection('TEACHER')
+                .doc(docId)
+                .set(teacher);
+          })),
+          Future.wait(accountStudentUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('ACCOUNT')
+                .doc(docId)
+                .set(studentup);
+          })),
+        ]);
+      } else if (position == 'hocSinh') {
+        accountStudentUp.add({
+          '_accName': username,
+          '_birth': date,
+          '_email': email,
+          '_gender': gender,
+          '_groupID': position,
+          '_id': employeeCode,
+          '_pass': _hashPassword('123'),
+          '_permission': init,
+          '_phone': phone,
+          '_status': 'true',
+          '_token': init,
+          '_userName': employeeCode,
+        });
+
+        accountParentUp.add({
+          '_accName': 'PHHS - $username - $employeeCode',
+          '_birth': '',
+          '_email': '',
+          '_gender': '',
+          '_groupID': 'phuHuynh',
+          '_id': phoneParent,
+          '_pass': _hashPassword('123'),
+          '_permission': init,
+          '_phone': phoneParent,
+          '_status': 'true',
+          '_token': init,
+          '_userName': phoneParent,
+        });
+
+        conductMonthUp.add({
+          'STDL_id': employeeCode,
+          '_id': '$employeeCode$year',
+          '_month': monthData,
+        });
+
+        parentUp.add({
+          'ACC_id': phoneParent,
+          '_birthday': '',
+          '_gender': '',
+          '_id': phoneParent,
+          '_parentName': 'PHHS - $username - $employeeCode',
+          '_phone': phoneParent,
+        });
+
+        studentUp.add({
+          '_id': employeeCode,
+          'ACC_id': employeeCode,
+          'P_id': phoneParent,
+          '_birthday': date,
+          '_gender': gender,
+          '_phone': phone,
+          '_studentName': username,
+        });
+
+        studentDetailsUp.add({
+          'Class_id': '${classs.toLowerCase()}$year',
+          'Class_name': classs.toLowerCase(),
+          'ST_id': employeeCode,
+          '_birthday': date,
+          '_committee': 'Học sinh',
+          '_conductAllYear': 'Tốt',
+          '_conductTerm1': 'Tốt',
+          '_conductTerm2': 'Tốt',
+          '_gender': gender,
+          '_id': '$employeeCode$year',
+          '_phone': phone,
+          '_studentName': username,
+        });
+
+        // Tăng _amount trong CLASS
+        CollectionReference classCollection =
+            FirebaseFirestore.instance.collection('CLASS');
+        DocumentReference classDoc =
+            classCollection.doc('${classs.toLowerCase()}$year');
+        await classDoc.get().then((snapshot) async {
+          if (snapshot.exists) {
+            // Ép kiểu dữ liệu từ snapshot.data() thành Map<String, dynamic>
+            final data = snapshot.data() as Map<String, dynamic>;
+            final currentAmount = data['_amount'] as num? ?? 0;
+            final newAmount = currentAmount.toInt() + 1;
+            await classDoc.update({'_amount': newAmount});
+          } else {
+            // Tạo mới tài liệu CLASS nếu chưa tồn tại
+            await classDoc.set({
+              '_id': '${classs.toLowerCase()}$year',
+              '_amount': 1,
+              // Thêm các trường khác nếu cần
+            });
+          }
+        }).catchError((error) {
+          print(
+              'Error accessing document ${classs.toLowerCase()}$year: $error');
+        });
+
+        await Future.wait([
+          Future.wait(studentUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('STUDENT')
+                .doc(docId)
+                .set(studentup);
+          })),
+          Future.wait(studentDetailsUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('STUDENT_DETAIL')
+                .doc(docId)
+                .set(studentup);
+          })),
+          Future.wait(conductMonthUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('CONDUCT_MONTH')
+                .doc(docId)
+                .set(studentup);
+          })),
+          Future.wait(accountStudentUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('ACCOUNT')
+                .doc(docId)
+                .set(studentup);
+          })),
+          Future.wait(accountParentUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('ACCOUNT')
+                .doc(docId)
+                .set(studentup);
+          })),
+          Future.wait(parentUp.map((studentup) {
+            String docId = studentup['_id'];
+            return FirebaseFirestore.instance
+                .collection('PARENT')
+                .doc(docId)
+                .set(studentup);
+          })),
+        ]);
+      }
+
+      print('Dữ liệu lưu: $formData');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tạo tài khoản thành công!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tạo tài khoản: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tạo tài khoản thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -184,12 +415,11 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      controller: _scrollController, // Gắn ScrollController
+      controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Phần 1: Thông tin lớp học (nếu hiển thị)
           if (widget.show) ...[
             _buildSectionHeader('Thông tin lớp học'),
             DropMenuWidget(
@@ -216,8 +446,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
             ),
             const SizedBox(height: 24),
           ],
-
-          // Phần 2: Thông tin cá nhân
           _buildSectionHeader('Thông tin cá nhân'),
           TextfieldWidget(
             labelText: 'Tên người dùng',
@@ -238,7 +466,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
             labelText: 'SĐT',
             controller: _phoneController,
           ),
-          if (widget.student ?? true) ...[
+          if (widget.typeAcc == 'Học sinh') ...[
             const SizedBox(height: 16),
             TextfieldWidget(
               labelText: 'SĐT PHHS',
@@ -277,8 +505,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           const SizedBox(height: 16),
           _buildRadioSection('Giới tính', ['Nam', 'Nữ'], selectedGender,
               (value) => setState(() => selectedGender = value!)),
-
-          // Phần 3: Thông tin tài khoản
           const SizedBox(height: 24),
           _buildSectionHeader('Thông tin tài khoản'),
           _buildRadioSection(
@@ -287,18 +513,38 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           const SizedBox(height: 16),
           TextfieldWidget(
             labelText: 'Tên tài khoản',
-            controller: _usernameController,
+            controller: _employeeCodeController,
+            enabled: false,
           ),
           const SizedBox(height: 16),
-          _buildPasswordField(
-              'Mật khẩu', _passwordController, _isShowPass, onToggleShowPass,
+          _buildPasswordField('Mật khẩu', _passwordController, _isShowPass,
+              onToggleShowPass, false,
               focusNode: _passwordFocusNode),
           const SizedBox(height: 16),
           _buildPasswordField('Nhập lại mật khẩu', _confirmPasswordController,
-              _isShowPassAgain, onToggleShowPassAgain,
+              _isShowPassAgain, onToggleShowPassAgain, false,
               focusNode: _confirmPasswordFocusNode),
-
-          // Nút Tạo tài khoản
+          if (widget.typeAcc == 'Học sinh') ...[
+            const SizedBox(height: 24),
+            _buildSectionHeader('Thông tin tài khoản PHHS'),
+            _buildRadioSection(
+                'Chức vụ', ['Phụ huynh'], 'Phụ huynh', (value) {},
+                enabled: false),
+            const SizedBox(height: 16),
+            TextfieldWidget(
+              labelText: 'Tên tài khoản',
+              controller: _phoneParentController,
+              enabled: false,
+            ),
+            const SizedBox(height: 16),
+            _buildPasswordField('Mật khẩu', _passwordController, _isShowPass,
+                onToggleShowPass, false,
+                focusNode: _passwordFocusNode),
+            const SizedBox(height: 16),
+            _buildPasswordField('Nhập lại mật khẩu', _confirmPasswordController,
+                _isShowPassAgain, onToggleShowPassAgain, false,
+                focusNode: _confirmPasswordFocusNode),
+          ],
           const SizedBox(height: 32),
           ButtonWidget(
             title: 'Tạo tài khoản',
@@ -311,7 +557,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     );
   }
 
-  // Hàm tạo tiêu đề phần
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 12),
@@ -326,7 +571,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     );
   }
 
-  // Hàm tạo phần radio
   Widget _buildRadioSection(String label, List<String> options,
       String selectedValue, ValueChanged<String?>? onChanged,
       {bool enabled = true}) {
@@ -373,20 +617,35 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
     );
   }
 
-  // Hàm tạo trường mật khẩu với FocusNode
-  Widget _buildPasswordField(String label, TextEditingController controller,
-      bool isVisible, VoidCallback onToggle,
-      {required FocusNode focusNode}) {
+  Widget _buildPasswordField(
+    String label,
+    TextEditingController controller,
+    bool isVisible,
+    VoidCallback onToggle,
+    bool enabled, {
+    required FocusNode focusNode,
+  }) {
     return TextField(
-      obscureText: !isVisible,
+      enabled: enabled,
+      obscureText: isVisible,
       controller: controller,
-      focusNode: focusNode, // Gắn FocusNode để theo dõi focus
-      style: const TextStyle(fontSize: 16, color: Color(0xFF263238)),
+      focusNode: focusNode,
+      style: TextStyle(
+        fontSize: 16,
+        color: enabled ? const Color(0xFF263238) : Colors.grey.shade400,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF78909C)),
+        labelStyle: TextStyle(
+          color: enabled ? const Color(0xFF78909C) : Colors.grey.shade400,
+        ),
+        floatingLabelStyle: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: enabled ? const Color(0xFF1976D2) : Colors.grey.shade400,
+        ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: enabled ? Colors.white : Colors.grey.shade100,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         border: OutlineInputBorder(
@@ -401,13 +660,17 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+        ),
         suffixIcon: IconButton(
           icon: Icon(
             isVisible ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
             size: 20,
-            color: const Color(0xFF1976D2),
+            color: enabled ? const Color(0xFF1976D2) : Colors.grey.shade400,
           ),
-          onPressed: onToggle,
+          onPressed: enabled ? onToggle : null,
         ),
       ),
     );

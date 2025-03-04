@@ -12,49 +12,33 @@ class MistakeViewMistakePage extends StatefulWidget {
 }
 
 class _MistakeViewMistakePageState extends State<MistakeViewMistakePage> {
-  StudentDetailModel? studentDetailModel;
-  String? month;
+  late StudentDetailModel studentDetailModel;
+  late String month;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Nhận tham số
-    // studentDetailModel =
-    //     ModalRoute.of(context)!.settings.arguments as StudentDetailModel?;
-
-    final Map<String, dynamic> arguments =
+    final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-    studentDetailModel = arguments['studentDetailModel'];
-    month = arguments['month'];
+    studentDetailModel = args['studentDetailModel'] as StudentDetailModel;
+    month = args['month'] as String;
   }
 
   void _refreshItems() {
     setState(() {});
-    // Thêm dòng này để đảm bảo cập nhật dữ liệu
-    if (context.mounted) Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
-    String nameStudent = studentDetailModel!.nameStudent;
     return AppBarWidget(
-      titleString: 'Vi phạm của $nameStudent',
+      titleString: 'Vi phạm của ${studentDetailModel.nameStudent}',
       implementLeading: true,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height *
-                  0.8, // Chiều cao của ListView
-              child: SingleChildScrollView(
-                child: ItemEditMistake(
-                  studentDetailModel: studentDetailModel,
-                  onItemDeleted: _refreshItems,
-                  month: month,
-                ),
-              ),
-            ),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ItemEditMistake(
+          studentDetailModel: studentDetailModel,
+          onItemDeleted: _refreshItems,
+          month: month,
         ),
       ),
     );

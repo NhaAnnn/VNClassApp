@@ -5,6 +5,7 @@ import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
+import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
@@ -22,6 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     final yearProvider = Provider.of<YearProvider>(context, listen: false);
     yearProvider.fetchYears();
+    final classProvider = Provider.of<ClassProvider>(context, listen: false);
+    classProvider.fetchClassNames();
   }
 
   @override

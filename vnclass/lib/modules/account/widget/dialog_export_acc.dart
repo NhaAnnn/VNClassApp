@@ -500,19 +500,19 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       excel.Sheet sheet, String classId, ClassMistakeModel? classInfo) {
     sheet.cell(excel.CellIndex.indexByString("A1")).value =
         excel.TextCellValue("Tên lớp");
-    sheet.cell(excel.CellIndex.indexByString("B1")).value =
+    sheet.cell(excel.CellIndex.indexByString("C1")).value =
         excel.TextCellValue(classInfo?.className ?? classId);
     sheet.cell(excel.CellIndex.indexByString("A2")).value =
         excel.TextCellValue("Niên khóa");
-    sheet.cell(excel.CellIndex.indexByString("B2")).value =
+    sheet.cell(excel.CellIndex.indexByString("C2")).value =
         excel.TextCellValue(classInfo?.academicYear ?? selectedYear ?? '');
     sheet.cell(excel.CellIndex.indexByString("A3")).value =
         excel.TextCellValue("Giáo viên chủ nhiệm");
-    sheet.cell(excel.CellIndex.indexByString("B3")).value =
+    sheet.cell(excel.CellIndex.indexByString("C3")).value =
         excel.TextCellValue(classInfo?.homeroomTeacher ?? '');
     sheet.cell(excel.CellIndex.indexByString("A4")).value =
         excel.TextCellValue("Ngày xuất báo cáo");
-    sheet.cell(excel.CellIndex.indexByString("B4")).value =
+    sheet.cell(excel.CellIndex.indexByString("C4")).value =
         excel.TextCellValue(DateFormat('dd/MM/yyyy').format(DateTime.now()));
 
     // Định dạng tiêu đề
@@ -522,11 +522,26 @@ class _DialogExportAccState extends State<DialogExportAcc> {
         bold: true,
         horizontalAlign: excel.HorizontalAlign.Left,
       );
-      sheet.cell(excel.CellIndex.indexByString("B$row")).cellStyle =
+      sheet.merge(excel.CellIndex.indexByString("A$row"),
+          excel.CellIndex.indexByString("B$row"));
+      sheet.cell(excel.CellIndex.indexByString("C$row")).cellStyle =
           excel.CellStyle(
         horizontalAlign: excel.HorizontalAlign.Left,
       );
     }
+
+    int titleRow = 5;
+    sheet.cell(excel.CellIndex.indexByString("A$titleRow")).value =
+        excel.TextCellValue(
+            "DANH SÁCH TÀI KHOẢN HS - PHHS LỚP ${classInfo?.className.toUpperCase() ?? ''}");
+    sheet.merge(excel.CellIndex.indexByString("A$titleRow"),
+        excel.CellIndex.indexByString("H$titleRow"));
+    sheet.cell(excel.CellIndex.indexByString("A$titleRow")).cellStyle =
+        excel.CellStyle(
+      bold: true,
+      fontSize: 14,
+      horizontalAlign: excel.HorizontalAlign.Center,
+    );
   }
 
   Future<void> _fillStudentExcelTable(
@@ -552,8 +567,11 @@ class _DialogExportAccState extends State<DialogExportAcc> {
           excel.CellStyle(
         bold: true,
         horizontalAlign: excel.HorizontalAlign.Center,
+        textWrapping: excel.TextWrapping.WrapText,
       );
     }
+    // Thiết lập chiều cao tự động cho hàng chứa header
+    sheet.setRowHeight(headerRowIndex, 0);
 
     // Ghi dữ liệu
     int currentRow = headerRowIndex + 1;
@@ -606,6 +624,16 @@ class _DialogExportAccState extends State<DialogExportAcc> {
     sheet.cell(excel.CellIndex.indexByString("B1")).cellStyle = excel.CellStyle(
       horizontalAlign: excel.HorizontalAlign.Left,
     );
+
+    sheet.cell(excel.CellIndex.indexByString("A3")).value =
+        excel.TextCellValue("DANH SÁCH TÀI KHOẢN GIÁO VIÊN ");
+    sheet.merge(excel.CellIndex.indexByString("A3"),
+        excel.CellIndex.indexByString("F3"));
+    sheet.cell(excel.CellIndex.indexByString("A3")).cellStyle = excel.CellStyle(
+      bold: true,
+      fontSize: 14,
+      horizontalAlign: excel.HorizontalAlign.Center,
+    );
   }
 
   Future<void> _fillStaffExcelTable(
@@ -613,7 +641,7 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       Map<String, dynamic> accountMap,
       Map<String, dynamic> staffMap,
       excel.Excel excelFile) async {
-    const int headerRowIndex = 3;
+    const int headerRowIndex = 4;
     const headers = [
       "STT",
       "Họ và tên",
@@ -621,6 +649,7 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       "Giới tính",
       "Tên đăng nhập",
       "Mật khẩu",
+      // "Lớp phụ trách",
     ];
 
     // Ghi header
@@ -651,7 +680,7 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       sheet.cell(excel.CellIndex.indexByString("D$currentRow")).value =
           excel.TextCellValue(account['_gender'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("E$currentRow")).value =
-          excel.TextCellValue(account['_username'] ?? '');
+          excel.TextCellValue(account['_userName'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
           excel.TextCellValue(account['_password'] ?? '123');
 
@@ -688,319 +717,4 @@ class _DialogExportAccState extends State<DialogExportAcc> {
     }
     return result;
   }
-  // Future<void> _createSheetsByClassId(excel.Excel excelFile) async {
-  //   // Lấy dữ liệu tài khoản
-  //   final accountSnapshot = await FirebaseFirestore.instance
-  //       .collection('ACCOUNT')
-  //       .where('_groupID', isEqualTo: 'hocSinh')
-  //       .get();
-
-  //   if (accountSnapshot.docs.isEmpty) return;
-
-  //   final accountMap = {
-  //     for (var doc in accountSnapshot.docs) doc['_id'] as String: doc.data()
-  //   };
-  //   final accIds = accountMap.keys.toList();
-  //   print('datad accid $accIds');
-
-  //   // Lấy dữ liệu sinh viên
-  //   final studentDocs = await _batchQuery('STUDENT', 'ACC_id', accIds);
-  //   final studentMap = {for (var doc in studentDocs) doc['_id'] as String: doc};
-  //   final stIds = studentMap.keys.toList();
-
-  //   // Lấy dữ liệu chi tiết sinh viên
-  //   final studentDetailDocs =
-  //       await _batchQuery('STUDENT_DETAIL', 'ST_id', stIds);
-  //   final studentDetailMap = {
-  //     for (var doc in studentDetailDocs) doc['ST_id'] as String: doc
-  //   };
-  //   final allStudentDetailIds = studentDetailMap.keys.toList();
-
-  //   final classIds = studentDetailDocs
-  //       .map((doc) => doc['Class_id'] as String?)
-  //       .where((id) => id != null && id.isNotEmpty)
-  //       .map((id) => id!)
-  //       .toSet()
-  //       .toList();
-  //   print('so luong class id ${classIds.length}');
-
-  //   if (classIds.isEmpty) return;
-
-  //   // Lấy dữ liệu lớp
-  //   final classDocsWithSnapshots = await FirebaseFirestore.instance
-  //       .collection('CLASS')
-  //       .where('_id', whereIn: classIds)
-  //       .get();
-  //   final classMap = {
-  //     for (var doc in classDocsWithSnapshots.docs)
-  //       doc.id: ClassMistakeModel.fromFirestore(doc)
-  //   };
-
-  //   // Lấy tất cả dữ liệu CONDUCT_MONTH và MISTAKE_MONTH một lần
-  //   final allConductSnapshot =
-  //       await _batchQuery('CONDUCT_MONTH', 'studentID', allStudentDetailIds);
-  //   final allMistakeSnapshot =
-  //       await _batchQuery('MISTAKE_MONTH', 'STD_id', allStudentDetailIds);
-
-  //   final allConductDataByStudent = {
-  //     for (var doc in allConductSnapshot) doc['studentID'] as String: doc
-  //   };
-  //   final allMistakeDataByStudent = {
-  //     for (var doc in allMistakeSnapshot) doc['STD_id'] as String: doc
-  //   };
-
-  //   // Xử lý song song dữ liệu cho tất cả lớp
-  //   final futures = classIds.map((classId) async {
-  //     return _fetchStudentDataOptimized(
-  //       classId,
-  //       accountMap,
-  //       studentMap,
-  //       studentDetailMap,
-  //       allConductDataByStudent,
-  //       allMistakeDataByStudent,
-  //     );
-  //   }).toList();
-
-  //   final results = await Future.wait(futures);
-
-  //   // Ghi dữ liệu tuần tự vào Excel
-  //   final defaultSheetName = excelFile.getDefaultSheet()!;
-  //   excelFile.rename(defaultSheetName, classIds.first);
-  //   final firstSheet = excelFile[classIds.first];
-  //   _fillClassInfo(firstSheet, classIds.first, classMap[classIds.first]);
-  //   await _fillExcelTable(firstSheet, results[0], excelFile);
-
-  //   for (int i = 1; i < classIds.length; i++) {
-  //     final classId = classIds[i];
-  //     final sheet = excelFile[classId];
-  //     _fillClassInfo(sheet, classId, classMap[classId]);
-  //     await _fillExcelTable(sheet, results[i], excelFile);
-  //   }
-  // }
-
-  // void _fillClassInfo(
-  //     excel.Sheet sheet, String classId, ClassMistakeModel? classInfo) {
-  //   sheet.cell(excel.CellIndex.indexByString("A1")).value =
-  //       excel.TextCellValue("Tên lớp");
-  //   sheet.cell(excel.CellIndex.indexByString("B1")).value =
-  //       excel.TextCellValue(classInfo?.className ?? '');
-  //   sheet.cell(excel.CellIndex.indexByString("A2")).value =
-  //       excel.TextCellValue("Niên khóa");
-  //   sheet.cell(excel.CellIndex.indexByString("B2")).value =
-  //       excel.TextCellValue(classInfo?.academicYear ?? '');
-  //   sheet.cell(excel.CellIndex.indexByString("A3")).value =
-  //       excel.TextCellValue("Giáo viên chủ nhiệm");
-  //   sheet.cell(excel.CellIndex.indexByString("B3")).value =
-  //       excel.TextCellValue(classInfo?.homeroomTeacher ?? '');
-  //   sheet.cell(excel.CellIndex.indexByString("A4")).value =
-  //       excel.TextCellValue("Tháng");
-  //   sheet.cell(excel.CellIndex.indexByString("B4")).value =
-  //       excel.TextCellValue('');
-  //   sheet.cell(excel.CellIndex.indexByString("A5")).value =
-  //       excel.TextCellValue("Ngày xuất báo cáo");
-  //   sheet.cell(excel.CellIndex.indexByString("B5")).value =
-  //       excel.TextCellValue(DateFormat('dd/MM/yyyy').format(DateTime.now()));
-
-  //   const int titleRow = 11;
-  //   sheet.cell(excel.CellIndex.indexByString("A$titleRow")).value =
-  //       excel.TextCellValue("BÁO CÁO TỔNG KẾT VI PHẠM HỌC SINH");
-  //   sheet.merge(excel.CellIndex.indexByString("A$titleRow"),
-  //       excel.CellIndex.indexByString("I$titleRow"));
-  //   sheet.cell(excel.CellIndex.indexByString("A$titleRow")).cellStyle =
-  //       excel.CellStyle(
-  //     bold: true,
-  //     fontSize: 14,
-  //     horizontalAlign: excel.HorizontalAlign.Center,
-  //   );
-  // }
-
-  // Future<Map<String, dynamic>> _fetchStudentDataOptimized(
-  //   String classId,
-  //   Map<String, Map<String, dynamic>> accountMap,
-  //   Map<String, Map<String, dynamic>> studentMap,
-  //   Map<String, Map<String, dynamic>> studentDetailMap,
-  //   Map<String, Map<String, dynamic>> allConductDataByStudent,
-  //   Map<String, Map<String, dynamic>> allMistakeDataByStudent,
-  // ) async {
-  //   List<List<dynamic>> tableData = [];
-  //   int stt = 1;
-
-  //   int totalMistakeCount = 0;
-  //   Map<String, int> conductCounts = {
-  //     'Tốt': 0,
-  //     'Khá': 0,
-  //     'Đạt': 0,
-  //     'Chưa Đạt': 0,
-  //   };
-
-  //   // Lọc studentDetailIds theo lớp
-  //   final studentDetailIdsForClass = studentDetailMap.values
-  //       .where((detail) => detail['Class_id'] == classId)
-  //       .map((detail) => detail['_id'] as String)
-  //       .toList();
-
-  //   // Đếm tổng số MISTAKE_MONTH và CONDUCT_MONTH từ dữ liệu đã tải
-  //   for (var studentDetailId in studentDetailIdsForClass) {
-  //     final conductData = allConductDataByStudent[studentDetailId];
-  //     if (conductData != null) {
-  //       final monthData = conductData['_month']['month10'] as List<dynamic>?;
-  //       if (monthData != null && monthData.length >= 2) {
-  //         String conduct = monthData[1].toString();
-  //         conductCounts[conduct] = (conductCounts[conduct] ?? 0) + 1;
-  //       }
-  //     }
-
-  //     final mistakeData = allMistakeDataByStudent[studentDetailId];
-  //     if (mistakeData != null) {
-  //       totalMistakeCount++;
-  //     }
-  //   }
-
-  //   // Xây dựng tableData
-  //   for (var accId in accountMap.keys) {
-  //     final student = studentMap.values.firstWhere(
-  //       (s) => s['ACC_id'] == accId,
-  //       orElse: () => <String, dynamic>{},
-  //     );
-  //     if (student.isEmpty) continue;
-
-  //     final studentId = student['_id'] as String;
-  //     final parentId = student['P_id'] as String?;
-  //     final studentDetail = studentDetailMap[studentId];
-  //     if (studentDetail == null || studentDetail['Class_id'] != classId)
-  //       continue;
-
-  //     final studentDetailId = studentDetail['_id'] as String;
-  //     final account = accountMap[accId]!;
-
-  //     String conduct = '';
-  //     int trainingScore = 0;
-  //     final conductData = allConductDataByStudent[studentDetailId];
-  //     if (conductData != null) {
-  //       final monthData = conductData['_month']['month10'] as List<dynamic>?;
-  //       if (monthData != null && monthData.length >= 2) {
-  //         trainingScore = int.tryParse(monthData[0].toString()) ?? 0;
-  //         conduct = monthData[1].toString();
-  //       }
-  //     }
-
-  //     int violationCount = 0;
-  //     String violationInfo = '';
-  //     final mistakeData = allMistakeDataByStudent[studentDetailId];
-  //     if (mistakeData != null) {
-  //       violationCount =
-  //           1; // Giả sử mỗi tài liệu là 1 vi phạm, cần điều chỉnh nếu có danh sách
-  //       violationInfo =
-  //           '${mistakeData['M_name']}(${mistakeData['_subject']}+${mistakeData['_time']})';
-  //     }
-
-  //     tableData.add([
-  //       (stt++).toString(),
-  //       studentId,
-  //       studentDetail['_studentName'] ?? account['_accName'] ?? '',
-  //       studentDetail['_birthday'] ?? account['_birth'] ?? '',
-  //       studentDetail['_gender'] ?? account['_gender'] ?? '',
-  //       conduct,
-  //       trainingScore.toString(),
-  //       violationCount.toString(),
-  //       violationInfo,
-  //     ]);
-  //   }
-
-  //   return {
-  //     'tableData': tableData,
-  //     'totalMistakeCount': totalMistakeCount,
-  //     'conductCounts': conductCounts,
-  //   };
-  // }
-
-  // Future<void> _fillExcelTable(excel.Sheet sheet, Map<String, dynamic> data,
-  //     excel.Excel excelFile) async {
-  //   final List<List<dynamic>> tableData = data['tableData'];
-  //   final int totalMistakeCount = data['totalMistakeCount'];
-  //   final Map<String, int> conductCounts = data['conductCounts'];
-
-  //   sheet.cell(excel.CellIndex.indexByString("A7")).value =
-  //       excel.TextCellValue("Tổng số lượng vi phạm");
-  //   sheet.cell(excel.CellIndex.indexByString("B7")).value =
-  //       excel.TextCellValue(totalMistakeCount.toString());
-  //   sheet.cell(excel.CellIndex.indexByString("A8")).value =
-  //       excel.TextCellValue("Số lượng hạnh kiểm");
-  //   sheet.cell(excel.CellIndex.indexByString("B8")).value =
-  //       excel.TextCellValue("Hạnh kiểm Tốt");
-  //   sheet.cell(excel.CellIndex.indexByString("B9")).value =
-  //       excel.TextCellValue(conductCounts['Tốt'].toString());
-  //   sheet.cell(excel.CellIndex.indexByString("C8")).value =
-  //       excel.TextCellValue("Hạnh kiểm Khá");
-  //   sheet.cell(excel.CellIndex.indexByString("C9")).value =
-  //       excel.TextCellValue(conductCounts['Khá'].toString());
-  //   sheet.cell(excel.CellIndex.indexByString("D8")).value =
-  //       excel.TextCellValue("Hạnh kiểm Đạt");
-  //   sheet.cell(excel.CellIndex.indexByString("D9")).value =
-  //       excel.TextCellValue(conductCounts['Đạt'].toString());
-  //   sheet.cell(excel.CellIndex.indexByString("E8")).value =
-  //       excel.TextCellValue("Hạnh kiểm Chưa Đạt");
-  //   sheet.cell(excel.CellIndex.indexByString("E9")).value =
-  //       excel.TextCellValue(conductCounts['Chưa Đạt'].toString());
-
-  //   const int headerRowIndex = 12;
-  //   const headers = [
-  //     "STT",
-  //     "Mã học sinh",
-  //     "Họ và tên",
-  //     "Ngày sinh",
-  //     "Giới tính",
-  //     "Hạnh kiểm",
-  //     "Điểm rèn luyện",
-  //     "Số lượng vi phạm",
-  //     "Thông tin các lỗi vi phạm",
-  //   ];
-
-  //   for (int col = 0; col < headers.length; col++) {
-  //     final cellAddress = "${getColumnLetter(col)}$headerRowIndex";
-  //     sheet.cell(excel.CellIndex.indexByString(cellAddress)).value =
-  //         excel.TextCellValue(headers[col]);
-  //     sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =
-  //         excel.CellStyle(
-  //       bold: true,
-  //       horizontalAlign: excel.HorizontalAlign.Center,
-  //     );
-  //   }
-
-  //   int currentRow = headerRowIndex + 1;
-  //   for (var rowData in tableData) {
-  //     for (int col = 0; col < rowData.length; col++) {
-  //       final cellAddress = "${getColumnLetter(col)}$currentRow";
-  //       final value = rowData[col];
-  //       sheet.cell(excel.CellIndex.indexByString(cellAddress)).value =
-  //           value is String
-  //               ? excel.TextCellValue(value)
-  //               : value is int
-  //                   ? excel.IntCellValue(value)
-  //                   : excel.TextCellValue(value.toString());
-  //       sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =
-  //           excel.CellStyle(
-  //         horizontalAlign: excel.HorizontalAlign.Left,
-  //         textWrapping: excel.TextWrapping.WrapText,
-  //       );
-  //     }
-  //     currentRow++;
-  //   }
-
-  //   try {
-  //     final directory = Directory('/storage/emulated/0/Download');
-  //     final path =
-  //         '${directory.path}/report_${DateTime.now().millisecondsSinceEpoch}.xlsx';
-  //     final file = File(path);
-  //     await file.writeAsBytes(excelFile.encode()!);
-
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('File đã được lưu tại: $path')),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Lỗi khi xuất file: ${e.toString()}')),
-  //     );
-  //   }
-  // }
 }

@@ -342,7 +342,7 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
   }
 }
 // {
-//   "isEnabled": true,
+
 //   "conditions": {
 //     "good": [
 //       {"hki": "Tốt", "hkii": "Tốt"}

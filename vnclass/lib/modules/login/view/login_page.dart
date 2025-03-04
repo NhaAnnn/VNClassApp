@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
@@ -10,7 +11,6 @@ import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/main_home/views/main_home_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,41 +27,107 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AccountController _accountController = AccountController();
+  late SharedPreferences _prefs;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPrefs();
+  }
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    _loadSavedCredentials();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final savedUsername = _prefs.getString('username');
+    final savedPassword = _prefs.getString('password');
+
+    if (savedUsername != null && savedPassword != null) {
+      _userNameController.text = savedUsername;
+      _passwordController.text = savedPassword;
+      setState(() => _isChecked = true);
+      _autoLogin(savedUsername, savedPassword);
+    }
+  }
 
   void _onChanged(bool? newValue) =>
       setState(() => _isChecked = newValue ?? false);
   void _toggleShowPass() => setState(() => _isShowPass = !_isShowPass);
 
   String _hashPassword(String password) {
-    final bytes = utf8.encode(password);
+    final bytes = utf8.encode(password.trim());
     final digest = sha256.convert(bytes);
     return digest.toString();
   }
 
-  void _login() async {
-    final String username = _userNameController.text.trim();
-    final String password = _passwordController.text.trim();
-    final String passHash = _hashPassword(password);
-
-    if (username.isEmpty || password.isEmpty) {
-      _showMessage('Tên đăng nhập hoặc mật khẩu không được để trống');
-      return;
-    }
-
+  Future<void> _autoLogin(String username, String password) async {
+    final passHash = _hashPassword(password);
     setState(() => _isLoading = true);
     try {
       AccountModel account =
           await _accountController.fetchAccount(username, passHash);
       await account.fetchGroupModel();
       Provider.of<AccountProvider>(context, listen: false).setAccount(account);
-      Navigator.of(context).pushNamed(MainHomePage.routeName);
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(MainHomePage.routeName);
+      }
     } catch (e) {
-      _showMessage('Đã xảy ra lỗi, vui lòng thử lại');
+      print('Auto-login failed: $e');
     }
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  Future<void> _login() async {
+    final String username = _userNameController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      _showMessage('Tên đăng nhập hoặc mật khẩu không được để trống');
+      return;
+    }
+
+    final String passHash = _hashPassword(password);
+    setState(() => _isLoading = true);
+    print("passss: '$passHash'");
+    print("user: '$username'");
+
+    try {
+      AccountModel account =
+          await _accountController.fetchAccount(username, passHash);
+      print('Account fetched: $account');
+      await account.fetchGroupModel();
+      print('Group model fetched successfully');
+
+      if (_isChecked) {
+        await _prefs.setString('username', username);
+        await _prefs.setString('password', password);
+        print('Credentials saved');
+      } else {
+        await _prefs.remove('username');
+        await _prefs.remove('password');
+        print('Credentials removed');
+      }
+
+      Provider.of<AccountProvider>(context, listen: false).setAccount(account);
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(MainHomePage.routeName);
+      }
+    } catch (e) {
+      print('Login failed: $e');
+      if (e.toString().contains('PlatformException') &&
+          e.toString().contains('shared_preferences')) {
+        _showMessage('Lỗi lưu thông tin đăng nhập, vui lòng thử lại');
+      } else {
+        _showMessage('Tài khoản hoặc mật khẩu không đúng');
+      }
+    }
+    if (mounted) setState(() => _isLoading = false);
   }
 
   void _showMessage(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message,
@@ -75,9 +141,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void dispose() {
+    _userNameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue.shade50, // Light sky-blue background
+      backgroundColor: Colors.blue.shade50,
       body: Stack(
         children: [
           SingleChildScrollView(

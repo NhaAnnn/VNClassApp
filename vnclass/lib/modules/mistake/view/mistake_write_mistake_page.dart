@@ -215,6 +215,8 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
     });
 
     try {
+      print('Bắt đầu xử lý - ID Student: ${studentDetailModel.id}');
+
       final classDocRef = FirebaseFirestore.instance
           .collection('CLASS')
           .doc(studentDetailModel.classID);
@@ -222,29 +224,33 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
 
       if (classSnapshot.exists) {
         final data = classSnapshot.data()!;
-        int numberOfMisALL = int.parse(data['_numberOfMisAll'].toString()) + 1;
+        print('Dữ liệu CLASS: $data');
+        int numberOfMisALL = int.parse(data['_numberOfMisAll']) + 1;
 
         await classDocRef.update({
           '_numberOfMisAll': numberOfMisALL.toString(),
-          '_numberOfMisS2': (DateTime.now().month >= 1 &&
-                  DateTime.now().month <= 5)
-              ? (int.parse(data['_numberOfMisS2'].toString()) + 1).toString()
-              : data['_numberOfMisS2'].toString(),
-          '_numberOfMisS1': (DateTime.now().month >= 9 &&
-                  DateTime.now().month <= 12)
-              ? (int.parse(data['_numberOfMisS1'].toString()) + 1).toString()
-              : data['_numberOfMisS1'].toString(),
+          '_numberOfMisS2':
+              (DateTime.now().month >= 1 && DateTime.now().month <= 5)
+                  ? (int.parse(data['_numberOfMisS2']) + 1).toString()
+                  : data['_numberOfMisS2'],
+          '_numberOfMisS1':
+              (DateTime.now().month >= 9 && DateTime.now().month <= 12)
+                  ? (int.parse(data['_numberOfMisS1']) + 1).toString()
+                  : data['_numberOfMisS1'],
         });
+        print('Đã cập nhật CLASS - numberOfMisALL: $numberOfMisALL');
 
         final time = DateTime.now();
         final formattedTime =
             '${time.second}${time.minute}${time.day}${time.month}${time.year}';
         String idStudent = studentDetailModel.id;
         final idDoc = '$idStudent+$formattedTime';
+        print('ID Document: $idDoc');
 
         String monthString = _dateController.text.split('-')[1];
         String monthKey = 'month${monthString.replaceFirst('0', '')}';
         String monthSave = 'Tháng ${monthString.replaceFirst('0', '')}';
+        print('Month Key: $monthKey, Month Save: $monthSave');
 
         final conductDocRef = FirebaseFirestore.instance
             .collection('CONDUCT_MONTH')
@@ -253,17 +259,47 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
 
         if (conductSnapshot.exists) {
           final conductData = conductSnapshot.data() as Map<String, dynamic>;
+          print('Dữ liệu CONDUCT_MONTH ban đầu: $conductData');
           final monthData = conductData['_month'] as Map<String, dynamic>;
 
           if (monthData.containsKey(monthKey) &&
               monthData[monthKey] is List &&
               monthData[monthKey].length >= 2) {
-            int currentPoints = int.parse(monthData[monthKey][0].toString());
+            int currentPoints = int.parse(monthData[monthKey][0]);
             String updatedPoints =
                 (currentPoints - mistakeModel.minusPoint).toString();
+            print(
+                'Current Points: $currentPoints, Updated Points: $updatedPoints');
 
-            monthData[monthKey][0] = updatedPoints;
+            final setPointRef =
+                FirebaseFirestore.instance.collection('SET_UP').doc('setPoint');
+            final setPointSnapshot = await setPointRef.get();
+            String conductType = '';
+
+            if (setPointSnapshot.exists) {
+              final pointsData = setPointSnapshot.data()!['points'];
+              print('Points Data from setPoint: $pointsData');
+              int points = int.parse(updatedPoints);
+
+              if (points >= int.parse(pointsData['good']['from']) &&
+                  points <= int.parse(pointsData['good']['to'])) {
+                conductType = 'Tốt';
+              } else if (points >= int.parse(pointsData['fair']['from']) &&
+                  points <= int.parse(pointsData['fair']['to'])) {
+                conductType = 'Khá';
+              } else if (points >= int.parse(pointsData['pass']['from']) &&
+                  points <= int.parse(pointsData['pass']['to'])) {
+                conductType = 'Đạt';
+              } else {
+                conductType = 'Chưa Đạt';
+              }
+              print('Conduct Type: $conductType');
+            }
+
+            monthData[monthKey][0] = updatedPoints.toString();
+            monthData[monthKey][1] = conductType;
             await conductDocRef.update({'_month': monthData});
+            print('Đã cập nhật CONDUCT_MONTH với monthData: $monthData');
 
             await FirebaseFirestore.instance
                 .collection('MISTAKE_MONTH')
@@ -279,32 +315,290 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
               '_subject': selectedItem ?? '',
               '_time': _dateController.text,
             });
+            print('Đã lưu MISTAKE_MONTH với ID: $idDoc');
 
-            showCustomSnackBar(context, message: 'Lưu thành công!');
-            Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
-              Navigator.pop(context);
+            final updatedConductSnapshot = await conductDocRef.get();
+            if (!updatedConductSnapshot.exists) {
+              throw Exception('Không thể lấy dữ liệu CONDUCT_MONTH mới');
+            }
+            final allConductData = updatedConductSnapshot.data()!['_month']
+                as Map<String, dynamic>;
+            print('Dữ liệu CONDUCT_MONTH mới sau cập nhật: $allConductData');
+
+            print("ID studentdetail: $idStudent");
+            final studentDocRef = FirebaseFirestore.instance
+                .collection('STUDENT_DETAIL')
+                .doc(idStudent);
+
+            Map<String, int> term1Count = {
+              'Tốt': 0,
+              'Khá': 0,
+              'Đạt': 0,
+              'Chưa Đạt': 0
+            };
+            for (int i = 9; i <= 12; i++) {
+              String key = 'month$i';
+              if (allConductData.containsKey(key) &&
+                  allConductData[key].length >= 2) {
+                term1Count[allConductData[key][1] as String] =
+                    (term1Count[allConductData[key][1] as String] ?? 0) + 1;
+              }
+            }
+            print("Dữ liệu term1: $term1Count");
+
+            Map<String, int> term2Count = {
+              'Tốt': 0,
+              'Khá': 0,
+              'Đạt': 0,
+              'Chưa Đạt': 0
+            };
+            for (int i = 1; i <= 5; i++) {
+              String key = 'month$i';
+              if (allConductData.containsKey(key) &&
+                  allConductData[key].length >= 2) {
+                term2Count[allConductData[key][1] as String] =
+                    (term2Count[allConductData[key][1] as String] ?? 0) + 1;
+              }
+            }
+            print("Dữ liệu term2: $term2Count");
+
+            final setTerm1Ref =
+                FirebaseFirestore.instance.collection('SET_UP').doc('setTerm1');
+            final setTerm2Ref =
+                FirebaseFirestore.instance.collection('SET_UP').doc('setTerm2');
+            final setTerm3Ref =
+                FirebaseFirestore.instance.collection('SET_UP').doc('setTerm3');
+
+            final setTerm1Snap = await setTerm1Ref.get();
+            final setTerm2Snap = await setTerm2Ref.get();
+            final setTerm3Snap = await setTerm3Ref.get();
+
+            String conductTerm1 = '';
+            String conductTerm2 = '';
+
+            if (setTerm1Snap.exists) {
+              final conditions = setTerm1Snap.data()!['conditions'];
+              print('Conditions Term1: $conditions');
+              conductTerm1 = _determineConduct(
+                  conditions,
+                  term1Count['Tốt']!,
+                  term1Count['Khá']!,
+                  term1Count['Đạt']!,
+                  term1Count['Chưa Đạt']!);
+            }
+            print('Conduct Term1: $conductTerm1');
+
+            if (setTerm2Snap.exists) {
+              final conditions = setTerm2Snap.data()!['conditions'];
+              print('Conditions Term2: $conditions');
+              conductTerm2 = _determineConduct(
+                  conditions,
+                  term2Count['Tốt']!,
+                  term2Count['Khá']!,
+                  term2Count['Đạt']!,
+                  term2Count['Chưa Đạt']!);
+            }
+            print('Conduct Term2: $conductTerm2');
+
+            String conductAllYear = '';
+            if (setTerm3Snap.exists) {
+              final conditions = setTerm3Snap.data()!['conditions'];
+              print('Conditions Term3: $conditions');
+              for (var type in ['good', 'fair', 'pass', 'fail']) {
+                for (var condition in conditions[type]) {
+                  if (condition['hki'] == conductTerm1 &&
+                      condition['hkii'] == conductTerm2) {
+                    conductAllYear = type == 'good'
+                        ? 'Tốt'
+                        : type == 'fair'
+                            ? 'Khá'
+                            : type == 'pass'
+                                ? 'Đạt'
+                                : 'Chưa Đạt';
+                    break;
+                  }
+                }
+                if (conductAllYear.isNotEmpty) break;
+              }
+            }
+            print('Conduct All Year: $conductAllYear');
+
+            await studentDocRef.update({
+              '_conductAllYear': conductAllYear,
+              '_conductTerm1': conductTerm1,
+              '_conductTerm2': conductTerm2,
             });
+            print('Đã cập nhật STUDENT_DETAIL');
+
+            // Thoát trang và trả về kết quả thành công
+            if (mounted) {
+              Navigator.pop(context, true); // Trả về true để báo thành công
+            }
           } else {
-            showCustomSnackBar(context,
-                message: 'Không tìm thấy dữ liệu tháng!', isError: true);
+            print('Không tìm thấy monthKey hoặc dữ liệu không hợp lệ');
+            if (mounted) {
+              showCustomSnackBar(context,
+                  message: 'Không tìm thấy dữ liệu tháng!', isError: true);
+            }
           }
         } else {
-          showCustomSnackBar(context,
-              message: 'Không tìm thấy dữ liệu conduct!', isError: true);
+          print('Không tìm thấy CONDUCT_MONTH');
+          if (mounted) {
+            showCustomSnackBar(context,
+                message: 'Không tìm thấy dữ liệu conduct!', isError: true);
+          }
         }
       } else {
-        showCustomSnackBar(context,
-            message: 'Không tìm thấy lớp!', isError: true);
+        print('Không tìm thấy CLASS');
+        if (mounted) {
+          showCustomSnackBar(context,
+              message: 'Không tìm thấy lớp!', isError: true);
+        }
       }
     } catch (e) {
-      showCustomSnackBar(context,
-          message: 'Lỗi: $e',
-          isError: true,
-          duration: const Duration(seconds: 3));
+      print('Lỗi xảy ra: $e');
+      if (mounted) {
+        showCustomSnackBar(context,
+            message: 'Lỗi: $e',
+            isError: true,
+            duration: const Duration(seconds: 3));
+      }
     } finally {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      print('Kết thúc xử lý');
     }
   }
+
+  String _determineConduct(
+      Map<String, dynamic> conditions, int good, int fair, int pass, int fail) {
+    print(
+        'Determine Conduct - Input: good=$good, fair=$fair, pass=$pass, fail=$fail');
+    for (var type in ['good', 'fair', 'pass', 'fail']) {
+      for (var condition in conditions[type]) {
+        if (int.parse(condition['good']) == good &&
+            int.parse(condition['fair']) == fair &&
+            int.parse(condition['pass']) == pass &&
+            int.parse(condition['fail']) == fail) {
+          String result = type == 'good'
+              ? 'Tốt'
+              : type == 'fair'
+                  ? 'Khá'
+                  : type == 'pass'
+                      ? 'Đạt'
+                      : 'Chưa Đạt';
+          print('Determine Conduct - Result: $result');
+          return result;
+        }
+      }
+    }
+    print('Determine Conduct - Default: Chưa Đạt');
+    return 'Chưa Đạt'; // Default case
+  }
+
+  // Future<void> _saveMistakeData(
+  //   StudentDetailModel studentDetailModel,
+  //   MistakeModel mistakeModel,
+  //   AccountModel accountModel,
+  // ) async {
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   try {
+  //     final classDocRef = FirebaseFirestore.instance
+  //         .collection('CLASS')
+  //         .doc(studentDetailModel.classID);
+  //     final classSnapshot = await classDocRef.get();
+
+  //     if (classSnapshot.exists) {
+  //       final data = classSnapshot.data()!;
+  //       int numberOfMisALL = int.parse(data['_numberOfMisAll'].toString()) + 1;
+
+  //       await classDocRef.update({
+  //         '_numberOfMisAll': numberOfMisALL.toString(),
+  //         '_numberOfMisS2': (DateTime.now().month >= 1 &&
+  //                 DateTime.now().month <= 5)
+  //             ? (int.parse(data['_numberOfMisS2'].toString()) + 1).toString()
+  //             : data['_numberOfMisS2'].toString(),
+  //         '_numberOfMisS1': (DateTime.now().month >= 9 &&
+  //                 DateTime.now().month <= 12)
+  //             ? (int.parse(data['_numberOfMisS1'].toString()) + 1).toString()
+  //             : data['_numberOfMisS1'].toString(),
+  //       });
+
+  //       final time = DateTime.now();
+  //       final formattedTime =
+  //           '${time.second}${time.minute}${time.day}${time.month}${time.year}';
+  //       String idStudent = studentDetailModel.id;
+  //       final idDoc = '$idStudent+$formattedTime';
+
+  //       String monthString = _dateController.text.split('-')[1];
+  //       String monthKey = 'month${monthString.replaceFirst('0', '')}';
+  //       String monthSave = 'Tháng ${monthString.replaceFirst('0', '')}';
+
+  //       final conductDocRef = FirebaseFirestore.instance
+  //           .collection('CONDUCT_MONTH')
+  //           .doc(idStudent);
+  //       final conductSnapshot = await conductDocRef.get();
+
+  //       if (conductSnapshot.exists) {
+  //         final conductData = conductSnapshot.data() as Map<String, dynamic>;
+  //         final monthData = conductData['_month'] as Map<String, dynamic>;
+
+  //         if (monthData.containsKey(monthKey) &&
+  //             monthData[monthKey] is List &&
+  //             monthData[monthKey].length >= 2) {
+  //           int currentPoints = int.parse(monthData[monthKey][0].toString());
+  //           String updatedPoints =
+  //               (currentPoints - mistakeModel.minusPoint).toString();
+
+  //           monthData[monthKey][0] = updatedPoints;
+  //           await conductDocRef.update({'_month': monthData});
+
+  //           await FirebaseFirestore.instance
+  //               .collection('MISTAKE_MONTH')
+  //               .doc(idDoc)
+  //               .set({
+  //             'ACC_id': accountModel.idAcc,
+  //             'ACC_name': accountModel.accName,
+  //             'M_id': mistakeModel.idMistake,
+  //             'M_name': mistakeModel.nameMistake,
+  //             'STD_id': idStudent,
+  //             '_id': idDoc,
+  //             '_month': monthSave,
+  //             '_subject': selectedItem ?? '',
+  //             '_time': _dateController.text,
+  //           });
+
+  //           showCustomSnackBar(context, message: 'Lưu thành công!');
+  //           Future.delayed(const Duration(seconds: 1, milliseconds: 500), () {
+  //             Navigator.pop(context);
+  //           });
+  //         } else {
+  //           showCustomSnackBar(context,
+  //               message: 'Không tìm thấy dữ liệu tháng!', isError: true);
+  //         }
+  //       } else {
+  //         showCustomSnackBar(context,
+  //             message: 'Không tìm thấy dữ liệu conduct!', isError: true);
+  //       }
+  //     } else {
+  //       showCustomSnackBar(context,
+  //           message: 'Không tìm thấy lớp!', isError: true);
+  //     }
+  //   } catch (e) {
+  //     showCustomSnackBar(context,
+  //         message: 'Lỗi: $e',
+  //         isError: true,
+  //         duration: const Duration(seconds: 3));
+  //   } finally {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 }

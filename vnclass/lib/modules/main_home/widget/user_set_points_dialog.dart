@@ -334,3 +334,21 @@ class _SetPointsDialogState extends State<SetPointsDialog> {
     super.dispose();
   }
 }
+//  'points': {
+//           'good': {
+//             'from': ,
+//             'to': ,
+//           },
+//           'fair': {
+//             'from': ,
+//             'to': ,
+//           },
+//           'pass': {
+//             'from': ,
+//             'to':,
+//           },
+//           'fail': {
+//             'from': ,
+//             'to': ,
+//           },
+//         },

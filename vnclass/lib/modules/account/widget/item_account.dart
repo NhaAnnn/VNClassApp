@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';
@@ -6,10 +7,17 @@ import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 
 class ItemAccount extends StatelessWidget {
-  const ItemAccount({super.key, this.accountModel, this.accountEditModel});
+  const ItemAccount({
+    super.key,
+    this.accountModel,
+    this.accountEditModel,
+    this.onDataChanged,
+  });
 
   final AccountModel? accountModel;
   final AccountEditModel? accountEditModel;
+  final Function(AccountEditModel?, bool)?
+      onDataChanged; // Thêm tham số isDeleted
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +27,7 @@ class ItemAccount extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(10.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -39,25 +47,60 @@ class ItemAccount extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          accountEditModel?.accountModel.accName ?? 'Không có tên',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+        if (accountEditModel?.accountModel.goupID == 'phuHuynh') ...[
+          const Text(
+            'PHHS',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 6),
-        Text(
-          accountEditModel?.accountModel.userName ?? 'Không có tài khoản',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.w500,
+          Text(
+            (accountEditModel!.accountModel.accName)
+                    .split(' - ')
+                    .sublist(1)
+                    .join(' - ') ??
+                'Không có tên',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-          overflow: TextOverflow.ellipsis,
-        ),
+          const SizedBox(height: 6),
+          Text(
+            accountEditModel?.accountModel.userName ?? 'Không có tài khoản',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ] else ...[
+          Text(
+            accountEditModel?.accountModel.accName ?? 'Không có tên',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            accountEditModel?.accountModel.userName ?? 'Không có tài khoản',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ],
     );
   }
@@ -69,7 +112,7 @@ class ItemAccount extends StatelessWidget {
         _buildActionButton(
           context: context,
           icon: FontAwesomeIcons.pen,
-          color: const Color(0xFF1976D2), // Xanh đậm cho chỉnh sửa
+          color: const Color(0xFF1976D2),
           tooltip: 'Chỉnh sửa',
           onTap: () => _handleEdit(context),
         ),
@@ -77,7 +120,7 @@ class ItemAccount extends StatelessWidget {
         _buildActionButton(
           context: context,
           icon: FontAwesomeIcons.trash,
-          color: Colors.redAccent, // Đỏ cho xóa
+          color: Colors.redAccent,
           tooltip: 'Xóa',
           onTap: () => _handleDelete(context),
         ),
@@ -123,6 +166,169 @@ class ItemAccount extends StatelessWidget {
         context,
         AccountEditAccPage.routeName,
         arguments: accountEditModel,
+      ).then((result) {
+        if (result != null &&
+            result is AccountEditModel &&
+            onDataChanged != null) {
+          onDataChanged!(result, false); // Chỉnh sửa, không xóa
+        }
+      });
+    }
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    if (accountEditModel == null) return;
+
+    final String groupId = accountEditModel!.accountModel.goupID;
+    final String accountId = accountEditModel!.accountModel.idAcc;
+
+    try {
+      if (groupId == 'banGH' || groupId == 'giaoVien') {
+        await Future.wait([
+          FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(accountId)
+              .delete(),
+          FirebaseFirestore.instance
+              .collection('TEACHER')
+              .doc(accountId)
+              .delete(),
+        ]);
+      } else if (groupId == 'hocSinh') {
+        final studentDoc = await FirebaseFirestore.instance
+            .collection('STUDENT')
+            .doc(accountId)
+            .get();
+        final String? parentId = studentDoc.data()?['P_id'];
+
+        final String? classId = accountEditModel!.studentDetailModel?.classID;
+        if (classId != null) {
+          final classDoc = await FirebaseFirestore.instance
+              .collection('CLASS')
+              .doc(classId)
+              .get();
+          if (classDoc.exists) {
+            final currentAmount = classDoc.data()!['_amount'] as num? ?? 0;
+            final newAmount = currentAmount > 0 ? currentAmount.toInt() - 1 : 0;
+            await FirebaseFirestore.instance
+                .collection('CLASS')
+                .doc(classId)
+                .update({'_amount': newAmount});
+          }
+        }
+
+        await Future.wait([
+          FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(accountId)
+              .delete(),
+          FirebaseFirestore.instance
+              .collection('STUDENT')
+              .doc(accountId)
+              .delete(),
+          if (accountEditModel!.classMistakeModel?.academicYear != null)
+            FirebaseFirestore.instance
+                .collection('STUDENT_DETAIL')
+                .doc(
+                    '$accountId${accountEditModel!.classMistakeModel!.academicYear}')
+                .delete(),
+          if (accountEditModel!.classMistakeModel?.academicYear != null)
+            FirebaseFirestore.instance
+                .collection('CONDUCT_MONTH')
+                .doc(
+                    '$accountId${accountEditModel!.classMistakeModel!.academicYear}')
+                .delete(),
+          if (parentId != null)
+            FirebaseFirestore.instance
+                .collection('ACCOUNT')
+                .doc(parentId)
+                .delete(),
+          if (parentId != null)
+            FirebaseFirestore.instance
+                .collection('PARENT')
+                .doc(parentId)
+                .delete(),
+        ]);
+      } else if (groupId == 'phuHuynh') {
+        final studentQuery = await FirebaseFirestore.instance
+            .collection('STUDENT')
+            .where('P_id', isEqualTo: accountId)
+            .get();
+        final studentDocs = studentQuery.docs;
+
+        await Future.wait([
+          FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(accountId)
+              .delete(),
+          FirebaseFirestore.instance
+              .collection('PARENT')
+              .doc(accountId)
+              .delete(),
+          ...studentDocs.map((studentDoc) async {
+            final studentId = studentDoc.id;
+            final studentDetailQuery = await FirebaseFirestore.instance
+                .collection('STUDENT_DETAIL')
+                .where('ST_id', isEqualTo: studentId)
+                .get();
+            final studentDetailDocs = studentDetailQuery.docs;
+
+            if (studentDetailDocs.isNotEmpty) {
+              final classId = studentDetailDocs.first.data()['Class_id'];
+              final classDoc = await FirebaseFirestore.instance
+                  .collection('CLASS')
+                  .doc(classId)
+                  .get();
+              if (classDoc.exists) {
+                final currentAmount = classDoc.data()!['_amount'] as num? ?? 0;
+                final newAmount =
+                    currentAmount > 0 ? currentAmount.toInt() - 1 : 0;
+                await FirebaseFirestore.instance
+                    .collection('CLASS')
+                    .doc(classId)
+                    .update({'_amount': newAmount});
+              }
+            }
+
+            await Future.wait([
+              FirebaseFirestore.instance
+                  .collection('ACCOUNT')
+                  .doc(studentId)
+                  .delete(),
+              FirebaseFirestore.instance
+                  .collection('STUDENT')
+                  .doc(studentId)
+                  .delete(),
+              ...studentDetailDocs.map((doc) => FirebaseFirestore.instance
+                  .collection('STUDENT_DETAIL')
+                  .doc(doc.id)
+                  .delete()),
+              ...studentDetailDocs.map((doc) => FirebaseFirestore.instance
+                  .collection('CONDUCT_MONTH')
+                  .doc(
+                      '$studentId${doc.data()['Class_id'].substring(doc.data()['Class_id'].length - 4)}')
+                  .delete()),
+            ]);
+          }),
+        ]);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Xóa tài khoản thành công!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      if (onDataChanged != null) {
+        onDataChanged!(accountEditModel, true); // Báo rằng tài khoản đã bị xóa
+      }
+    } catch (e) {
+      print('Lỗi khi xóa tài khoản: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Xóa tài khoản thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -132,6 +338,10 @@ class ItemAccount extends StatelessWidget {
       CustomDialogWidget.showConfirmationDialog(
         context,
         'Xác nhận xóa tài khoản?',
+        onTapOK: () async {
+          await _deleteAccount(context);
+          Navigator.of(context).pop(); // Đóng dialog
+        },
       );
     }
   }

@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:math';
-import 'package:crypto/crypto.dart';
-import 'package:flutter/material.dart';
-import 'package:vnclass/common/widget/button_widget.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:path/path.dart' as path;
-import 'package:excel/excel.dart' as excel;
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:crypto/crypto.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:excel/excel.dart' as excel;
+import 'package:vnclass/common/widget/button_widget.dart';
 
 class ItemTabarListAcc extends StatefulWidget {
   const ItemTabarListAcc({super.key, required this.title, this.typeAcc});
@@ -23,7 +24,59 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
   List<Map<String, dynamic>> students = [];
   List<Map<String, dynamic>> teachers = [];
 
-  // [Giữ nguyên toàn bộ logic của bạn từ pickFile đến setFormDataTeacher]
+  Future<void> downloadTemplate(String typeAcc) async {
+    String? assetPath;
+    String fileName;
+
+    switch (typeAcc) {
+      case 'bgh':
+        assetPath = 'assets/files/BGH_template.xlsx';
+        fileName = 'BGH_template.xlsx';
+        break;
+      case 'gv':
+        assetPath = 'assets/files/GiaoVien_template.xlsx';
+        fileName = 'GiaoVien_template.xlsx';
+        break;
+      case 'hs':
+        assetPath = 'assets/files/HocSinh_template.xlsx';
+        fileName = 'HocSinh_template.xlsx';
+        break;
+      default:
+        return;
+    }
+
+    try {
+      // Đọc dữ liệu từ assets
+      final byteData = await rootBundle.load(assetPath);
+      final buffer = byteData.buffer;
+      final bytes =
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+
+      // Lấy thư mục Downloads
+      final directory = Directory('/storage/emulated/0/Download');
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+
+      // Ghi file vào thư mục Downloads
+      await file.writeAsBytes(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã tải mẫu về: $filePath'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tải mẫu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tải mẫu thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   Future<void> pickFile(String typeAcc) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -277,12 +330,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
     studentsUp = students.map((student) {
       String birth = student['birthDate']?.toString() ?? '';
-      // String ddmm = '';
-      // if (birth.length >= 10) {
-      //   ddmm = birth.substring(0, 2) + birth.substring(3, 5);
-      // }
-      // Random random = Random();
-      // String xxx = random.nextInt(1000).toString().padLeft(3, '0');
       String id = student['idstudent']?.toString() ?? '';
       String gender = student['gender']?.toString() ?? '';
       String phone = student['phone']?.toString() ?? '';
@@ -324,7 +371,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       });
 
       accParentsUp.add({
-        '_accName': 'PHHS $studentName - $id',
+        '_accName': 'PHHS - $studentName - $id',
         '_birth': '',
         '_email': '',
         '_gender': '',
@@ -349,7 +396,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_birthday': '',
         '_gender': '',
         '_id': parentID,
-        '_parentName': 'PHHS $studentName',
+        '_parentName': 'PHHS - $studentName - $id',
         '_phone': parentID,
       });
 
@@ -420,8 +467,16 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     return null;
   }
 
-  Future<void> setFormDataTeacher() async {
+  Future<void> setFormDataTeacher(String posi) async {
     print('Dữ liệu giáo viên trước khi tải lên: ${teachers.length}');
+    print('type $posi');
+    String position = '';
+    if (posi == 'gv') {
+      position = 'giaoVien';
+    } else if (posi == 'bgh') {
+      position = 'banGH';
+    }
+    print('position $position');
     List<Map<String, dynamic>> teachersUp = [];
     List<Map<String, dynamic>> accountsUp = [];
     List<String> init = [];
@@ -439,7 +494,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_birth': birth,
         '_email': email,
         '_gender': gender,
-        '_groupID': 'giaoVien',
+        '_groupID': position,
         '_id': id,
         '_pass': _hashPassword('123'),
         '_permission': init,
@@ -477,27 +532,26 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     ]);
   }
 
-  Future<void> uploadData() async {
-    print('Dữ liệu sinh viên trước khi tải lên: $students');
-    try {
-      for (var student in students) {
-        await FirebaseFirestore.instance.collection('STUDENT').add(student);
-      }
-      setState(() {
-        students.clear();
-        fileName = '';
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tải lên thành công!')),
-      );
-    } catch (e) {
-      print('Lỗi khi tải lên: $e');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    // Xác định tên file mẫu dựa trên typeAcc
+    String templateName;
+    switch (widget.typeAcc) {
+      case 'bgh':
+        templateName = 'BGH_template.xlsx';
+        break;
+      case 'gv':
+        templateName = 'GiaoVien_template.xlsx';
+        break;
+      case 'hs':
+        templateName = 'HocSinh_template.xlsx';
+        break;
+      default:
+        templateName = 'Unknown_template.xlsx';
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -513,16 +567,51 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                 color: Colors.blueAccent,
               ),
             ),
+            const SizedBox(height: 8),
+            // Tên file mẫu và nút tải mẫu
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Mẫu: $templateName',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade700,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => downloadTemplate(widget.typeAcc ?? ''),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF388E3C),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 2,
+                  ),
+                  child: const Text(
+                    'Tải mẫu',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 20),
-            // Khu vực chọn file
+            // Khu vực chọn file (giữ nguyên)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.grey.shade400, // Viền rõ hơn với màu xám nhạt
-                  width: 1.5, // Độ dày viền tăng lên để rõ hơn
+                  color: Colors.grey.shade400,
+                  width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -578,7 +667,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
               ),
             ),
             const SizedBox(height: 24),
-            // Nút điều khiển
+            // Nút điều khiển (giữ nguyên)
             Row(
               children: [
                 Expanded(
@@ -587,12 +676,12 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                         ? () {
                             if (widget.typeAcc == 'bgh' ||
                                 widget.typeAcc == 'gv') {
-                              setFormDataTeacher();
+                              setFormDataTeacher(widget.typeAcc ?? '');
                             } else {
                               setFormData();
                             }
                           }
-                        : null, // Vô hiệu hóa nếu chưa chọn file
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -635,7 +724,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                 ),
               ],
             ),
-            // Hiển thị số lượng dữ liệu (tùy chọn)
+            // Số lượng dữ liệu (giữ nguyên)
             if (fileName.isNotEmpty &&
                 (students.isNotEmpty || teachers.isNotEmpty))
               Padding(

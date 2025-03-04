@@ -32,7 +32,12 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _classController = TextEditingController();
+
+  late List<String> groupPermissions; // Permissions từ group (cố định)
+  late List<String>
+      accountPermissions; // Permissions từ account (có thể chỉnh sửa)
+  late List<String>
+      dbPermissions; // Permissions từ Firestore (có thể chỉnh sửa)
 
   bool _isShowPass = false;
   bool _isShowPassAgain = false;
@@ -40,6 +45,7 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
   String? _selectedGender;
   String? _selectedAcademicYear;
   bool _isEditing = false;
+  String? _selectedClass;
 
   @override
   void didChangeDependencies() {
@@ -57,15 +63,59 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
           '';
       _emailController.text = accountEditModel.accountModel.email ?? '';
       _phoneController.text = accountEditModel.accountModel.phone ?? '';
-      _classController.text =
-          accountEditModel.classMistakeModel?.className ?? '';
+
       _selectedGender = accountEditModel.studentMistakeModel?.gender ??
           accountEditModel.teacherModel?.gender ??
           accountEditModel.parentModel?.gender ??
           'Nam';
+
+      // Lấy danh sách years từ YearProvider
+      final yearProvider = Provider.of<YearProvider>(context, listen: false);
+      final years = yearProvider.years;
+
+      // Kiểm tra academicYear
+      String? academicYear = accountEditModel.classMistakeModel?.academicYear;
       _selectedAcademicYear =
-          accountEditModel.classMistakeModel?.academicYear ?? '';
+          (academicYear != null && years.contains(academicYear))
+              ? academicYear
+              : null;
+
+      // Kiểm tra className với danh sách classes
+      final List<String> classes = [
+        'Lớp 6A',
+        'Lớp 6B',
+        'Lớp 7A',
+        'Lớp 7B',
+        'Lớp 8A',
+        'Lớp 8B',
+      ];
+      String? className = accountEditModel.classMistakeModel?.className;
+      _selectedClass =
+          (className != null && classes.contains(className)) ? className : null;
+
+      // Khởi tạo danh sách permissions
+      groupPermissions = [];
+      accountPermissions = List.from(accountEditModel.accountModel.permission);
+      dbPermissions = [];
+
+      // Lấy permissions từ group
+      accountEditModel.groupModel!.permission.forEach((key, value) {
+        if (value.length > 1) groupPermissions.add(value[1]);
+      });
+
       _isInit = false;
+
+      // Lấy permissions từ Firestore
+      fetchDbPermissions().then((dbPerms) {
+        setState(() {
+          // Loại bỏ trùng lặp với groupPermissions và accountPermissions
+          dbPermissions = dbPerms
+              .where((perm) =>
+                  !groupPermissions.contains(perm) &&
+                  !accountPermissions.contains(perm))
+              .toList();
+        });
+      });
     }
     super.didChangeDependencies();
   }
@@ -145,6 +195,15 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
   }
 
   Widget _buildInfoTab(BuildContext context, List years) {
+    // Thêm vào _AccountEditAccPageState
+    final List<String> classes = [
+      'Lớp 6A',
+      'Lớp 6B',
+      'Lớp 7A',
+      'Lớp 7B',
+      'Lớp 8A',
+      'Lớp 8B',
+    ]; // Thay bằng danh sách thực tế của bạn
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -194,13 +253,21 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
           _buildDateField(),
           _buildTextField('Email', _emailController, enabled: _isEditing),
           _buildTextField('SĐT', _phoneController, enabled: _isEditing),
-          _buildTextField('Lớp', _classController, enabled: _isEditing),
+          // Thay _buildTextField bằng _buildDropdownField cho Lớp
           _buildDropdownField(
-              'Năm học',
-              years,
-              _selectedAcademicYear,
-              _isEditing,
-              (value) => setState(() => _selectedAcademicYear = value)),
+            'Lớp',
+            classes, // Danh sách lớp
+            _selectedClass,
+            _isEditing,
+            (value) => setState(() => _selectedClass = value),
+          ),
+          _buildDropdownField(
+            'Năm học',
+            years,
+            _selectedAcademicYear,
+            _isEditing,
+            (value) => setState(() => _selectedAcademicYear = value),
+          ),
           _buildRadioField('Giới tính', ['Nam', 'Nữ'], _selectedGender,
               _isEditing, (value) => setState(() => _selectedGender = value)),
           const SizedBox(height: 32),
@@ -219,7 +286,7 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
                           print("Ngày: ${_dateController.text}");
                           print("Email: ${_emailController.text}");
                           print("SĐT: ${_phoneController.text}");
-                          print("Lớp: ${_classController.text}");
+                          print("Lớp: $_selectedClass");
                           print("Năm học: $_selectedAcademicYear");
                           print("Giới tính: $_selectedGender");
                           CustomDialogWidget.showConfirmationDialog(
@@ -275,39 +342,225 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
     );
   }
 
-  Widget _buildPermissionTab(List<String> permissionList) {
+  Widget _buildPermissionTab() {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Quyền truy cập',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 16),
+          // Nội dung permissions với khả năng cuộn tổng thể
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Phần permissions của group (cố định, luôn check)
+                  ExpansionTile(
+                    title: const Text(
+                      'Quyền của nhóm (cố định)',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    initiallyExpanded: true,
+                    children: [
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: groupPermissions.map((perm) {
+                              return CheckboxListTile(
+                                value: true,
+                                title: Text(perm),
+                                onChanged: null,
+                                activeColor: const Color(0xFF388E3C),
+                                checkColor: Colors.white,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                enabled: false,
+                                dense: true,
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Phần permissions của account (có thể check/uncheck)
+                  ExpansionTile(
+                    title: const Text(
+                      'Quyền của tài khoản',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    initiallyExpanded: true,
+                    children: [
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: accountPermissions.map((perm) {
+                              return CheckboxListTile(
+                                value: true,
+                                title: Text(perm),
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    accountPermissions.remove(perm);
+                                    dbPermissions.add(perm);
+                                  });
+                                },
+                                activeColor: const Color(0xFF388E3C),
+                                checkColor: Colors.white,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                dense: true,
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Phần permissions từ Firestore (có thể check/uncheck)
+                  ExpansionTile(
+                    title: const Text(
+                      'Quyền từ cơ sở dữ liệu',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    initiallyExpanded: true,
+                    children: [
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: dbPermissions.map((perm) {
+                              return CheckboxListTile(
+                                value: false,
+                                title: Text(perm),
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    dbPermissions.remove(perm);
+                                    accountPermissions.add(perm);
+                                  });
+                                },
+                                activeColor: const Color(0xFF388E3C),
+                                checkColor: Colors.white,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                dense: true,
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              child: ChecklistTab(
-                listA: permissionList,
-                listB: permissionList,
-              ),
             ),
+          ),
+
+          // Nút hành động
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final AccountEditModel accountEditModel =
+                        ModalRoute.of(context)!.settings.arguments
+                            as AccountEditModel;
+                    try {
+                      CollectionReference accounts =
+                          FirebaseFirestore.instance.collection('ACCOUNT');
+                      QuerySnapshot querySnapshot = await accounts
+                          .where('_id',
+                              isEqualTo: accountEditModel.accountModel.idAcc)
+                          .get();
+                      if (querySnapshot.docs.isNotEmpty) {
+                        DocumentSnapshot document = querySnapshot.docs.first;
+                        await accounts.doc(document.id).update({
+                          '_permission':
+                              accountPermissions, // Lưu mảng permissions
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Lưu thay đổi quyền thành công!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Không tìm thấy tài khoản!'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      print('Lỗi khi lưu permissions: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Lưu thay đổi thất bại!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: const Text(
+                    'Lưu thay đổi',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: const Text(
+                    'Thoát',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -393,24 +646,25 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
     );
   }
 
+  Future<List<String>> fetchDbPermissions() async {
+    try {
+      QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('PERMISSION').get();
+      return snapshot.docs
+          .map((doc) => doc['_permisssionName'] as String)
+          .toList();
+    } catch (e) {
+      print('Lỗi khi lấy permissions từ Firestore: $e');
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final yearProvider = Provider.of<YearProvider>(context);
     final years = yearProvider.years;
     final AccountEditModel accountEditModel =
         ModalRoute.of(context)!.settings.arguments as AccountEditModel;
-
-    List<String> permissionList = [];
-    void addSecondElementsFromPermissions(
-        Map<String, List<dynamic>> permissions) {
-      for (var entry in permissions.entries) {
-        var value = entry.value;
-        if (value.length > 1) permissionList.add(value[1]);
-      }
-    }
-
-    addSecondElementsFromPermissions(accountEditModel.groupModel!.permission);
-    permissionList.addAll(accountEditModel.accountModel.permission);
 
     return AppBarWidget(
       implementLeading: true,
@@ -445,7 +699,7 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
               child: TabBarView(
                 children: [
                   _buildInfoTab(context, years),
-                  _buildPermissionTab(permissionList),
+                  _buildPermissionTab(), // Gọi hàm mới
                   _buildResetPasswordTab(context, accountEditModel),
                 ],
               ),
@@ -509,27 +763,84 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
       bool enabled, ValueChanged<String?> onChanged) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Text(
-            '$label:',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+      child: DropdownButtonFormField<String>(
+        value: selectedItem,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: Colors.grey.shade600, // Màu nhãn khi ở trạng thái nghỉ
+          ),
+          floatingLabelStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: selectedItem != null
+                ? const Color(0xFF1976D2) // Xanh lá đậm khi có giá trị
+                : enabled
+                    ? const Color(0xFF1976D2) // Xanh dương khi focus
+                    : Colors.grey.shade400, // Xám nhạt khi disabled
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          filled: true,
+          fillColor: enabled ? Colors.white : Colors.grey.shade100,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey.shade300,
+              width: 1.5,
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: DropMenuWidget(
-              items: items,
-              selectedItem: selectedItem,
-              enabled: enabled,
-              hintText: 'Chọn $label',
-              // onChanged: onChanged,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFF1976D2),
+              width: 2,
             ),
           ),
-        ],
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey.shade200,
+              width: 1.5,
+            ),
+          ),
+        ),
+        style: TextStyle(
+          fontSize: 16,
+          color: enabled
+              ? Colors.black87
+              : Colors.grey.shade600, // Đồng bộ với TextfieldWidget
+        ),
+        hint: Text(
+          'Chọn $label',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey.shade500,
+          ),
+        ),
+        icon: Icon(
+          Icons.arrow_drop_down_rounded,
+          color: enabled ? const Color(0xFF1976D2) : Colors.grey.shade400,
+        ),
+        dropdownColor: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        isExpanded: true,
+        onChanged: enabled ? onChanged : null,
+        items: items.map<DropdownMenuItem<String>>((item) {
+          return DropdownMenuItem<String>(
+            value: item.toString(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(item.toString()),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
