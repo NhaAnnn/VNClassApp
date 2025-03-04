@@ -11,13 +11,18 @@ class LocalStorageHelper {
   Box<dynamic>? hiveBox;
 
   static Future<void> initLocalStorageHelper() async {
-    await Hive.initFlutter(); // Chỉ khởi tạo Hive
+    final start = DateTime.now();
+    await Hive.initFlutter();
+    print(
+        'Hive.initFlutter took: ${DateTime.now().difference(start).inMilliseconds}ms');
   }
 
   static Future<void> openBoxIfNeeded() async {
     if (_shared.hiveBox == null || !_shared.hiveBox!.isOpen) {
+      final start = DateTime.now();
       _shared.hiveBox = await Hive.openBox('StuApp');
-      print('Box StuApp size: ${Hive.box('StuApp').length} keys');
+      print(
+          'Hive.openBox took: ${DateTime.now().difference(start).inMilliseconds}ms');
     }
   }
 

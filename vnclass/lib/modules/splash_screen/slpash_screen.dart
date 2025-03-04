@@ -26,19 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeApp() async {
     if (kDebugMode) print('Start init: ${DateTime.now()}');
 
-    // Chỉ khởi tạo Hive, không mở box ngay
-    await LocalStorageHelper.initLocalStorageHelper();
-    if (kDebugMode) print('Hive init done: ${DateTime.now()}');
+    // Chạy các khởi tạo bất đồng bộ, không đợi hoàn tất
+    LocalStorageHelper.initLocalStorageHelper().then(
+        (_) => kDebugMode ? print('Hive init done: ${DateTime.now()}') : null);
+    NotificationService.initialize().then((_) =>
+        kDebugMode ? print('Notification done: ${DateTime.now()}') : null);
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
+        .then((_) =>
+            kDebugMode ? print('Firebase done: ${DateTime.now()}') : null);
 
-    await Future.wait<void>([
-      NotificationService.initialize().then((_) =>
-          kDebugMode ? print('Notification done: ${DateTime.now()}') : null),
-      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-          .then((_) =>
-              kDebugMode ? print('Firebase done: ${DateTime.now()}') : null),
-    ]);
-
-    if (kDebugMode) print('All done: ${DateTime.now()}');
+    // Chuyển màn hình sau 2 giây, không đợi khởi tạo xong
     _navigateToNextScreen();
   }
 
@@ -81,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.shade200.withOpacity(0.3),
+                    color: Colors.blue.shade700.withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -104,10 +101,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.blue,
               ),
             ),
-            const SizedBox(height: 20),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-            ),
+            // const SizedBox(height: 20),
+            // const CircularProgressIndicator(
+            //   valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            // ),
           ],
         ),
       ),

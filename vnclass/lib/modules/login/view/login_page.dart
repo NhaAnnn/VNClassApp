@@ -167,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.shade200.withOpacity(0.3),
+                        color: Colors.blue.shade600.withOpacity(0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -283,20 +283,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    // Add forgot password logic here if needed
-                  },
-                  child: Text(
-                    'Quên mật khẩu?',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.blue.shade600,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
               ],
             ),
           ),
