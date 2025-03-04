@@ -23,7 +23,10 @@ class BackBar extends StatelessWidget {
       leading: IconButton(
         icon: Transform.rotate(
             angle: -1.57,
-            child: Icon(FontAwesomeIcons.turnUp)), // Custom back button icon
+            child: Icon(
+              FontAwesomeIcons.turnUp,
+              color: Colors.white,
+            )), // Custom back button icon
         onPressed: () {
           Navigator.pop(context); // Navigate back
         },
@@ -31,7 +34,7 @@ class BackBar extends StatelessWidget {
       titleSpacing: 0.5,
       titleTextStyle: TextStyle(
         fontWeight: FontWeight.bold,
-        color: Colors.black,
+        color: Colors.white,
         fontSize: 20,
       ),
     );

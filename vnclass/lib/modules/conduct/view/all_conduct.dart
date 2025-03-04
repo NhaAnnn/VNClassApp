@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
@@ -161,7 +162,27 @@ class _AllConductState extends State<AllConduct> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return SkeletonLoader(
+                            builder: Column(
+                              children: List.generate(
+                                  3,
+                                  (index) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Container(
+                                          height: 150,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      )),
+                            ),
+                            items: 1, // Số lượng skeleton items
+                            period: const Duration(
+                                seconds: 2), // Thời gian hiệu ứng
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));

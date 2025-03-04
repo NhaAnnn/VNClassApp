@@ -29,37 +29,37 @@ class NotificationService {
     });
   }
 
-  static Future<void> sendNotification(
-      String accId, String deviceToken, String title, body) async {
+  static Future<void> sendNotification(String accId, List<String> deviceTokens,
+      String title, String body) async {
     final String accessToken = await getAccessToken();
     const String fcmUrl =
         'https://fcm.googleapis.com/v1/projects/flutterapp-dde40/messages:send';
 
-    final Map<String, dynamic> notificationData = {
-      'message': {
-        'token': deviceToken,
-        'notification': {
-          'title': title,
-          'body': body,
+    for (String deviceToken in deviceTokens) {
+      final Map<String, dynamic> notificationData = {
+        'message': {
+          'token': deviceToken,
+          'notification': {
+            'title': title,
+            'body': body,
+          },
         },
-      },
-    };
+      };
 
-    final response = await http.post(
-      Uri.parse(fcmUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-      body: jsonEncode(notificationData),
-    );
+      final response = await http.post(
+        Uri.parse(fcmUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: json.encode(notificationData),
+      );
 
-    if (response.statusCode == 200) {
-      print('Thông báo đã được gửi thành công! ${response.body}');
-
-      await NotificationController.createNotification(accId, title, body);
-    } else {
-      print('Lỗi khi gửi thông báo: ${response.body}');
+      if (response.statusCode != 200) {
+        print('Failed to send notification to $deviceToken: ${response.body}');
+      } else {
+        print('Notification sent to $deviceToken successfully.');
+      }
     }
   }
 

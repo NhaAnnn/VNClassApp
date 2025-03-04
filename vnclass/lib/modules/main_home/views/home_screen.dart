@@ -1,13 +1,21 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
+import 'package:vnclass/modules/classes/view/all_classes.dart';
+import 'package:vnclass/modules/conduct/view/all_conduct.dart';
+import 'package:vnclass/modules/conduct/widget/choose_year_dialog.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
+import 'package:vnclass/modules/notification/controller/notification_controller.dart';
+import 'package:vnclass/modules/notification/funtion/notification_change.dart';
+import 'package:vnclass/modules/notification/model/notification_model.dart';
+import 'package:vnclass/modules/notification/view/notification_screen.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<NotificationModel> notifications = [];
   @override
   void initState() {
     super.initState();
@@ -25,6 +34,44 @@ class _HomeScreenState extends State<HomeScreen> {
     yearProvider.fetchYears();
     final classProvider = Provider.of<ClassProvider>(context, listen: false);
     classProvider.fetchClassNames();
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    accountProvider.account;
+
+    fetchNotifications(accountProvider.account!.idAcc, context);
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      handleIncomingNotification(message);
+    });
+  }
+
+  void handleIncomingNotification(RemoteMessage message) {
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    accountProvider.account;
+    NotificationModel newNotification = NotificationModel(
+      id: message.messageId ?? DateTime.now().toString(),
+      accountId: accountProvider.account!.idAcc,
+      notificationTitle: message.notification?.title ?? 'Thông báo mới',
+      notificationDetail: message.notification?.body ?? 'Nội dung thông báo',
+      isRead: false,
+      timestamp: DateTime.now(),
+    );
+
+    setState(() {
+      notifications.add(newNotification);
+      Provider.of<NotificationChange>(context, listen: false)
+          .incrementUnreadCount();
+    });
+  }
+
+  Future<void> fetchNotifications(
+      String accountId, BuildContext context) async {
+    notifications = await NotificationController.fetchNotifications(accountId);
+    int unreadCount = notifications.where((n) => !n.isRead).length;
+    Provider.of<NotificationChange>(context, listen: false)
+        .setUnreadCount(unreadCount);
+    print('Thong bao chua doc$unreadCount');
+    // setState(() {}); // Cập nhật giao diện
   }
 
   @override
@@ -69,34 +116,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     top: 40,
                     right: 16,
-                    child: GestureDetector(
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Chức năng thông báo đang phát triển'),
+                    child: IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(
+                            Icons.notifications,
+                            color: Colors.white,
+                            size: 40,
                           ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                          // Kiểm tra số lượng thông báo chưa đọc
+                          Positioned(
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 12,
+                                minHeight: 12,
+                              ),
+                              child: Text(
+                                '${NotificationChange.unreadCount}',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          FontAwesomeIcons.bell,
-                          size: 24,
-                          color: const Color(0xFF1976D2),
-                        ),
+                          ),
+                        ],
                       ),
+                      onPressed: () {
+                        // Xử lý khi người dùng nhấn vào biểu tượng thông báo
+                        Navigator.of(context).pushNamed(
+                            NotificationScreen.routeName,
+                            arguments: {
+                              'notifications': notifications,
+                              'onUpdate': () {
+                                setState(() {});
+                              },
+                            });
+                      },
                     ),
                   ),
                 ],
@@ -170,12 +233,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           context,
                           icon: FontAwesomeIcons.chartLine,
                           title: 'KQ Rèn Luyện',
+                          dialog: 'Dialog',
                         ),
                         const SizedBox(height: 16),
                         _buildHomeItem(
                           context,
                           icon: FontAwesomeIcons.school,
                           title: 'Lớp Học',
+                          route: AllClasses.routeName,
                         ),
                         const SizedBox(height: 16),
                         _buildHomeItem(
@@ -204,11 +269,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeItem(BuildContext context,
-      {required IconData icon, required String title, String? route}) {
+      {required IconData icon,
+      required String title,
+      String? route,
+      String? dialog}) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap:
-          route != null ? () => Navigator.of(context).pushNamed(route) : null,
+      onTap: () {
+        if (route != null) {
+          Navigator.of(context).pushNamed(route);
+        }
+        if (dialog != null) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return ChooseYearDialog();
+            },
+          );
+        }
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
         decoration: BoxDecoration(
@@ -243,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            if (route != null)
+            if (route != null || dialog != null)
               Icon(
                 Icons.chevron_right,
                 size: 24,

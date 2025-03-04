@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
@@ -44,19 +45,10 @@ class _AllClassesState extends State<AllClasses> {
       years.add(doc['_year']);
     }
 
-    // Tìm năm học mới nhất
-    // if (years.isNotEmpty) {
-    //   setState(() {
-    //     selectedYear =
-    //         years.reduce((a, b) => a.compareTo(b) > 0 ? a : b); // Năm mới nhất
-    //   });
-    // }
-
     setState(() {}); // Cập nhật lại giao diện sau khi lấy dữ liệu
   }
 
   Future<List<ClassModel>> _fetchFilteredClasses() async {
-    // Lấy tất cả lớp học nếu chưa chọn khối hoặc năm học
     var allclasses = await ClassController.fetchAllClasses();
     List<ClassModel> filteredClass = [];
     if (selectedGrade == null && selectedYear == null) {
@@ -98,8 +90,6 @@ class _AllClassesState extends State<AllClasses> {
       }
       return filteredClass;
     }
-
-    // return result;
   }
 
   @override
@@ -226,7 +216,28 @@ class _AllClassesState extends State<AllClasses> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          // Hiển thị khung xương khi đang tải
+                          return SkeletonLoader(
+                            builder: Column(
+                              children: List.generate(
+                                  3,
+                                  (index) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Container(
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      )),
+                            ),
+                            items: 1, // Số lượng skeleton items
+                            period: const Duration(
+                                seconds: 2), // Thời gian hiệu ứng
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));
@@ -236,15 +247,14 @@ class _AllClassesState extends State<AllClasses> {
                         }
 
                         List<ClassModel> classes = snapshot.data!;
-                        return SingleChildScrollView(
-                          child: Column(
-                            children: classes.map((classModel) {
-                              return AllClassesCard(
-                                classModel: classModel,
-                                onUpdate: _refreshClasses,
-                              );
-                            }).toList(),
-                          ),
+                        return ListView.builder(
+                          itemCount: classes.length,
+                          itemBuilder: (context, index) {
+                            return AllClassesCard(
+                              classModel: classes[index],
+                              onUpdate: _refreshClasses,
+                            );
+                          },
                         );
                       },
                     ),

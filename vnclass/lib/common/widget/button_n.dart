@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vnclass/modules/classes/widget/create_one_class_dialog.dart';
 
 class ButtonN extends StatelessWidget {
   const ButtonN({
@@ -8,6 +7,7 @@ class ButtonN extends StatelessWidget {
     this.icon,
     this.color,
     this.size,
+    this.textSize,
     this.colorText,
     this.ontap,
   });
@@ -16,6 +16,7 @@ class ButtonN extends StatelessWidget {
   final Widget? icon;
   final Color? color; // Color property for the button
   final Size? size;
+  final double? textSize;
   final Color? colorText;
   final Function()? ontap;
 
@@ -44,8 +45,8 @@ class ButtonN extends StatelessWidget {
                 label ?? '',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color:
-                      colorText ?? Colors.amber, // Change text color if needed
+                  color: colorText ?? Colors.amber,
+                  fontSize: textSize, // Change text color if needed
                 ),
               ),
             ],

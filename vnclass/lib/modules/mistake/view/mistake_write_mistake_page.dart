@@ -5,10 +5,14 @@ import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/common/widget/custom_snack_bar.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/mistake/models/mistake_model.dart';
 import 'package:vnclass/modules/mistake/models/package_data.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
+import 'package:vnclass/modules/notification/controller/notification_controller.dart';
+import 'package:vnclass/modules/notification/funtion/notification_service.dart';
 
 class MistakeWriteMistakePage extends StatefulWidget {
   const MistakeWriteMistakePage({super.key});
@@ -146,8 +150,24 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
                     color: const Color(0xFF43A047),
                     ontap: isLoading
                         ? null
-                        : () => _saveMistakeData(
-                            studentDetailModel, mistakeModel, accountModel),
+                        : () async {
+                            _saveMistakeData(
+                                studentDetailModel, mistakeModel, accountModel);
+                            String accid =
+                                await StudentController.fetchAccountByID(
+                                    studentDetailModel.idStudent);
+                            List<String> deviceTokens =
+                                await AccountController.fetchTokens(accid);
+                            await NotificationService.sendNotification(
+                                accid, //tim id accacc
+                                deviceTokens,
+                                'Thông báo vi phạm',
+                                'Bạn có 1 vi phạm mới: ${mistakeModel.nameMistake}');
+                            await NotificationController.createNotification(
+                                accid,
+                                'Thông báo vi phạm',
+                                'Bạn có 1 vi phạm mới: ${mistakeModel.nameMistake}');
+                          },
                     child: isLoading
                         ? const SizedBox(
                             height: 20,

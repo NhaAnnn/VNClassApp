@@ -3,7 +3,7 @@ import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
@@ -27,7 +27,7 @@ class _SearchScreenState extends State<SearchScreen>
   final List<String> _filteredCategories = ['Học Sinh', 'Lớp Học'];
 
   Future<void> getList() async {
-    _students = await StudentController.fetchAllStudents();
+    _students = await StudentDetailController.fetchAllStudents();
     _classes = await ClassController.fetchAllClasses();
     print('Số học sinh: ${_students.length}');
     print('Số lớp học: ${_classes.length}');

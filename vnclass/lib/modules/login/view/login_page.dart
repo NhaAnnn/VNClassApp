@@ -11,6 +11,7 @@ import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/login/model/account_model.dart';
 import 'package:vnclass/modules/main_home/views/main_home_page.dart';
+import 'package:vnclass/modules/notification/funtion/update_device_token.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -113,6 +114,7 @@ class _LoginPageState extends State<LoginPage> {
       Provider.of<AccountProvider>(context, listen: false).setAccount(account);
       if (mounted) {
         Navigator.of(context).pushReplacementNamed(MainHomePage.routeName);
+        updateToken(account.idAcc);
       }
     } catch (e) {
       print('Login failed: $e');

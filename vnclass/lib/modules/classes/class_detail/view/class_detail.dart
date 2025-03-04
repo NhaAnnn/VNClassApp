@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/classes/class_detail/widget/class_detail_card.dart';
 
@@ -61,11 +62,32 @@ class _ClassDetailState extends State<ClassDetail> {
                   ),
                   Expanded(
                     child: FutureBuilder<List<StudentModel>>(
-                      future: StudentController.fetchStudentsByClass(classID),
+                      future:
+                          StudentDetailController.fetchStudentsByClass(classID),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return SkeletonLoader(
+                            builder: Column(
+                              children: List.generate(
+                                  3,
+                                  (index) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Container(
+                                          height: 80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                      )),
+                            ),
+                            items: 2, // Số lượng skeleton items
+                            period: const Duration(
+                                seconds: 2), // Thời gian hiệu ứng
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));

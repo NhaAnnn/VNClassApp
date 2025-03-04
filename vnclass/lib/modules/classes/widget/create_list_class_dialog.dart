@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CreateListClassDialog extends StatefulWidget {
   const CreateListClassDialog({super.key, required this.onCreate});
@@ -20,7 +22,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
   String? selectedFileName; // Biến lưu tên file đã chọn
   bool isLoading = false; // Trạng thái tải
 
-  Future<void> pickExcelFile(BuildContext context) async {
+  Future<void> pickExcelFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls'],
@@ -39,10 +41,10 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       for (var table in excel.tables.keys) {
         var rows = excel.tables[table]!.rows;
 
-        // Bỏ qua dòng đầu tiên (tiêu đề)
-        for (int i = 2; i < rows.length; i++) {
-          var row = rows[i];
-          if (row.isNotEmpty) {
+        // Tự động bỏ qua các dòng không chứa dữ liệu (tiêu đề)
+        for (var row in rows) {
+          // Kiểm tra xem dòng có đủ số cột hay không
+          if (row.length >= 4 && row[0] != null) {
             var newData = {
               'T_name': row[2]?.value.toString(),
               'T_id': row[1]?.value.toString(),
@@ -58,6 +60,45 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
     }
   }
 
+  Future<void> pickExcelFileInWeb() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xls'],
+    );
+
+    if (result != null) {
+      Uint8List? bytes = result.files.single.bytes;
+
+      if (bytes != null) {
+        var excel = Excel.decodeBytes(bytes);
+
+        for (var table in excel.tables.keys) {
+          var rows = excel.tables[table]!.rows;
+
+          // Tự động bỏ qua các dòng không chứa dữ liệu (tiêu đề)
+          for (var row in rows) {
+            // Kiểm tra xem dòng có đủ số cột hay không
+            if (row.length >= 4 && row[0] != null) {
+              var newData = {
+                'T_name': row[2]?.value.toString(),
+                'T_id': row[1]?.value.toString(),
+                '_className': row[0]?.value.toString(),
+                '_year': row[3]?.value.toString(),
+              };
+              newDataList.add(newData); // Thêm dữ liệu vào danh sách
+            }
+          }
+        }
+
+        setState(() {
+          selectedFileName = result.files.single.name; // Lưu tên file đã chọn
+        });
+      }
+    } else {
+      print('Không có file nào được chọn.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -67,73 +108,76 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
       ),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isLoading) // Hiển thị vòng tròn tải nếu đang tải
-                Center(child: CircularProgressIndicator()),
-              if (!isLoading) ...[
-                // Chỉ hiển thị khi không đang tải
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 7,
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.04,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText: 'File danh sách lớp',
-                            labelStyle: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w300,
-                                color: Colors.black),
-                            contentPadding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide:
-                                  BorderSide(color: ColorApp.primaryColor),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: const Color.fromARGB(255, 29, 92, 252),
-                                  width: 2),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: ColorApp.primaryColor, width: 2.0),
-                            ),
+        width: kIsWeb
+            ? MediaQuery.of(context).size.width * 0.2
+            : MediaQuery.of(context).size.width * 0.8,
+        child: Wrap(
+          children: [
+            if (isLoading) // Hiển thị vòng tròn tải nếu đang tải
+              Center(child: CircularProgressIndicator()),
+            if (!isLoading) ...[
+              // Chỉ hiển thị khi không đang tải
+              Row(
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.04,
+                      child: TextField(
+                        decoration: InputDecoration(
+                          labelText: 'File danh sách lớp',
+                          labelStyle: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.black),
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide:
+                                BorderSide(color: ColorApp.primaryColor),
                           ),
-                          controller: TextEditingController(
-                              text: selectedFileName), // Hiển thị tên file
-                          enabled: false, // Không cho phép chỉnh sửa
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: const Color.fromARGB(255, 29, 92, 252),
+                                width: 2),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: ColorApp.primaryColor, width: 2.0),
+                          ),
                         ),
+                        controller: TextEditingController(
+                            text: selectedFileName), // Hiển thị tên file
+                        enabled: false, // Không cho phép chỉnh sửa
                       ),
                     ),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                    Expanded(
-                      flex: 3,
-                      child: ButtonN(
-                        label: 'Chọn file',
-                        color: Colors.cyanAccent.shade700,
-                        colorText: Colors.white,
-                        ontap: () {
-                          pickExcelFile(context);
-                        },
-                      ),
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
+                  Expanded(
+                    flex: 3,
+                    child: ButtonN(
+                      label: 'Chọn file',
+                      color: Colors.cyanAccent.shade700,
+                      colorText: Colors.white,
+                      ontap: () {
+                        if (kIsWeb) {
+                          pickExcelFileInWeb();
+                        } else {
+                          pickExcelFile(); // Hàm cho Android/iOS
+                        }
+                      },
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ],
-          ),
+          ],
         ),
       ),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             if (!isLoading) ...[
               ButtonN(
@@ -171,7 +215,6 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                       );
                     }
 
-                    // Hiển thị thông báo thành công
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -188,9 +231,6 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                         ],
                       ),
                     );
-
-                    // Tự động đóng dialog sau 2 giây
-                    // await Future.delayed(Duration(seconds: 0));
                   } catch (e) {
                     print(e);
                     showDialog(

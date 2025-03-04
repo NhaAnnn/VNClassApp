@@ -5,46 +5,46 @@ import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 class ClassController {
   static Future<List<ClassModel>> fetchAllClasses() async {
     try {
-      final QuerySnapshot =
+      final QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('CLASS').get();
 
-      List<ClassModel> classes = []; // Khởi tạo danh sách học sinh
+      // Tạo danh sách các Future để thực hiện song song
+      List<Future<ClassModel>> classFutures =
+          querySnapshot.docs.map((doc) async {
+        return await ClassModel.fetchCLassFromFirestore(doc);
+      }).toList();
 
-      for (var doc in QuerySnapshot.docs) {
-        // Lặp qua từng tài liệu
-        ClassModel classInfo = await ClassModel.fetchCLassFromFirestore(
-            doc); // Gọi hàm lấy thông tin học sinh
-        classes.add(classInfo); // Thêm học sinh vào danh sách
-      }
+      // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
+      List<ClassModel> classes = await Future.wait(classFutures);
 
       return classes;
     } catch (e) {
       // Xử lý lỗi nếu có
-      print('Failed to fetch mistake types: $e');
+      print('Failed to fetch classes: $e');
       return []; // Trả về danh sách rỗng trong trường hợp có lỗi
     }
   }
 
   static Future<List<ClassModel>> fetchAllClassesByYear(String year) async {
     try {
-      final QuerySnapshot = await FirebaseFirestore.instance
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('CLASS')
           .where('_year', isEqualTo: year)
           .get();
 
-      List<ClassModel> classes = []; // Khởi tạo danh sách học sinh
+      // Tạo danh sách các Future để thực hiện song song
+      List<Future<ClassModel>> classFutures =
+          querySnapshot.docs.map((doc) async {
+        return await ClassModel.fetchCLassFromFirestore(doc);
+      }).toList();
 
-      for (var doc in QuerySnapshot.docs) {
-        // Lặp qua từng tài liệu
-        ClassModel classInfo = await ClassModel.fetchCLassFromFirestore(
-            doc); // Gọi hàm lấy thông tin học sinh
-        classes.add(classInfo); // Thêm học sinh vào danh sách
-      }
+      // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
+      List<ClassModel> classes = await Future.wait(classFutures);
 
       return classes;
     } catch (e) {
       // Xử lý lỗi nếu có
-      print('Failed to fetch mistake types: $e');
+      print('Failed to fetch classes: $e');
       return []; // Trả về danh sách rỗng trong trường hợp có lỗi
     }
   }
@@ -76,25 +76,29 @@ class ClassController {
     print('Unique ID: $documentId');
 
     try {
-      DocumentSnapshot doc =
-          await FirebaseFirestore.instance.collection('YEAR').doc(year).get();
+      // Tạo một Future để kiểm tra năm học
+      Future<void> checkYearFuture = Future(() async {
+        DocumentSnapshot doc =
+            await FirebaseFirestore.instance.collection('YEAR').doc(year).get();
 
-      if (!doc.exists) {
-        print("Tạo năm học $year.");
-        final Map<String, dynamic> newYear = {'_year': year};
-        await FirebaseFirestore.instance
-            .collection('YEAR')
-            .doc(year)
-            .set(newYear);
-      }
-      // Gán document ID vào dữ liệu mới
-      newData['_id'] = documentId; // Gán document ID
+        if (!doc.exists) {
+          print("Tạo năm học $year.");
+          final Map<String, dynamic> newYear = {'_year': year};
+          await FirebaseFirestore.instance
+              .collection('YEAR')
+              .doc(year)
+              .set(newYear);
+        }
+      });
 
-      // Thêm tài liệu mới vào collection với document ID đã chỉ định
-      await FirebaseFirestore.instance
-          .collection('CLASS')
-          .doc(documentId) // Sử dụng document ID
-          .set(newData);
+      // Thực hiện kiểm tra năm học và thêm lớp song song
+      await Future.wait([
+        checkYearFuture,
+        FirebaseFirestore.instance
+            .collection('CLASS')
+            .doc(documentId) // Sử dụng document ID
+            .set(newData),
+      ]);
 
       print("Dữ liệu đã được tạo thành công.");
     } catch (e) {

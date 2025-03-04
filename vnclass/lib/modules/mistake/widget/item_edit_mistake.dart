@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/mistake/models/edit_mistake_model.dart';
 import 'package:vnclass/modules/mistake/models/package_data.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
 import 'package:vnclass/modules/mistake/view/mistake_edit_mistake_page.dart';
+import 'package:vnclass/modules/notification/controller/notification_controller.dart';
+import 'package:vnclass/modules/notification/funtion/notification_service.dart';
 
 class ItemEditMistake extends StatefulWidget {
   const ItemEditMistake({
@@ -311,7 +315,22 @@ class _ItemEditMistakeState extends State<ItemEditMistake> {
                         color: Colors.redAccent,
                         ontap: _isDeleting
                             ? null
-                            : () => _deleteItem(context, item),
+                            : () async {
+                                _deleteItem(context, item);
+                                String accid = await NotificationController
+                                    .fetchAccIdFromStudentDetail(item.std_id);
+                                List<String> deviceTokens =
+                                    await AccountController.fetchTokens(accid);
+                                await NotificationService.sendNotification(
+                                    accid, //tim id accacc
+                                    deviceTokens,
+                                    'Thông báo vi phạm',
+                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
+                                await NotificationController.createNotification(
+                                    accid,
+                                    'Thông báo vi phạm',
+                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
+                              },
                         child: _isDeleting
                             ? const SizedBox(
                                 height: 20,

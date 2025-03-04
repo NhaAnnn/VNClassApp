@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
 
@@ -74,11 +75,31 @@ class _ConductDetailState extends State<ConductDetail> {
                   ),
                   Expanded(
                     child: FutureBuilder<List<StudentModel>>(
-                      future: StudentController.fetchStudentsByClass(classID),
+                      future:
+                          StudentDetailController.fetchStudentsByClass(classID),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return SkeletonLoader(
+                            builder: Column(
+                              children: List.generate(
+                                2, // Số lượng skeleton items
+                                (index) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Container(
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            items: 2,
+                            // period: const Duration(seconds: 2),
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));
@@ -88,16 +109,14 @@ class _ConductDetailState extends State<ConductDetail> {
                         }
 
                         List<StudentModel> students = snapshot.data!;
-                        return SingleChildScrollView(
-                          child: Column(
-                            children: students.map((studentModel) {
-                              print(monthKey);
-                              return ConductDetailCard(
-                                studentModel: studentModel,
-                                monthKey: monthKey,
-                              ); // Truyền dữ liệu vào ClassDetailCard
-                            }).toList(),
-                          ),
+                        return ListView.builder(
+                          itemCount: students.length,
+                          itemBuilder: (context, index) {
+                            return ConductDetailCard(
+                              studentModel: students[index],
+                              monthKey: monthKey,
+                            );
+                          },
                         );
                       },
                     ),

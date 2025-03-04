@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CreateOneClassDialog extends StatefulWidget {
   const CreateOneClassDialog({super.key, required this.onCreate});
 
   final VoidCallback onCreate;
+
   @override
   State<CreateOneClassDialog> createState() => _CreateOneClassDialogState();
 }
@@ -16,79 +18,105 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
   String teacherId = '';
   String teacherName = '';
   String year = '';
+
+  String? classNameError;
+  String? teacherIdError;
+  String? teacherNameError;
+  String? yearError;
+
+  void _validateInputs() {
+    setState(() {
+      classNameError = className.isEmpty ? 'Vui lòng nhập lớp học' : null;
+      teacherIdError = teacherId.isEmpty ? 'Vui lòng nhập mã GVCN' : null;
+      teacherNameError = teacherName.isEmpty ? 'Vui lòng nhập tên GVCN' : null;
+      yearError = year.isEmpty ? 'Vui lòng nhập niên khóa' : null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
       title: Text(
         'Thêm lớp học:',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       ),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: SingleChildScrollView(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextfieldWidget(
-                        labelText: 'Lớp học:',
-                        onChanged: (value) {
-                          className = value;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextfieldWidget(
-                        labelText: 'Mã GVCN',
-                        onChanged: (value) {
-                          teacherId = value;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextfieldWidget(
-                        labelText: 'Tên GVCN',
-                        onChanged: (value) {
-                          teacherName = value;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextfieldWidget(
-                        labelText: 'Niên khóa',
-                        onChanged: (value) {
-                          year = value;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-              ]),
+        width: kIsWeb
+            ? MediaQuery.of(context).size.width * 0.2
+            : MediaQuery.of(context).size.width * 0.8,
+        child: Wrap(
+          runSpacing: MediaQuery.of(context).size.width * 0.01,
+          children: [
+            TextfieldWidget(
+              labelText: 'Lớp học',
+              onChanged: (value) {
+                className = value;
+                classNameError = null; // Xóa lỗi khi người dùng nhập
+              },
+              errorText: classNameError,
+              onTap: () {
+                setState(() {
+                  classNameError = null; // Ẩn thông báo lỗi
+                });
+              },
+            ),
+            TextfieldWidget(
+              labelText: 'Mã GVCN',
+              onChanged: (value) {
+                teacherId = value;
+                teacherIdError = null; // Xóa lỗi khi người dùng nhập
+              },
+              errorText: teacherIdError,
+              onTap: () {
+                setState(
+                  () {
+                    teacherIdError = null; // Ẩn thông báo lỗi
+                  },
+                );
+              },
+            ),
+            TextfieldWidget(
+              labelText: 'Tên GVCN',
+              onChanged: (value) {
+                teacherName = value;
+                teacherNameError = null; // Xóa lỗi khi người dùng nhập
+              },
+              errorText: teacherNameError,
+              onTap: () {
+                setState(() {
+                  teacherNameError = null; // Ẩn thông báo lỗi
+                });
+              },
+            ),
+            TextfieldWidget(
+              labelText: 'Niên khóa',
+              onChanged: (value) {
+                year = value;
+                yearError = null; // Xóa lỗi khi người dùng nhập
+              },
+              errorText: yearError,
+              onTap: () {
+                setState(() {
+                  yearError = null; // Ẩn thông báo lỗi
+                });
+              },
+            ),
+          ],
         ),
       ),
       actions: [
         ButtonN(
           ontap: () async {
+            _validateInputs(); // Kiểm tra các trường
+
+            if (classNameError != null ||
+                teacherIdError != null ||
+                teacherNameError != null ||
+                yearError != null) {
+              return; // Dừng lại nếu có lỗi
+            }
+
             try {
               if (await ClassController.classExists(
                   className.toLowerCase().replaceAll(' ', '') +
@@ -106,7 +134,6 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
                     ],
                   ),
                 );
-                // Bỏ qua lớp này
               } else {
                 await ClassController.createClass(
                     context, className, teacherId, teacherName, year);
@@ -122,8 +149,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context)
-                                .pop(); // Đóng dialog thông báo
+                            Navigator.of(context).pop();
                           },
                           child: Text('OK'),
                         ),
@@ -133,7 +159,6 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
                 );
               }
             } catch (e) {
-              // Hiện thông báo thất bại
               Navigator.of(context).pop(); // Đóng dialog xóa
               showDialog(
                 context: context,
@@ -144,7 +169,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
                     actions: [
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).pop(); // Đóng dialog thông báo
+                          Navigator.of(context).pop();
                         },
                         child: Text('OK'),
                       ),
@@ -155,10 +180,13 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
             }
           },
           size: Size(
-            MediaQuery.of(context).size.width * 0.2,
+            kIsWeb
+                ? MediaQuery.of(context).size.width * 0.05
+                : MediaQuery.of(context).size.width * 0.2,
             MediaQuery.of(context).size.height * 0.05,
           ),
           label: 'Thêm',
+          textSize: 13,
           color: Colors.blue,
           colorText: Colors.white,
         ),
@@ -167,9 +195,12 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
             Navigator.of(context).pop();
           },
           size: Size(
-            MediaQuery.of(context).size.width * 0.2,
+            kIsWeb
+                ? MediaQuery.of(context).size.width * 0.05
+                : MediaQuery.of(context).size.width * 0.2,
             MediaQuery.of(context).size.height * 0.05,
           ),
+          textSize: 13,
           label: 'Đóng',
           color: Colors.red,
           colorText: Colors.white,

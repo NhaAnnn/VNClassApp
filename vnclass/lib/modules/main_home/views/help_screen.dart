@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -92,75 +91,42 @@ class _HelpScreenState extends State<HelpScreen> {
                 );
               },
             ),
-            ButtonWidget(
-              title: 'Gửi thông báo',
-              ontap: () async {
-                if (deviceToken != null) {
-                  await NotificationService.sendNotification(
-                      'idtk', deviceToken!, 'alo', 'hehe');
-                  // Provider.of<NotificationChange>(context, listen: false)
-                  //     .incrementUnreadCount();
-                  // NotificationModel newNotification = NotificationModel(
-                  //   id: ('idtk${DateTime.now()}').toString(),
-                  //   accountId: 'idtk',
-                  //   notificationTitle: 'alo',
-                  //   notificationDetail: 'hehe',
-                  //   isRead: false,
-                  // );
-                  // notifications.add(newNotification);
-                } else {
-                  // Hiển thị thông báo nếu token không có
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Không thể gửi thông báo.')),
-                  );
-                }
-              },
-            ),
-            IconButton(
-              icon: Stack(
-                children: [
-                  Icon(
-                    Icons.notifications,
-                    color: Colors.blue,
-                    size: 40,
-                  ),
-                  if (NotificationChange.unreadCount >
-                      0) // Kiểm tra số lượng thông báo chưa đọc
-                    Positioned(
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(2),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 12,
-                          minHeight: 12,
-                        ),
-                        child: Text(
-                          '${NotificationChange.unreadCount}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              onPressed: () {
-                // Xử lý khi người dùng nhấn vào biểu tượng thông báo
-                Navigator.of(context)
-                    .pushNamed(NotificationScreen.routeName, arguments: {
-                  'notifications': notifications,
-                  'onUpdate': () {
-                    setState(() {});
-                  },
-                });
-              },
-            ),
+            // IconButton(
+            //   icon: Stack(
+            //     children: [
+            //       Icon(
+            //         Icons.notifications,
+            //         color: Colors.blue,
+            //         size: 40,
+            //       ),
+            //       if (NotificationChange.unreadCount >
+            //           0) // Kiểm tra số lượng thông báo chưa đọc
+            //         Positioned(
+            //           right: 0,
+            //           child: Container(
+            //             padding: EdgeInsets.all(2),
+            //             decoration: BoxDecoration(
+            //               color: Colors.red,
+            //               borderRadius: BorderRadius.circular(6),
+            //             ),
+            //             constraints: BoxConstraints(
+            //               minWidth: 12,
+            //               minHeight: 12,
+            //             ),
+            //             child: Text(
+            //               '${NotificationChange.unreadCount}',
+            //               style: TextStyle(
+            //                 color: Colors.white,
+            //                 fontSize: 10,
+            //               ),
+            //               textAlign: TextAlign.center,
+            //             ),
+            //           ),
+            //         ),
+            //     ],
+            //   ),
+
+            //   ),
           ],
         ),
       ),

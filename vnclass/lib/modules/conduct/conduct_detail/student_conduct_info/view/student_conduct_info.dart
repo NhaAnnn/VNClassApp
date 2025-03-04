@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
-import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/widget/student_mistake_card.dart';
-import 'package:vnclass/modules/mistake/models/edit_mistake_model.dart';
+import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/controller/conduct_month_controller.dart';
+import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/model/conduct_month_model.dart';
+import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/widget/student_conduct_month_card.dart';
 
 class StudentConductInfo extends StatefulWidget {
   const StudentConductInfo({super.key});
@@ -13,29 +13,14 @@ class StudentConductInfo extends StatefulWidget {
 }
 
 class _StudentConductInfoState extends State<StudentConductInfo> {
-  List<EditMistakeModel> listMistake = [];
-
-  Future<List<EditMistakeModel>> getMistake(String studentID) async {
-    final QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('MISTAKE_MONTH')
-        .where('STD_id', isEqualTo: studentID)
-        .get();
-
-    for (var doc in snapshot.docs) {
-      EditMistakeModel item = EditMistakeModel(
-        acc_name: doc['ACC_name'],
-        m_name: doc['M_name'],
-        mm_time: doc['_time'],
-        mm_subject: doc['_subject'],
-        acc_id: '',
-        m_id: '',
-        mm_id: '',
-        mm_month: '',
-        std_id: '',
-      );
-      listMistake.add(item);
+  String getTermString(int term) {
+    if (term == 100) {
+      return 'Học kì 1';
+    } else if (term == 200) {
+      return 'Học kì 2';
+    } else {
+      return 'Cả năm';
     }
-    return listMistake;
   }
 
   @override
@@ -46,8 +31,8 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
     // Truy cập các tham số
     final studentID = args['studentID'];
     final studentName = args['studentName'];
-    final trainingScore = args['trainingScore'];
     final conduct = args['conduct'];
+    final term = args['term'] as int;
 
     return Scaffold(
       body: Column(
@@ -76,7 +61,7 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                             _buildStudentInfoRow(
                                 'Họ và tên:', studentName.toString()),
                             _buildStudentInfoRow(
-                                'Điểm rèn luyện:', trainingScore.toString()),
+                                'Học kì:', getTermString(term)),
                             _buildStudentInfoRow(
                                 'Hạnh kiểm:', conduct.toString()),
                           ],
@@ -84,82 +69,57 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                       ),
                     ),
                   ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadiusDirectional.only(
-                        topStart: Radius.circular(10),
-                        topEnd: Radius.circular(10),
-                      ),
-                      color: Colors.blue.shade100,
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'STT',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 8,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Vi phạm',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                  'Chi tiết',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                          StudentMistakeCard(),
-                        ],
-                      ),
+                    child: FutureBuilder<ConductMonthModel>(
+                      future:
+                          ConductMonthController.fetchConductMonth(studentID),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text('Lỗi: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.months!.isEmpty) {
+                          return Center(child: Text('Không có dữ liệu.'));
+                        }
+
+                        ConductMonthModel conductMonthData = snapshot.data!;
+                        var entries = conductMonthData.months!.entries.toList();
+
+                        // Xử lý theo điều kiện term
+                        List<MapEntry<String, List<dynamic>>> data;
+
+                        if (term == 100) {
+                          // Lấy 4 tháng cuối
+                          data = entries.length > 4
+                              ? entries.sublist(entries.length - 4)
+                              : entries;
+                        } else if (term == 200) {
+                          // Lấy 5 tháng đầu
+                          data = entries.take(5).toList();
+                        } else {
+                          // Lấy tất cả các tháng còn lại
+                          data = entries;
+                        }
+
+                        return SingleChildScrollView(
+                          child: Column(
+                            children: data.map((entry) {
+                              String month = entry.key;
+                              List<dynamic> details = entry.value;
+
+                              return StudentConductMonthCard(
+                                studentID: studentID,
+                                studentName: studentName,
+                                month: month,
+                                trainingScore: details[0],
+                                conduct: details[1],
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      },
                     ),
                   )
                 ],

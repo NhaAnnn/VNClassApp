@@ -30,7 +30,7 @@ class AccountController {
     }
   }
 
-  Future<List<String>> fetchTokens(String id) async {
+  static Future<List<String>> fetchTokens(String id) async {
     try {
       final QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('ACCOUNT')
@@ -61,16 +61,51 @@ class AccountController {
       if (snapshot.docs.isNotEmpty) {
         DocumentSnapshot doc = snapshot.docs.first;
 
-        List<String> currentTokens = List<String>.from(doc['tokens'] ?? []);
-        currentTokens.add(newToken);
+        // Lấy danh sách token hiện tại hoặc khởi tạo một danh sách mới
+        List<String> currentTokens = List<String>.from(doc['_token'] ?? []);
 
-        await doc.reference.update({'tokens': currentTokens});
-        print('Token đã được cập nhật thành công.');
+        // Kiểm tra xem token mới đã tồn tại chưa
+        if (!currentTokens.contains(newToken)) {
+          currentTokens.add(newToken);
+
+          // Cập nhật tài liệu với danh sách token mới
+          await doc.reference.update({'_token': currentTokens});
+          print('Token đã được cập nhật thành công.');
+        } else {
+          print('Token này đã tồn tại trong danh sách.');
+        }
       } else {
         print('Không tìm thấy tài liệu với _id: $id');
       }
     } catch (e) {
       print('Lỗi khi cập nhật token: $e');
+    }
+  }
+
+  static Future<void> deleteToken(String id, String tokenToDelete) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('ACCOUNT')
+          .where('_id', isEqualTo: id)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        DocumentSnapshot doc = snapshot.docs.first;
+
+        // Lấy danh sách token hiện tại
+        List<String> currentTokens = List<String>.from(doc['_token'] ?? []);
+
+        // Xóa token nếu nó có trong danh sách
+        currentTokens.remove(tokenToDelete);
+
+        // Cập nhật lại danh sách token trong Firestore
+        await doc.reference.update({'_token': currentTokens});
+        print('Token đã được xóa thành công.');
+      } else {
+        print('Không tìm thấy tài liệu với _id: $id');
+      }
+    } catch (e) {
+      print('Lỗi khi xóa token: $e');
     }
   }
 }

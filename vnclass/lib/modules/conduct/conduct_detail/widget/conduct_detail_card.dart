@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/controller/conduct_month_controller.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/view/student_conduct_info.dart';
+import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/view/student_conduct_info_month.dart';
 
 class ConductDetailCard extends StatefulWidget {
   const ConductDetailCard({
@@ -41,28 +42,54 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
             Expanded(
               child: Column(
                 children: [
-                  _buildConductDetailRow(
-                      'Mã học sinh:', studentModel.id.toString()),
-                  _buildConductDetailRow(
-                      'Họ và tên:', studentModel.studentName.toString()),
-                  _buildConductInfoDetailRow('Điểm rèn luyện:',
-                      studentModel.id.toString(), monthKey, 0),
-                  _buildConductInfoDetailRow(
-                      'Hạnh kiểm:', studentModel.id.toString(), monthKey, 1),
+                  if (widget.monthKey >= 100) ...[
+                    _buildConductDetailRow(
+                        'Mã học sinh:', studentModel.id.toString()),
+                    _buildConductDetailRow(
+                        'Họ và tên:', studentModel.studentName.toString()),
+                    _buildConductInfoDetailRow(
+                        'Hạnh kiểm:', studentModel.id.toString(), monthKey, 1),
+                  ] else ...[
+                    _buildConductDetailRow(
+                        'Mã học sinh:', studentModel.id.toString()),
+                    _buildConductDetailRow(
+                        'Họ và tên:', studentModel.studentName.toString()),
+                    _buildConductInfoDetailRow('Điểm rèn luyện:',
+                        studentModel.id.toString(), monthKey, 0),
+                    _buildConductInfoDetailRow(
+                        'Hạnh kiểm:', studentModel.id.toString(), monthKey, 1),
+                  ]
                 ],
               ),
             ),
             GestureDetector(
               onTap: () => {
-                Navigator.of(context).pushNamed(
-                  StudentConductInfo.routeName,
-                  arguments: {
-                    'studentID': studentModel.id,
-                    'studentName': studentModel.studentName,
-                    'trainingScore': trainingScore,
-                    'conduct': conduct,
-                  },
-                ),
+                if (monthKey >= 100)
+                  {
+                    Navigator.of(context).pushNamed(
+                      StudentConductInfo.routeName,
+                      arguments: {
+                        'studentID': studentModel.id,
+                        'studentName': studentModel.studentName,
+                        'trainingScore': trainingScore,
+                        'conduct': conduct,
+                        'term': monthKey,
+                      },
+                    ),
+                  }
+                else
+                  {
+                    Navigator.of(context).pushNamed(
+                      StudentConductInfoMonth.routeName,
+                      arguments: {
+                        'studentID': studentModel.id,
+                        'studentName': studentModel.studentName,
+                        'monthKey': monthKey,
+                        'trainingScore': trainingScore,
+                        'conduct': conduct,
+                      },
+                    ),
+                  }
               },
               child: Padding(
                 padding: const EdgeInsets.only(left: 16),
@@ -138,11 +165,11 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
   Widget _buildConductInfoText(String studentID, int monthKey, int n) {
     Future<String> fetchConductData() {
       if (monthKey == 100) {
-        return StudentController.fetchConductTerm1ByID(studentID);
+        return StudentDetailController.fetchConductTerm1ByID(studentID);
       } else if (monthKey == 200) {
-        return StudentController.fetchConductTerm2ByID(studentID);
+        return StudentDetailController.fetchConductTerm2ByID(studentID);
       } else if (monthKey == 300) {
-        return StudentController.fetchConductAllYearByID(studentID);
+        return StudentDetailController.fetchConductAllYearByID(studentID);
       } else {
         return ConductMonthController.fetchConductMonthByOneMonth(
             studentID, Getmonthnow.getMonthKey(monthKey), n);

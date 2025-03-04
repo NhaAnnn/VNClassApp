@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -5,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
+import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/login/view/login_page.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
@@ -120,7 +122,12 @@ class _UserScreenState extends State<UserScreen> {
                     // Xóa thông tin đăng nhập đã lưu
                     await prefs.remove('username');
                     await prefs.remove('password');
+                    FirebaseMessaging firebaseMessaging =
+                        FirebaseMessaging.instance;
 
+                    String? tokenToDelete = await firebaseMessaging.getToken();
+                    await AccountController.deleteToken(
+                        account.idAcc, tokenToDelete!);
                     // Xóa thông tin tài khoản trong AccountProvider
                     //   Provider.of<AccountProvider>(context, listen: false)
                     //    .clearAccount();

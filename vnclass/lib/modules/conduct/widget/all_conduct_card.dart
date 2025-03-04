@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/view/conduct_detail.dart';
 
 class AllConductCard extends StatefulWidget {
@@ -121,16 +121,16 @@ class _AllConductCardState extends State<AllConductCard> {
   Widget _buildConductFutureBuilder(String conductType) {
     Future<int?> fetchConductData() {
       if (monthKey == 100) {
-        return StudentController.fetchStudentsConductTerm1ByClass(
+        return StudentDetailController.fetchStudentsConductTerm1ByClass(
             classModel.id!, conductType);
       } else if (monthKey == 200) {
-        return StudentController.fetchStudentsConductTerm2ByClass(
+        return StudentDetailController.fetchStudentsConductTerm2ByClass(
             classModel.id!, conductType);
       } else if (monthKey == 300) {
-        return StudentController.fetchStudentsConductAllTermByClass(
+        return StudentDetailController.fetchStudentsConductAllTermByClass(
             classModel.id!, conductType);
       } else {
-        return StudentController.fetchStudentsConductMonthByClass(
+        return StudentDetailController.fetchStudentsConductMonthByClass(
           classModel.id!,
           Getmonthnow.getMonthKey(monthKey),
           conductType,

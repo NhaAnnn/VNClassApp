@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/modules/mistake/models/edit_mistake_model.dart';
 
 class StudentMistakeCard extends StatefulWidget {
-  const StudentMistakeCard({super.key});
+  const StudentMistakeCard({super.key, this.mistake});
 
+  final EditMistakeModel? mistake;
   @override
   State<StudentMistakeCard> createState() => _StudentMistakeCardState();
 }
@@ -35,7 +37,7 @@ class _StudentMistakeCardState extends State<StudentMistakeCard> {
                       ),
                       Expanded(
                         flex: 8,
-                        child: Text('Column 2hhfghhghhghhghgh',
+                        child: Text(widget.mistake!.m_name.toString(),
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.red,
@@ -45,7 +47,8 @@ class _StudentMistakeCardState extends State<StudentMistakeCard> {
                   ),
                   SizedBox(height: 12), // Space between rows
                   if (_isVisible)
-                    _buildMistakeDetailRow('asdgdhgfd', 'fssfsd 12/15/5155')
+                    _buildMistakeDetailRow(
+                        widget.mistake!.acc_name, widget.mistake!.mm_time)
                 ],
               ),
             ),

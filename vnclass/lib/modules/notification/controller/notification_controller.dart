@@ -60,4 +60,35 @@ class NotificationController {
       print('Lỗi khi thêm dữ liệu NOTIFICATION: $e');
     }
   }
+
+  static Future<String> fetchAccIdFromStudentDetail(
+      String studentDetailID) async {
+    try {
+      // Lấy studentID từ collection STUDENT_DETAIL
+      DocumentSnapshot studentDetailSnapshot = await FirebaseFirestore.instance
+          .collection('STUDENT_DETAIL')
+          .doc(studentDetailID)
+          .get();
+
+      if (!studentDetailSnapshot.exists) {
+        throw Exception('Student detail not found');
+      }
+
+      String studentID = studentDetailSnapshot.get('_id');
+
+      DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
+          .collection('STUDENT')
+          .doc(studentID)
+          .get();
+
+      if (!studentSnapshot.exists) {
+        throw Exception('Student not found');
+      }
+
+      return studentSnapshot.get('ACC_id').toString();
+    } catch (e) {
+      print("Error fetching ACC_id: $e");
+      return '';
+    }
+  }
 }

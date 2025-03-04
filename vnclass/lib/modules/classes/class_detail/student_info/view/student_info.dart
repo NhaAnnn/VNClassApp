@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 
 class StudentInfo extends StatefulWidget {
@@ -95,7 +95,7 @@ class _StudentInfoState extends State<StudentInfo> {
                     size: Size(MediaQuery.sizeOf(context).width * 0.4,
                         MediaQuery.sizeOf(context).height * 0.05),
                     ontap: () {
-                      StudentController.updateStudentPositionInDatabase(
+                      StudentDetailController.updateStudentPositionInDatabase(
                           context, studentModel);
                     },
                     label: 'Cập nhật',
