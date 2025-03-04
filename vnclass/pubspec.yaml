@@ -56,7 +56,7 @@ dependencies:
   device_info_plus: ^11.3.0
   open_file: ^3.5.10
   intl: ^0.20.2
-
+  shared_preferences: ^2.5.2
  
 
 dev_dependencies:
@@ -84,6 +84,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/files/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
