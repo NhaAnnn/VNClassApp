@@ -6,6 +6,7 @@ import 'package:vnclass/modules/classes/class_detail/student_info/view/student_i
 import 'package:vnclass/modules/classes/class_detail/view/class_detail.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/view/student_conduct_info.dart';
+import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/view/student_conduct_info_month.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/view/conduct_detail.dart';
 import 'package:vnclass/modules/conduct/view/all_conduct.dart';
 import 'package:vnclass/modules/login/view/login_page.dart';
@@ -13,6 +14,7 @@ import 'package:vnclass/modules/main_home/views/main_home_page.dart';
 import 'package:vnclass/modules/main_home/views/user_add_type_mistake_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_type_mistake_screen.dart';
+import 'package:vnclass/modules/main_home/views/user_set_points_screen.dart';
 import 'package:vnclass/modules/mistake/view/mistake_class_detail_page.dart';
 import 'package:vnclass/modules/mistake/view/mistake_edit_mistake_page.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
@@ -22,6 +24,8 @@ import 'package:vnclass/modules/mistake/view/mistake_write_mistake_page.dart';
 import 'package:vnclass/modules/notification/view/notification_screen.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
+import 'package:vnclass/modules/splash_screen/slpash_screen.dart';
+import 'package:vnclass/web/home_view_web.dart';
 
 final Map<String, WidgetBuilder> routes = {
   LoginPage.routeName: (context) => const LoginPage(),
@@ -51,4 +55,9 @@ final Map<String, WidgetBuilder> routes = {
   MainHomePage.routeName: (context) => const MainHomePage(),
   NotificationScreen.routeName: (context) => const NotificationScreen(),
   SearchScreen.routeName: (context) => const SearchScreen(),
+  StudentConductInfoMonth.routeName: (context) =>
+      const StudentConductInfoMonth(),
+  HomeViewWeb.routeName: (context) => const HomeViewWeb(),
+  SplashScreen.routeName: (context) => const SplashScreen(),
+  UserSetPointsScreen.routeName: (context) => const UserSetPointsScreen(),
 };

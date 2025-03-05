@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/design/color.dart';
@@ -7,6 +8,7 @@ import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/notification/funtion/notification_change.dart';
 import 'package:vnclass/modules/splash_screen/slpash_screen.dart';
+import 'package:vnclass/web/home_view_web.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +32,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'StuApp',
+      title: 'VnClass',
       theme: ThemeData(
         primaryColor: ColorApp.primaryColor,
       ),
       routes: routes,
-      initialRoute: SplashScreen.routeName,
+      initialRoute: kIsWeb ? HomeViewWeb.routeName : SplashScreen.routeName,
     );
   }
 }
