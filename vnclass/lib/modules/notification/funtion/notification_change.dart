@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class NotificationChange with ChangeNotifier {
-  static int _unreadCount = 0;
+  int _unreadCount = 0; // Không cần static
 
   // Getter cho số lượng chưa đọc
-  static int get unreadCount => _unreadCount;
+  int get unreadCount => _unreadCount; // Không cần static
 
   // Thiết lập số lượng chưa đọc
   void setUnreadCount(int count) {

@@ -31,6 +31,7 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
       elevation: 8,
       color: Colors.white,
       shape: RoundedRectangleBorder(
+        side: BorderSide(color: Colors.blueAccent, width: 1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(

@@ -27,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<NotificationModel> notifications = [];
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void handleIncomingNotification(RemoteMessage message) {
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-    accountProvider.account;
     NotificationModel newNotification = NotificationModel(
       id: message.messageId ?? DateTime.now().toString(),
       accountId: accountProvider.account!.idAcc,
@@ -70,8 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
     int unreadCount = notifications.where((n) => !n.isRead).length;
     Provider.of<NotificationChange>(context, listen: false)
         .setUnreadCount(unreadCount);
-    print('Thong bao chua doc$unreadCount');
-    // setState(() {}); // Cập nhật giao diện
+    print('Số thông báo chưa đọc: $unreadCount'); // Debug
+    setState(() {}); // Cập nhật giao diện
   }
 
   @override
@@ -79,12 +79,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
     final theme = Theme.of(context);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Phần nền trên cùng với gradient và ảnh tròn
           Positioned(
             top: 0,
             left: 0,
@@ -96,8 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0xFF42A5F5), // Xanh dương nhạt
-                    Color(0xFF1976D2), // Xanh dương đậm
+                    Color(0xFF42A5F5),
+                    Color(0xFF1976D2),
                   ],
                 ),
               ),
@@ -107,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ClipOval(
                       child: ImageHelper.loadFromAsset(
                         AssetHelper.imageLogoSplashScreen,
-                        width: 120, // Giảm kích thước để cân đối
+                        width: 120,
                         height: 120,
                         fit: BoxFit.cover,
                       ),
@@ -124,41 +122,43 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.white,
                             size: 40,
                           ),
-                          // Kiểm tra số lượng thông báo chưa đọc
-                          Positioned(
-                            right: 0,
-                            child: Container(
-                              padding: EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 12,
-                                minHeight: 12,
-                              ),
-                              child: Text(
-                                '${NotificationChange.unreadCount}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
+                          if (Provider.of<NotificationChange>(context)
+                                  .unreadCount >
+                              0) // Chỉ hiển thị nếu có thông báo chưa đọc
+                            Positioned(
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                                textAlign: TextAlign.center,
+                                constraints: BoxConstraints(
+                                  minWidth: 12,
+                                  minHeight: 12,
+                                ),
+                                child: Text(
+                                  '${Provider.of<NotificationChange>(context).unreadCount}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       onPressed: () {
-                        // Xử lý khi người dùng nhấn vào biểu tượng thông báo
                         Navigator.of(context).pushNamed(
-                            NotificationScreen.routeName,
-                            arguments: {
-                              'notifications': notifications,
-                              'onUpdate': () {
-                                setState(() {});
-                              },
-                            });
+                          NotificationScreen.routeName,
+                          arguments: {
+                            'notifications': notifications,
+                            'onUpdate': () {
+                              setState(() {});
+                            },
+                          },
+                        );
                       },
                     ),
                   ),
@@ -166,7 +166,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // Phần nội dung chính
           Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height * 0.22),
@@ -309,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(
               icon,
-              size: 32, // Giảm kích thước icon để cân đối
+              size: 32,
               color: const Color(0xFF1976D2),
             ),
             const SizedBox(width: 20),

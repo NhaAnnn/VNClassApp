@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
+import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
+import 'package:vnclass/modules/search/search_screen.dart';
 
 class ConductDetail extends StatefulWidget {
   const ConductDetail({super.key});
@@ -68,9 +70,11 @@ class _ConductDetailState extends State<ConductDetail> {
                   ),
                   Padding(
                     padding: EdgeInsets.all(paddingValue * 0.02),
-                    child: SearchBar(
+                    child: CustomSearchBar(
                       hintText: 'Search...',
-                      leading: Icon(FontAwesomeIcons.searchengin),
+                      onTap: () {
+                        Navigator.pushNamed(context, SearchScreen.routeName);
+                      },
                     ),
                   ),
                   Expanded(
@@ -88,7 +92,7 @@ class _ConductDetailState extends State<ConductDetail> {
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 8.0),
                                   child: Container(
-                                    height: 120,
+                                    height: 60,
                                     decoration: BoxDecoration(
                                       color: Colors.grey.shade200,
                                       borderRadius: BorderRadius.circular(8),
@@ -97,7 +101,7 @@ class _ConductDetailState extends State<ConductDetail> {
                                 ),
                               ),
                             ),
-                            items: 2,
+                            items: 1,
                             // period: const Duration(seconds: 2),
                           );
                         } else if (snapshot.hasError) {

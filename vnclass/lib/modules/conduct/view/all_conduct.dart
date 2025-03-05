@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
+import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/conduct/widget/all_conduct_card.dart';
@@ -149,9 +150,8 @@ class _AllConductState extends State<AllConduct> {
                     ),
                     Padding(
                       padding: EdgeInsets.all(paddingValue * 0.03),
-                      child: SearchBar(
+                      child: CustomSearchBar(
                         hintText: 'Search...',
-                        leading: Icon(FontAwesomeIcons.searchengin),
                         onTap: () {
                           Navigator.pushNamed(context, SearchScreen.routeName);
                         },
@@ -165,12 +165,12 @@ class _AllConductState extends State<AllConduct> {
                           return SkeletonLoader(
                             builder: Column(
                               children: List.generate(
-                                  3,
+                                  2,
                                   (index) => Padding(
                                         padding: const EdgeInsets.symmetric(
                                             vertical: 8.0),
                                         child: Container(
-                                          height: 150,
+                                          height: 60,
                                           decoration: BoxDecoration(
                                             color: Colors.grey.shade200,
                                             borderRadius:

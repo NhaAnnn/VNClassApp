@@ -7,9 +7,10 @@ class TextfieldWidget extends StatelessWidget {
     required this.labelText,
     this.obscureText = false,
     this.onChanged,
-    this.onTap, // Thêm tham số onTap
+    this.onTap, // Optional onTap callback
     this.enabled = true,
     this.errorText,
+    this.colorBorder,
     this.textStyle = const TextStyle(
       fontSize: 16,
       color: Colors.black87,
@@ -20,10 +21,11 @@ class TextfieldWidget extends StatelessWidget {
   final String labelText;
   final bool obscureText;
   final ValueChanged<String>? onChanged;
-  final VoidCallback? onTap; // Thêm kiểu VoidCallback
+  final VoidCallback? onTap; // Optional onTap callback
   final bool enabled;
   final TextStyle? textStyle;
   final String? errorText;
+  final Color? colorBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +36,12 @@ class TextfieldWidget extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           onChanged: onChanged,
-          onTap: onTap, // Gọi hàm onTap khi nhấn vào
+          onTap: onTap, // Call onTap when tapped
           enabled: enabled,
           style: textStyle,
           decoration: InputDecoration(
             labelText: labelText,
-            errorText: null, // Bỏ qua errorText ở đây
+            errorText: null, // Can be used for validation
             labelStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
@@ -61,27 +63,27 @@ class TextfieldWidget extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.grey.shade300,
-                width: 1.5,
+                color: colorBorder ?? Colors.grey.shade300,
+                width: 1,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF1976D2),
+              borderSide: BorderSide(
+                color: Color(0xFF1976D2), // Use provided color or default
                 width: 2,
               ),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.grey.shade200,
+                color: colorBorder ?? Colors.grey.shade200,
                 width: 1.5,
               ),
             ),
           ),
         ),
-        // Hiển thị thông báo lỗi bên dưới
+        // Display error message if present
         if (errorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 4.0),

@@ -31,6 +31,7 @@ class _AllConductCardState extends State<AllConductCard> {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.blueAccent, width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

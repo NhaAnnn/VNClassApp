@@ -30,10 +30,11 @@ class _AllClassesCardState extends State<AllClassesCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 8,
+      elevation: 4,
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: Colors.blueAccent, width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

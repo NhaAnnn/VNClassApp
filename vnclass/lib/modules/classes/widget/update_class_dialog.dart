@@ -5,6 +5,7 @@ import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class UpdateClassDialog extends StatefulWidget {
   const UpdateClassDialog({
@@ -65,80 +66,43 @@ class _UpdateClassDialogState extends State<UpdateClassDialog> {
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
       ),
       content: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      child: TextfieldWidget(
-                        labelText: classModel.className.toString(),
-                      ),
-                    ),
-                  ),
-                ],
+        width: kIsWeb
+            ? MediaQuery.of(context).size.width * 0.2
+            : MediaQuery.of(context).size.width * 0.8,
+        child: Wrap(
+          runSpacing: MediaQuery.of(context).size.width * 0.03,
+          children: [
+            TextfieldWidget(
+              labelText: classModel.className.toString(),
+              colorBorder: Color(0xFF666666),
+            ),
+            TextfieldWidget(
+              labelText: teacherId.isEmpty ? 'Mã GVCN' : teacherId,
+              colorBorder: Color(0xFF666666),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.065,
+              child: DropMenuWidget(
+                items:
+                    teacherList?.map((teacher) => teacher['name']).toList() ??
+                        [],
+                selectedItem: selectedTeacher,
+                onChanged: (value) {
+                  final selected = teacherList
+                      ?.firstWhere((teacher) => teacher['name'] == value);
+                  if (selected != null) {
+                    selectedTeacher = value;
+                    teacherId = selected['id']!; // Cập nhật mã giáo viên
+                  }
+                  setState(() {}); // Cập nhật lại giao diện
+                },
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      child: TextfieldWidget(
-                        labelText: teacherId.isEmpty ? 'Mã GVCN' : teacherId,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      child: DropMenuWidget(
-                        items: teacherList
-                                ?.map((teacher) => teacher['name'])
-                                .toList() ??
-                            [],
-                        selectedItem: selectedTeacher,
-                        onChanged: (value) {
-                          final selected = teacherList?.firstWhere(
-                              (teacher) => teacher['name'] == value);
-                          if (selected != null) {
-                            selectedTeacher = value;
-                            teacherId =
-                                selected['id']!; // Cập nhật mã giáo viên
-                          }
-                          setState(() {}); // Cập nhật lại giao diện
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-              Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      child: TextfieldWidget(
-                        labelText: classModel.year.toString(),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-            ],
-          ),
+            ),
+            TextfieldWidget(
+              labelText: classModel.year.toString(),
+              colorBorder: Color(0xFF666666),
+            ),
+          ],
         ),
       ),
       actions: [
@@ -194,6 +158,7 @@ class _UpdateClassDialogState extends State<UpdateClassDialog> {
           ),
           label: 'Sửa',
           color: Colors.blue,
+          colorText: Colors.white,
         ),
         ButtonN(
           ontap: () {
@@ -205,6 +170,7 @@ class _UpdateClassDialogState extends State<UpdateClassDialog> {
           ),
           label: 'Đóng',
           color: Colors.red,
+          colorText: Colors.white,
         ),
       ],
     );

@@ -5,6 +5,7 @@ import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
+import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
@@ -51,8 +52,9 @@ class _AllClassesState extends State<AllClasses> {
   Future<List<ClassModel>> _fetchFilteredClasses() async {
     var allclasses = await ClassController.fetchAllClasses();
     List<ClassModel> filteredClass = [];
+
     if (selectedGrade == null && selectedYear == null) {
-      return allclasses; // Hàm này nên trả về tất cả lớp học
+      return allclasses; // Trả về tất cả lớp học
     } else if (selectedGrade != null && selectedYear != null) {
       var result = await ClassController.fetchAllClassesByYear(selectedYear!);
 
@@ -99,167 +101,146 @@ class _AllClassesState extends State<AllClasses> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          BackBar(
-            title: 'Danh sách các lớp',
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  // Các nút thêm lớp học
-                  Padding(
+          BackBar(title: 'Danh sách các lớp'),
+          Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // Các nút thêm lớp học
+                Padding(
                     padding: EdgeInsets.all(12),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceAround, // Distribute buttons evenly
                       children: [
-                        Expanded(
-                          child: ButtonN(
-                            colorText: Colors.black,
-                            color: Colors.cyan.shade200,
-                            size: Size(
-                              MediaQuery.of(context).size.width * 0.42,
-                              MediaQuery.of(context).size.height * 0.05,
-                            ),
-                            label: 'Thêm 1 lớp học',
-                            icon: Icon(
-                              FontAwesomeIcons.circlePlus,
-                              color: Colors.black,
-                            ),
-                            ontap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CreateOneClassDialog(
-                                    onCreate: _refreshClasses,
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.02,
-                        ),
-                        Expanded(
-                          child: ButtonN(
-                            colorText: Colors.black,
-                            color: Colors.cyan.shade200,
-                            size: Size(
-                              MediaQuery.of(context).size.width * 0.42,
-                              MediaQuery.of(context).size.height * 0.05,
-                            ),
-                            label: 'Thêm DS lớp học',
-                            icon: Icon(
-                              FontAwesomeIcons.circlePlus,
-                              color: Colors.black,
-                            ),
-                            ontap: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return CreateListClassDialog(
-                                    onCreate: _refreshClasses,
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Dropdown cho khối và năm học
-                  Row(
-                    children: [
-                      Expanded(
-                        child: DropMenuWidget(
-                          items: ['Khối 10', 'Khối 11', 'Khối 12'],
-                          hintText: 'Khối',
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGrade = value; // Cập nhật khối đã chọn
-                            });
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 20),
-                      Expanded(
-                        child: DropMenuWidget(
-                          selectedItem: selectedYear,
-                          items: years,
-                          hintText: 'Năm học',
-                          onChanged: (value) {
-                            setState(() {
-                              selectedYear = value; // Cập nhật năm học đã chọn
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Thanh tìm kiếm
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: SearchBar(
-                      hintText: 'Search...',
-                      leading: Icon(FontAwesomeIcons.searchengin),
-                      onTap: () {
-                        Navigator.pushNamed(context, SearchScreen.routeName);
-                      },
-                    ),
-                  ),
-                  // Hiển thị danh sách lớp học
-                  Expanded(
-                    child: FutureBuilder<List<ClassModel>>(
-                      future: _fetchFilteredClasses(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          // Hiển thị khung xương khi đang tải
-                          return SkeletonLoader(
-                            builder: Column(
-                              children: List.generate(
-                                  3,
-                                  (index) => Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0),
-                                        child: Container(
-                                          height: 120,
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade200,
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                      )),
-                            ),
-                            items: 1, // Số lượng skeleton items
-                            period: const Duration(
-                                seconds: 2), // Thời gian hiệu ứng
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return Center(child: Text('Không có lớp học'));
-                        }
-
-                        List<ClassModel> classes = snapshot.data!;
-                        return ListView.builder(
-                          itemCount: classes.length,
-                          itemBuilder: (context, index) {
-                            return AllClassesCard(
-                              classModel: classes[index],
-                              onUpdate: _refreshClasses,
+                        ButtonN(
+                          label: 'Thêm 1 lớp',
+                          icon: Icon(FontAwesomeIcons.circlePlus,
+                              color: Colors.black),
+                          color: Colors.cyan.shade200,
+                          colorText: Colors.black,
+                          borderRadius: BorderRadius.circular(10),
+                          ontap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CreateOneClassDialog(
+                                    onCreate: _refreshClasses);
+                              },
                             );
                           },
-                        );
-                      },
+                        ),
+                        // Spacing between buttons
+                        ButtonN(
+                          label: 'Thêm DS lớp',
+                          icon: Icon(FontAwesomeIcons.upload,
+                              color: Colors.black),
+                          color: Colors.cyan.shade200,
+                          borderRadius: BorderRadius.circular(10),
+                          colorText: Colors.black,
+                          ontap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CreateListClassDialog(
+                                    onCreate: _refreshClasses);
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    )),
+                // Dropdown cho khối và năm học
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropMenuWidget(
+                        items: ['Khối 10', 'Khối 11', 'Khối 12'],
+                        hintText: 'Khối',
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGrade = value; // Cập nhật khối đã chọn
+                          });
+                        },
+                      ),
                     ),
+                    SizedBox(width: 20),
+                    Expanded(
+                      child: DropMenuWidget(
+                        selectedItem: selectedYear,
+                        items: years,
+                        hintText: 'Năm học',
+                        onChanged: (value) {
+                          setState(() {
+                            selectedYear = value; // Cập nhật năm học đã chọn
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                // Thanh tìm kiếm
+                Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.of(context).size.width * 0.01,
+                      right: MediaQuery.of(context).size.width * 0.01,
+                      top: MediaQuery.of(context).size.width * 0.02),
+                  child: CustomSearchBar(
+                    hintText: 'Search...',
+                    onTap: () {
+                      Navigator.pushNamed(context, SearchScreen.routeName);
+                    },
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          // Hiển thị danh sách lớp học
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: MediaQuery.of(context).size.width * 0.05,
+                right: MediaQuery.of(context).size.width * 0.05,
+              ),
+              child: FutureBuilder<List<ClassModel>>(
+                future: _fetchFilteredClasses(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return SkeletonLoader(
+                      builder: Column(
+                        children: List.generate(
+                            2,
+                            (index) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Container(
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                )),
+                      ),
+                      items: 1, // Số lượng skeleton items
+                      period: const Duration(seconds: 2), // Thời gian hiệu ứng
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('Không có lớp học'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      return AllClassesCard(
+                        classModel: snapshot.data![index],
+                        onUpdate: _refreshClasses,
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ),

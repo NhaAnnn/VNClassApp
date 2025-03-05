@@ -50,6 +50,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
           children: [
             TextfieldWidget(
               labelText: 'Lớp học',
+              colorBorder: Color(0xFF666666),
               onChanged: (value) {
                 className = value;
                 classNameError = null; // Xóa lỗi khi người dùng nhập
@@ -63,6 +64,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
             ),
             TextfieldWidget(
               labelText: 'Mã GVCN',
+              colorBorder: Color(0xFF666666),
               onChanged: (value) {
                 teacherId = value;
                 teacherIdError = null; // Xóa lỗi khi người dùng nhập
@@ -78,6 +80,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
             ),
             TextfieldWidget(
               labelText: 'Tên GVCN',
+              colorBorder: Color(0xFF666666),
               onChanged: (value) {
                 teacherName = value;
                 teacherNameError = null; // Xóa lỗi khi người dùng nhập
@@ -91,6 +94,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
             ),
             TextfieldWidget(
               labelText: 'Niên khóa',
+              colorBorder: Color(0xFF666666),
               onChanged: (value) {
                 year = value;
                 yearError = null; // Xóa lỗi khi người dùng nhập

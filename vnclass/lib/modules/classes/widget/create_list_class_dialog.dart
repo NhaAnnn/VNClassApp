@@ -113,61 +113,51 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
             : MediaQuery.of(context).size.width * 0.8,
         child: Wrap(
           children: [
-            if (isLoading) // Hiển thị vòng tròn tải nếu đang tải
-              Center(child: CircularProgressIndicator()),
+            if (isLoading) Center(child: CircularProgressIndicator()),
             if (!isLoading) ...[
-              // Chỉ hiển thị khi không đang tải
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    flex: 7,
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.04,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          labelText: 'File danh sách lớp',
-                          labelStyle: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w300,
-                              color: Colors.black),
-                          contentPadding:
-                              EdgeInsets.symmetric(vertical: 20, horizontal: 8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide:
-                                BorderSide(color: ColorApp.primaryColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: const Color.fromARGB(255, 29, 92, 252),
-                                width: 2),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: ColorApp.primaryColor, width: 2.0),
-                          ),
+                    child: TextField(
+                      decoration: InputDecoration(
+                        labelText: 'File danh sách lớp',
+                        labelStyle: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.black),
+                        contentPadding:
+                            EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: ColorApp.primaryColor),
                         ),
-                        controller: TextEditingController(
-                            text: selectedFileName), // Hiển thị tên file
-                        enabled: false, // Không cho phép chỉnh sửa
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: const Color.fromARGB(255, 29, 92, 252),
+                              width: 2),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: ColorApp.primaryColor, width: 2.0),
+                        ),
                       ),
+                      controller: TextEditingController(text: selectedFileName),
+                      enabled: false,
                     ),
                   ),
-                  SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                  Expanded(
-                    flex: 3,
-                    child: ButtonN(
-                      label: 'Chọn file',
-                      color: Colors.cyanAccent.shade700,
-                      colorText: Colors.white,
-                      ontap: () {
-                        if (kIsWeb) {
-                          pickExcelFileInWeb();
-                        } else {
-                          pickExcelFile(); // Hàm cho Android/iOS
-                        }
-                      },
-                    ),
+                  SizedBox(width: 10),
+                  ButtonN(
+                    label: 'Chọn file',
+                    color: Colors.cyanAccent.shade700,
+                    colorText: Colors.white,
+                    ontap: () {
+                      if (kIsWeb) {
+                        pickExcelFileInWeb();
+                      } else {
+                        pickExcelFile();
+                      }
+                    },
                   ),
                 ],
               ),
@@ -177,101 +167,100 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       ),
       actions: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             if (!isLoading) ...[
-              ButtonN(
-                ontap: () async {
-                  // Kiểm tra xem file đã được chọn chưa
-                  if (selectedFileName == null || selectedFileName!.isEmpty) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Thông báo'),
-                        content: Text('Vui lòng chọn file trước khi lưu.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                    return; // Dừng lại nếu không có file
-                  }
-
-                  setState(() {
-                    isLoading = true; // Bắt đầu quá trình tải
-                  });
-
-                  try {
-                    for (var newData in newDataList) {
-                      await ClassController.createClass(
-                        context,
-                        newData['_className'],
-                        newData['T_name'],
-                        newData['T_id'],
-                        newData['_year'],
+              Flexible(
+                child: ButtonN(
+                  ontap: () async {
+                    if (selectedFileName == null || selectedFileName!.isEmpty) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Thông báo'),
+                          content: Text('Vui lòng chọn file trước khi lưu.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('OK'),
+                            ),
+                          ],
+                        ),
                       );
+                      return;
                     }
 
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Thông báo'),
-                        content: Text('Đã thêm danh sách lớp thành công.'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(); // Đóng thông báo
-                              Navigator.of(context).pop(); // Đóng dialog chính
-                            },
-                            child: Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  } catch (e) {
-                    print(e);
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Lỗi'),
-                        content: Text('Thêm danh sách lớp thất bại: $e'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  } finally {
                     setState(() {
-                      isLoading = false; // Kết thúc quá trình tải
+                      isLoading = true;
                     });
-                  }
-                },
-                size: Size(
-                  MediaQuery.of(context).size.width * 0.2,
-                  MediaQuery.of(context).size.height * 0.05,
+
+                    try {
+                      for (var newData in newDataList) {
+                        await ClassController.createClass(
+                          context,
+                          newData['_className'],
+                          newData['T_name'],
+                          newData['T_id'],
+                          newData['_year'],
+                        );
+                      }
+
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Thông báo'),
+                          content: Text('Đã thêm danh sách lớp thành công.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } catch (e) {
+                      print(e);
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Lỗi'),
+                          content: Text('Thêm danh sách lớp thất bại: $e'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } finally {
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }
+                  },
+                  size: Size(MediaQuery.of(context).size.width * 0.2,
+                      MediaQuery.of(context).size.height * 0.05),
+                  label: 'Lưu',
+                  colorText: Colors.white,
+                  color: Colors.blueAccent,
                 ),
-                label: 'Lưu',
-                colorText: Colors.white,
-                color: Colors.blueAccent,
               ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.02),
-              ButtonN(
-                ontap: () {
-                  Navigator.of(context).pop();
-                },
-                size: Size(
-                  MediaQuery.of(context).size.width * 0.2,
-                  MediaQuery.of(context).size.height * 0.05,
+              SizedBox(width: 10),
+              Flexible(
+                child: ButtonN(
+                  ontap: () {
+                    Navigator.of(context).pop();
+                  },
+                  size: Size(MediaQuery.of(context).size.width * 0.2,
+                      MediaQuery.of(context).size.height * 0.05),
+                  label: 'Đóng',
+                  colorText: Colors.white,
+                  color: Colors.red,
                 ),
-                label: 'Đóng',
-                colorText: Colors.white,
-                color: Colors.red,
               ),
             ]
           ],
