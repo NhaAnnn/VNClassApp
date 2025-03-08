@@ -6,9 +6,11 @@ import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
+import 'package:vnclass/modules/conduct/view/all_conduct.dart';
 import 'package:vnclass/modules/conduct/widget/choose_year_dialog.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
+import 'package:vnclass/modules/main_home/controller/permission_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/view/mistake_main_page.dart';
 import 'package:vnclass/modules/notification/controller/notification_controller.dart';
@@ -32,30 +34,43 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     final yearProvider = Provider.of<YearProvider>(context, listen: false);
     yearProvider.fetchYears();
-
     final classProvider = Provider.of<ClassProvider>(context, listen: false);
     classProvider.fetchClassNames();
-
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
     accountProvider.account;
 
-    // Fetch notifications on startup
     fetchNotifications(accountProvider.account!.idAcc, context);
-
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       handleIncomingNotification(message);
     });
+
+    List<String> groupPermissions = [];
+    List<String> accountPermissions =
+        List.from(accountProvider.account!.permission);
+
+    // Lấy permissions từ group
+    accountProvider.account!.groupModel!.permission.forEach((key, value) {
+      if (value.length > 1) groupPermissions.add(value[1]);
+    });
+
+    List<String> pers = [];
+    pers.addAll(accountPermissions);
+    pers.addAll(groupPermissions);
+
+    final permissProvider =
+        Provider.of<PermissionProvider>(context, listen: false);
+    permissProvider.setPermission(pers);
+
+    print('du lieu list permis+$pers');
   }
 
   void handleIncomingNotification(RemoteMessage message) {
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-
     if (notifications.any((n) => n.id == message.messageId)) {
       return;
     }
-
     NotificationModel newNotification = NotificationModel(
       id: message.messageId ?? DateTime.now().toString(),
       accountId: accountProvider.account!.idAcc,
@@ -67,8 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       notifications.add(newNotification);
-      print(
-          "Current unread count before increment: ${Provider.of<NotificationChange>(context, listen: false).unreadCount}");
       Provider.of<NotificationChange>(context, listen: false)
           .incrementUnreadCount();
     });
@@ -77,16 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchNotifications(
       String accountId, BuildContext context) async {
     notifications = await NotificationController.fetchNotifications(accountId);
-
-    // Set unread count based on the fetched notifications
     int unreadCount = notifications.where((n) => !n.isRead).length;
     Provider.of<NotificationChange>(context, listen: false)
         .setUnreadCount(unreadCount);
-
-    // Debugging output
-    print('Số thông báo chưa đọc: $unreadCount');
-
-    setState(() {});
+    print('Số thông báo chưa đọc: $unreadCount'); // Debug
+    setState(() {}); // Cập nhật giao diện
   }
 
   @override
@@ -94,6 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
     final theme = Theme.of(context);
+    final permissionProvider = Provider.of<PermissionProvider>(context);
+    final pers = permissionProvider.permission;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -139,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           if (Provider.of<NotificationChange>(context)
                                   .unreadCount >
-                              0)
+                              0) // Chỉ hiển thị nếu có thông báo chưa đọc
                             Positioned(
                               right: 0,
                               child: Container(
@@ -236,40 +246,97 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        _buildHomeItem(
-                          context,
-                          icon: FontAwesomeIcons.penToSquare,
-                          title: 'Cập Nhật Vi Phạm',
-                          route: MistakeMainPage.routeName,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHomeItem(
-                          context,
-                          icon: FontAwesomeIcons.chartLine,
-                          title: 'KQ Rèn Luyện',
-                          dialog: 'Dialog',
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHomeItem(
-                          context,
-                          icon: FontAwesomeIcons.school,
-                          title: 'Lớp Học',
-                          route: AllClasses.routeName,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHomeItem(
-                          context,
-                          icon: FontAwesomeIcons.fileLines,
-                          title: 'Báo Cáo',
-                          route: ReportMainPage.routeName,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildHomeItem(
-                          context,
-                          icon: FontAwesomeIcons.userGear,
-                          title: 'Quản Lý Tài Khoản',
-                          route: AccountMainPage.routeName,
-                        ),
+                        if (account!.goupID == 'hocSinh' ||
+                            account.goupID == 'phuHuynh') ...[
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.chartLine,
+                            title: 'KQ Rèn Luyện',
+                            dialog: 'Dialog',
+                          ),
+                          const SizedBox(height: 16),
+                        ] else if (account.goupID == 'hocSinh' &&
+                            (pers.contains(
+                                    'Cập nhật vi phạm học sinh toàn trường') ||
+                                pers.contains('Cập nhật vi phạm lớp học'))) ...[
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.penToSquare,
+                            title: 'Cập Nhật Vi Phạm',
+                            route: MistakeMainPage.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.chartLine,
+                            title: 'KQ Rèn Luyện',
+                            dialog: 'Dialog',
+                          ),
+                          const SizedBox(height: 16),
+                        ] else if (account.goupID == 'giaoVien') ...[
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.penToSquare,
+                            title: 'Cập Nhật Vi Phạm',
+                            route: MistakeMainPage.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.chartLine,
+                            title: 'KQ Rèn Luyện',
+                            dialog: 'Dialog',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.school,
+                            title: 'Lớp Học',
+                            route: AllClasses.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.fileLines,
+                            title: 'Báo Cáo',
+                            route: ReportMainPage.routeName,
+                          ),
+                        ] else ...[
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.penToSquare,
+                            title: 'Cập Nhật Vi Phạm',
+                            route: MistakeMainPage.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.chartLine,
+                            title: 'KQ Rèn Luyện',
+                            dialog: 'Dialog',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.school,
+                            title: 'Lớp Học',
+                            route: AllClasses.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.fileLines,
+                            title: 'Báo Cáo',
+                            route: ReportMainPage.routeName,
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.userGear,
+                            title: 'Quản Lý Tài Khoản',
+                            route: AccountMainPage.routeName,
+                          ),
+                        ],
                       ],
                     ),
                   ),
