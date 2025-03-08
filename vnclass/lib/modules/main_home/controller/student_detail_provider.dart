@@ -1,12 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
 
 class StudentDetailProvider with ChangeNotifier {
   final FirebaseFirestore firestore;
-  StudentDetailModel?
-      studentDetail; // Biến lưu trữ thông tin chi tiết sinh viên
+
   String classIdST = '';
+  String studentDetailId = '';
 
   StudentDetailProvider({FirebaseFirestore? firestore})
       : firestore = firestore ?? FirebaseFirestore.instance;
@@ -55,10 +54,8 @@ class StudentDetailProvider with ChangeNotifier {
       DocumentSnapshot detailDoc = detailSnapshot.docs.first;
       classIdST =
           detailDoc['Class_id'] ?? ''; // Lấy Class_id từ tài liệu chi tiết
+      studentDetailId = detailDoc['_id'] ?? ''; // Lấy id student detail
       print('Mã lớp của học sinh: $classIdST');
-
-      // // Tạo đối tượng StudentDetailModel từ tài liệu Firestore
-      // studentDetail = await StudentDetailModel.fromFirestore(detailDoc);
 
       // Thông báo cho các listener rằng dữ liệu đã thay đổi
       notifyListeners();
