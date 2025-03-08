@@ -62,6 +62,7 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
     final conduct = args['conduct'];
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(title: 'Hạnh kiểm của $studentName'),
@@ -97,24 +98,26 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
                       ),
                     ),
                   ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadiusDirectional.only(
-                        topStart: Radius.circular(10),
-                        topEnd: Radius.circular(10),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.14,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadiusDirectional.only(
+                          topStart: Radius.circular(10),
+                          topEnd: Radius.circular(10),
+                        ),
+                        color: Colors.blue.shade100,
+                        border: Border.all(color: Colors.grey),
                       ),
-                      color: Colors.blue.shade100,
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
                                 child: Text(
                                   'STT',
                                   style: TextStyle(
@@ -123,33 +126,33 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
                                       fontSize: 14),
                                 ),
                               ),
-                              Expanded(
-                                flex: 8,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    'Vi phạm',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        fontSize: 14),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 2,
+                            ),
+                            Expanded(
+                              flex: 8,
+                              child: Align(
+                                alignment: Alignment.center,
                                 child: Text(
-                                  'Chi tiết',
+                                  'Vi phạm',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.black,
                                       fontSize: 14),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                'Chi tiết',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 14),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   Expanded(
@@ -191,10 +194,14 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
 
                         return SingleChildScrollView(
                           child: Column(
-                            children: listMistake.map((mistake) {
+                            children: listMistake.asMap().entries.map((entry) {
+                              int index = entry.key;
+                              var mistake = entry.value;
+
                               return StudentMistakeCard(
-                                  mistake:
-                                      mistake); // Giả sử bạn đã sửa đổi StudentMistakeCard để nhận đối tượng mistake
+                                index: (index + 1).toString(),
+                                mistake: mistake,
+                              );
                             }).toList(),
                           ),
                         );

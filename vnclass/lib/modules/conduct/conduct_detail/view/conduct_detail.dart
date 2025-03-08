@@ -40,7 +40,7 @@ class _ConductDetailState extends State<ConductDetail> {
     }
     double paddingValue = MediaQuery.of(context).size.width * 1;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(

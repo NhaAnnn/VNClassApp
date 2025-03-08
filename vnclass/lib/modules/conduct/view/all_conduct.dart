@@ -109,7 +109,7 @@ class _AllConductState extends State<AllConduct> {
     // Truy cập các tham số
     final year = args['year'];
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(title: 'Danh sách các lớp $selectedTerm'),

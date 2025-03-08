@@ -30,7 +30,7 @@ class _ClassDetailState extends State<ClassDetail> {
     final String className = args['className'] as String;
     double paddingValue = MediaQuery.of(context).size.width * 1;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(

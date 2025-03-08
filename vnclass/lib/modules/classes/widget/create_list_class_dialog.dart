@@ -18,9 +18,9 @@ class CreateListClassDialog extends StatefulWidget {
 }
 
 class _CreateListClassDialogState extends State<CreateListClassDialog> {
-  List<Map<String, dynamic>> newDataList = []; // Danh sách để lưu nhiều lớp học
-  String? selectedFileName; // Biến lưu tên file đã chọn
-  bool isLoading = false; // Trạng thái tải
+  List<Map<String, dynamic>> newDataList = [];
+  String? selectedFileName;
+  bool isLoading = false;
 
   Future<void> pickExcelFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -30,7 +30,8 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
 
     if (result != null) {
       String filePath = result.files.single.path!;
-      selectedFileName = result.files.single.name; // Lưu tên file đã chọn
+      selectedFileName =
+          result.files.single.name; // Save the selected file name
 
       setState(() {});
 
@@ -38,23 +39,85 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       var bytes = file.readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
 
+      Map<String, List<Map<String, dynamic>>> classData = {};
+
       for (var table in excel.tables.keys) {
         var rows = excel.tables[table]!.rows;
 
-        // Tự động bỏ qua các dòng không chứa dữ liệu (tiêu đề)
-        for (var row in rows) {
-          // Kiểm tra xem dòng có đủ số cột hay không
-          if (row.length >= 4 && row[0] != null) {
-            var newData = {
-              'T_name': row[2]?.value.toString(),
-              'T_id': row[1]?.value.toString(),
-              '_className': row[0]?.value.toString(),
-              '_year': row[3]?.value.toString(),
-            };
-            newDataList.add(newData); // Thêm dữ liệu vào danh sách
+        if (rows.isEmpty) {
+          print('No rows found in the table: $table');
+          continue;
+        }
+
+        // Find the header row
+        int headerRowIndex = -1;
+        for (int i = 0; i < rows.length; i++) {
+          var rowValues = rows[i]
+              .map((cell) => cell?.value?.toString().trim() ?? '')
+              .toList();
+          if (rowValues.contains('Lớp') &&
+              rowValues.contains('Giáo Viên Chủ Nhiệm')) {
+            headerRowIndex = i;
+            break;
+          }
+        }
+
+        if (headerRowIndex == -1) {
+          print('Header row not found');
+          continue;
+        }
+
+        List<String> headers = rows[headerRowIndex]
+            .map((cell) => cell?.value?.toString().trim() ?? '')
+            .toList();
+        print('Header row: $headers');
+
+        for (int i = headerRowIndex + 1; i < rows.length; i++) {
+          var row = rows[i];
+
+          // Print each row for debugging
+          print('Row $i: $row');
+
+          if (row.length >= headers.length && row[0] != null) {
+            var className = headers.contains('Lớp')
+                ? row[headers.indexOf('Lớp')]?.value?.toString() ?? ''
+                : '';
+
+            if (className.isNotEmpty) {
+              if (!classData.containsKey(className)) {
+                classData[className] = []; // Initialize a list for this class
+              }
+
+              var newData = {
+                'T_name': headers.contains('Giáo Viên Chủ Nhiệm')
+                    ? row[headers.indexOf('Giáo Viên Chủ Nhiệm')]
+                            ?.value
+                            ?.toString() ??
+                        ''
+                    : '',
+                'T_id': headers.contains('Mã Giáo Viên')
+                    ? row[headers.indexOf('Mã Giáo Viên')]?.value?.toString() ??
+                        ''
+                    : '',
+                '_className': className,
+                '_year': headers.contains('Niên Khóa')
+                    ? row[headers.indexOf('Niên Khóa')]?.value?.toString() ?? ''
+                    : '',
+              };
+
+              classData[className]!.add(newData);
+              newDataList.add(newData); // Add data to the class list
+            } else {
+              print('Class name is empty for row $i');
+            }
+          } else {
+            print('Row $i does not have enough columns or is null');
           }
         }
       }
+
+      // Now classData contains all the students organized by class
+      print('Class Data: $classData');
     } else {
       print('Không có file nào được chọn.');
     }
@@ -65,6 +128,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       type: FileType.custom,
       allowedExtensions: ['xlsx', 'xls'],
     );
+    Map<String, List<Map<String, dynamic>>> classData = {};
 
     if (result != null) {
       Uint8List? bytes = result.files.single.bytes;
@@ -75,27 +139,88 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
         for (var table in excel.tables.keys) {
           var rows = excel.tables[table]!.rows;
 
-          // Tự động bỏ qua các dòng không chứa dữ liệu (tiêu đề)
-          for (var row in rows) {
-            // Kiểm tra xem dòng có đủ số cột hay không
-            if (row.length >= 4 && row[0] != null) {
-              var newData = {
-                'T_name': row[2]?.value.toString(),
-                'T_id': row[1]?.value.toString(),
-                '_className': row[0]?.value.toString(),
-                '_year': row[3]?.value.toString(),
-              };
-              newDataList.add(newData); // Thêm dữ liệu vào danh sách
+          if (rows.isEmpty) {
+            print('No rows found in the table: $table');
+            continue;
+          }
+
+          // Find the header row
+          int headerRowIndex = -1;
+          for (int i = 0; i < rows.length; i++) {
+            var rowValues = rows[i]
+                .map((cell) => cell?.value?.toString().trim() ?? '')
+                .toList();
+            if (rowValues.contains('Lớp') &&
+                rowValues.contains('Giáo Viên Chủ Nhiệm')) {
+              headerRowIndex = i;
+              break;
             }
           }
-        }
 
-        setState(() {
-          selectedFileName = result.files.single.name; // Lưu tên file đã chọn
-        });
+          if (headerRowIndex == -1) {
+            print('Header row not found');
+            continue;
+          }
+
+          List<String> headers = rows[headerRowIndex]
+              .map((cell) => cell?.value?.toString().trim() ?? '')
+              .toList();
+          print('Header row: $headers');
+
+          for (int i = headerRowIndex + 1; i < rows.length; i++) {
+            var row = rows[i];
+
+            // Print each row for debugging
+            print('Row $i: $row');
+
+            if (row.length >= headers.length && row[0] != null) {
+              var className = headers.contains('Lớp')
+                  ? row[headers.indexOf('Lớp')]?.value?.toString() ?? ''
+                  : '';
+
+              if (className.isNotEmpty) {
+                if (!classData.containsKey(className)) {
+                  classData[className] = []; // Initialize a list for this class
+                }
+
+                var newData = {
+                  'T_name': headers.contains('Giáo Viên Chủ Nhiệm')
+                      ? row[headers.indexOf('Giáo Viên Chủ Nhiệm')]
+                              ?.value
+                              ?.toString() ??
+                          ''
+                      : '',
+                  'T_id': headers.contains('Mã Giáo Viên')
+                      ? row[headers.indexOf('Mã Giáo Viên')]
+                              ?.value
+                              ?.toString() ??
+                          ''
+                      : '',
+                  '_className': className,
+                  '_year': headers.contains('Niên Khóa')
+                      ? row[headers.indexOf('Niên Khóa')]?.value?.toString() ??
+                          ''
+                      : '',
+                };
+
+                classData[className]!.add(newData);
+                newDataList.add(newData);
+                print('Added data for class $className: $newData');
+              } else {
+                print('Class name is empty for row $i');
+              }
+            } else {
+              print('Row $i does not have enough columns or is null');
+            }
+          }
+
+          setState(() {
+            selectedFileName = result.files.single.name; // Lưu tên file đã chọn
+          });
+        }
+      } else {
+        print('Không có file nào được chọn.');
       }
-    } else {
-      print('Không có file nào được chọn.');
     }
   }
 
@@ -204,7 +329,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                           newData['_year'],
                         );
                       }
-
+                      widget.onCreate();
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(

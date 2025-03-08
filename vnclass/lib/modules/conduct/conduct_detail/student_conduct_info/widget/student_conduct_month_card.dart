@@ -43,7 +43,7 @@ class _StudentConductMonthCardState extends State<StudentConductMonthCard> {
                 children: [
                   Text(
                     widget.month ?? 'Tháng không xác định',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(height: 12), // Khoảng cách giữa các dòng
 
@@ -90,13 +90,13 @@ class _StudentConductMonthCardState extends State<StudentConductMonthCard> {
           flex: 2,
           child: Text(
             label,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 14),
           ),
         ),
       ],

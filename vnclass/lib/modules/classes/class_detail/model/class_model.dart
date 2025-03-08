@@ -1,5 +1,5 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
 
 class ClassModel {
   String? id;
@@ -8,7 +8,7 @@ class ClassModel {
   String? year;
   String? teacherID;
   String? teacherName;
-  List<StudentModel>? studentModel;
+
   int? countConductEx;
   int? countConductGo;
   int? countConductAv;
@@ -21,30 +21,21 @@ class ClassModel {
     this.year,
     this.teacherID,
     this.teacherName,
-    // required List<StudentModel> studentModel,
     this.countConductEx,
     this.countConductGo,
     this.countConductAv,
     this.countConductWe,
   });
-  // Hàm lấy thông tin học sinh từ Firestore
-  static Future<ClassModel> fetchCLassFromFirestore(
+
+  // Fetch class data from Firestore
+  static Future<ClassModel> fetchClassFromFirestore(
       DocumentSnapshot doc) async {
-    // Lấy dữ liệu từ tài liệu
     Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
 
     if (data == null) {
       throw Exception("Document data is null");
     }
 
-    // String classID = data['Class_id'] ?? '';
-
-    // Lấy thông tin học sinh
-    // List<StudentModel> studentModel =
-    //     await StudentController.fetchStudentsByClass(classID);
-    // int goodConduct = StudentController.fetchStudentsConductMonthByClass
-
-    // Tạo một đối tượng StudentModel
     return ClassModel(
       id: data['_id'],
       className: data['_className'] ?? '',
@@ -52,7 +43,42 @@ class ClassModel {
       amount: data['_amount'] ?? 0,
       teacherID: data['T_id'] ?? '',
       teacherName: data['T_name'] ?? '',
-      // studentModel: studentModel,
     );
+  }
+
+  // Convert ClassModel to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      '_className': className,
+      '_year': year,
+      '_amount': amount,
+      'T_id': teacherID,
+      'T_name': teacherName,
+    };
+  }
+
+  // Create ClassModel from JSON
+  static ClassModel fromJson(Map<String, dynamic> json) {
+    return ClassModel(
+      id: json['_id'],
+      className: json['_className'],
+      year: json['_year'],
+      amount: json['_amount'],
+      teacherID: json['T_id'],
+      teacherName: json['T_name'],
+    );
+  }
+
+  // Convert a list of ClassModels to JSON
+  static String toJsonList(List<ClassModel> classes) {
+    return jsonEncode(
+        classes.map((classModel) => classModel.toJson()).toList());
+  }
+
+  // Create a list of ClassModels from JSON
+  static List<ClassModel> fromJsonList(String jsonString) {
+    List<dynamic> jsonList = jsonDecode(jsonString);
+    return jsonList.map((json) => ClassModel.fromJson(json)).toList();
   }
 }

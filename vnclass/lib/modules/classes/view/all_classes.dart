@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
@@ -11,6 +12,7 @@ import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
 import 'package:vnclass/modules/classes/widget/create_list_class_dialog.dart';
 import 'package:vnclass/modules/classes/widget/create_one_class_dialog.dart';
+import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 
 class AllClasses extends StatefulWidget {
@@ -24,30 +26,31 @@ class AllClasses extends StatefulWidget {
 class _AllClassesState extends State<AllClasses> {
   List<String> years = [];
   String? selectedGrade; // Biến trạng thái cho khối
-  String? selectedYear; // Biến trạng thái cho năm học
+  String? selectedYear = Provider.of<YearProvider>(context, listen: false)
+      .years
+      .last; // Biến trạng thái cho năm học
 
   @override
   void initState() {
     super.initState();
-    getYear();
+    // getYear();
+    // selectedYear = Provider.of<YearProvider>(context).years.last;
   }
 
   Future<void> _refreshClasses() async {
-    setState(() {
-      // Triggers a rebuild to fetch data again
-    });
+    setState(() {});
   }
 
-  Future<void> getYear() async {
-    final QuerySnapshot querySnapshot =
-        await FirebaseFirestore.instance.collection('YEAR').get();
+  // Future<void> getYear() async {
+  //   final QuerySnapshot querySnapshot =
+  //       await FirebaseFirestore.instance.collection('YEAR').get();
 
-    for (var doc in querySnapshot.docs) {
-      years.add(doc['_year']);
-    }
+  //   for (var doc in querySnapshot.docs) {
+  //     years.add(doc['_year']);
+  //   }
 
-    setState(() {}); // Cập nhật lại giao diện sau khi lấy dữ liệu
-  }
+  //   setState(() {}); // Cập nhật lại giao diện sau khi lấy dữ liệu
+  // }
 
   Future<List<ClassModel>> _fetchFilteredClasses() async {
     var allclasses = await ClassController.fetchAllClasses();
@@ -98,7 +101,7 @@ class _AllClassesState extends State<AllClasses> {
   Widget build(BuildContext context) {
     return Scaffold(
       persistentFooterAlignment: AlignmentDirectional.center,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(title: 'Danh sách các lớp'),
@@ -168,7 +171,8 @@ class _AllClassesState extends State<AllClasses> {
                     Expanded(
                       child: DropMenuWidget(
                         selectedItem: selectedYear,
-                        items: years,
+                        items: Provider.of<YearProvider>(context, listen: false)
+                            .years,
                         hintText: 'Năm học',
                         onChanged: (value) {
                           setState(() {

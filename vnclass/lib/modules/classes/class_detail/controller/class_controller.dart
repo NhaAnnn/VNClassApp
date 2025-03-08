@@ -11,7 +11,7 @@ class ClassController {
       // Tạo danh sách các Future để thực hiện song song
       List<Future<ClassModel>> classFutures =
           querySnapshot.docs.map((doc) async {
-        return await ClassModel.fetchCLassFromFirestore(doc);
+        return await ClassModel.fetchClassFromFirestore(doc);
       }).toList();
 
       // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
@@ -35,7 +35,7 @@ class ClassController {
       // Tạo danh sách các Future để thực hiện song song
       List<Future<ClassModel>> classFutures =
           querySnapshot.docs.map((doc) async {
-        return await ClassModel.fetchCLassFromFirestore(doc);
+        return await ClassModel.fetchClassFromFirestore(doc);
       }).toList();
 
       // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
@@ -74,6 +74,8 @@ class ClassController {
     // Tạo document ID từ className và year
     String documentId = className.replaceAll(' ', '').toLowerCase() + year;
     print('Unique ID: $documentId');
+    final newId = <String, dynamic>{'_id': documentId};
+    newData.addEntries(newId.entries);
 
     try {
       // Tạo một Future để kiểm tra năm học

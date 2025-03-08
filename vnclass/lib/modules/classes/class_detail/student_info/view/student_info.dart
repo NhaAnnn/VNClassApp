@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 
 class StudentInfo extends StatefulWidget {
   const StudentInfo({super.key});
@@ -15,6 +17,10 @@ class StudentInfo extends StatefulWidget {
 class _StudentInfoState extends State<StudentInfo> {
   @override
   Widget build(BuildContext context) {
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    accountProvider.account;
+
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
@@ -24,7 +30,7 @@ class _StudentInfoState extends State<StudentInfo> {
     double paddingValue = MediaQuery.of(context).size.width * 0.05;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(
@@ -57,59 +63,67 @@ class _StudentInfoState extends State<StudentInfo> {
                     _buildStudentDetailRow('Giới tính:', studentModel.gender!),
                     _buildStudentDetailRow(
                         'Ngày sinh:', studentModel.birthday!),
-                    Padding(
-                      padding: EdgeInsets.all(paddingValue),
-                      child: Text('Chức vụ:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: RadioListTile(
-                            title: Text('Học sinh',
-                                style: TextStyle(fontSize: 16)),
-                            value: 'Học sinh',
-                            groupValue: studentModel.committee,
-                            onChanged: (value) {
-                              setState(() {
-                                studentModel.committee = value!;
-                              });
-                            },
-                            activeColor: Colors.blueAccent,
-                          ),
-                        ),
-                        Expanded(
-                          child: RadioListTile(
-                            title: Text('Ban cán sự',
-                                style: TextStyle(fontSize: 16)),
-                            value: 'Ban cán sự',
-                            groupValue: studentModel.committee,
-                            onChanged: (value) {
-                              setState(() {
-                                studentModel.committee = value!;
-                              });
-                            },
-                            activeColor: Colors.blueAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: paddingValue),
-                    Center(
-                      child: ButtonN(
-                        color: Colors.blueAccent,
-                        size: Size(MediaQuery.of(context).size.width * 0.4,
-                            MediaQuery.of(context).size.height * 0.05),
-                        ontap: () {
-                          StudentDetailController
-                              .updateStudentPositionInDatabase(
-                                  context, studentModel);
-                        },
-                        label: 'Cập nhật',
-                        colorText: Colors.white,
+                    if (accountProvider.account!.goupID
+                        .contains('giaoVien')) ...[
+                      Padding(
+                        padding: EdgeInsets.all(paddingValue),
+                        child: Text('Chức vụ:',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18)),
                       ),
-                    ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RadioListTile(
+                              title: Text('Học sinh',
+                                  style: TextStyle(fontSize: 16)),
+                              value: 'Học sinh',
+                              groupValue: studentModel.committee,
+                              onChanged: (value) {
+                                setState(() {
+                                  studentModel.committee = value!;
+                                });
+                              },
+                              activeColor: Colors.blueAccent,
+                            ),
+                          ),
+                          Expanded(
+                            child: RadioListTile(
+                              title: Text('Ban cán sự',
+                                  style: TextStyle(fontSize: 16)),
+                              value: 'Ban cán sự',
+                              groupValue: studentModel.committee,
+                              onChanged: (value) {
+                                setState(() {
+                                  studentModel.committee = value!;
+                                });
+                              },
+                              activeColor: Colors.blueAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      _buildStudentDetailRow('Chức vụ', studentModel.committee!)
+                    ],
+                    SizedBox(height: paddingValue),
+                    if (accountProvider.account!.goupID
+                        .contains('giaoVien')) ...[
+                      Center(
+                        child: ButtonN(
+                          color: Colors.blueAccent,
+                          size: Size(MediaQuery.of(context).size.width * 0.4,
+                              MediaQuery.of(context).size.height * 0.05),
+                          ontap: () {
+                            StudentDetailController
+                                .updateStudentPositionInDatabase(
+                                    context, studentModel);
+                          },
+                          label: 'Cập nhật',
+                          colorText: Colors.white,
+                        ),
+                      ),
+                    ]
                   ],
                 ),
               ),

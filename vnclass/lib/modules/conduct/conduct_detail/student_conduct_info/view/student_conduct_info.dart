@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/controller/conduct_month_controller.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/model/conduct_month_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/widget/student_conduct_month_card.dart';
+
+import '../../../../login/controller/provider.dart';
 
 class StudentConductInfo extends StatefulWidget {
   const StudentConductInfo({super.key});
@@ -28,6 +31,10 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    accountProvider.account;
+
     // Truy cập các tham số
     final studentID = args['studentID'];
     final studentName = args['studentName'];
@@ -35,6 +42,7 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
     final term = args['term'] as int;
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
           BackBar(title: 'Hạnh kiểm của $studentName'),
@@ -90,17 +98,24 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                         // Xử lý theo điều kiện term
                         List<MapEntry<String, List<dynamic>>> data;
 
-                        if (term == 100) {
-                          // Lấy 4 tháng cuối
-                          data = entries.length > 4
-                              ? entries.sublist(entries.length - 4)
-                              : entries;
-                        } else if (term == 200) {
-                          // Lấy 5 tháng đầu
-                          data = entries.take(5).toList();
-                        } else {
-                          // Lấy tất cả các tháng còn lại
+                        if (accountProvider.account!.goupID
+                                .contains('hocSinh') ||
+                            accountProvider.account!.goupID
+                                .contains('phuHuynh')) {
                           data = entries;
+                        } else {
+                          if (term == 100) {
+                            // Lấy 4 tháng cuối
+                            data = entries.length > 4
+                                ? entries.sublist(entries.length - 4)
+                                : entries;
+                          } else if (term == 200) {
+                            // Lấy 5 tháng đầu
+                            data = entries.take(5).toList();
+                          } else {
+                            // Lấy tất cả các tháng còn lại
+                            data = entries;
+                          }
                         }
 
                         return SingleChildScrollView(

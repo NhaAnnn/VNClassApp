@@ -1,7 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
-import 'package:vnclass/modules/notification/controller/notification_controller.dart';
 import 'dart:convert';
 
 import 'package:vnclass/modules/notification/funtion/get_access_token.dart';

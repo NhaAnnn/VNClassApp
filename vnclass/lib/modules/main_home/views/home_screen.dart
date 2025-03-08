@@ -6,7 +6,6 @@ import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
-import 'package:vnclass/modules/conduct/view/all_conduct.dart';
 import 'package:vnclass/modules/conduct/widget/choose_year_dialog.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
@@ -33,13 +32,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     final yearProvider = Provider.of<YearProvider>(context, listen: false);
     yearProvider.fetchYears();
+
     final classProvider = Provider.of<ClassProvider>(context, listen: false);
     classProvider.fetchClassNames();
+
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
     accountProvider.account;
 
+    // Fetch notifications on startup
     fetchNotifications(accountProvider.account!.idAcc, context);
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       handleIncomingNotification(message);
     });
@@ -48,6 +51,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void handleIncomingNotification(RemoteMessage message) {
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
+
+    if (notifications.any((n) => n.id == message.messageId)) {
+      return;
+    }
+
     NotificationModel newNotification = NotificationModel(
       id: message.messageId ?? DateTime.now().toString(),
       accountId: accountProvider.account!.idAcc,
@@ -59,6 +67,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       notifications.add(newNotification);
+      print(
+          "Current unread count before increment: ${Provider.of<NotificationChange>(context, listen: false).unreadCount}");
       Provider.of<NotificationChange>(context, listen: false)
           .incrementUnreadCount();
     });
@@ -67,11 +77,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> fetchNotifications(
       String accountId, BuildContext context) async {
     notifications = await NotificationController.fetchNotifications(accountId);
+
+    // Set unread count based on the fetched notifications
     int unreadCount = notifications.where((n) => !n.isRead).length;
     Provider.of<NotificationChange>(context, listen: false)
         .setUnreadCount(unreadCount);
-    print('Số thông báo chưa đọc: $unreadCount'); // Debug
-    setState(() {}); // Cập nhật giao diện
+
+    // Debugging output
+    print('Số thông báo chưa đọc: $unreadCount');
+
+    setState(() {});
   }
 
   @override
@@ -124,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           if (Provider.of<NotificationChange>(context)
                                   .unreadCount >
-                              0) // Chỉ hiển thị nếu có thông báo chưa đọc
+                              0)
                             Positioned(
                               right: 0,
                               child: Container(

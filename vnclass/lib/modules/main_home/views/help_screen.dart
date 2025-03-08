@@ -25,36 +25,8 @@ class _HelpScreenState extends State<HelpScreen> {
   void initState() {
     super.initState();
     getToken();
-    fetchNotifications('idtk', context);
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      handleIncomingNotification(message);
-    });
-  }
 
-  void handleIncomingNotification(RemoteMessage message) {
-    NotificationModel newNotification = NotificationModel(
-      id: message.messageId ?? DateTime.now().toString(),
-      accountId: 'idtk',
-      notificationTitle: message.notification?.title ?? 'Thông báo mới',
-      notificationDetail: message.notification?.body ?? 'Nội dung thông báo',
-      isRead: false,
-      timestamp: DateTime.now(),
-    );
-
-    notifications.add(newNotification);
-    Provider.of<NotificationChange>(context, listen: false)
-        .incrementUnreadCount();
-
-    setState(() {});
-  }
-
-  Future<void> fetchNotifications(
-      String accountId, BuildContext context) async {
-    notifications = await NotificationController.fetchNotifications(accountId);
-    int unreadCount = notifications.where((n) => !n.isRead).length;
-    Provider.of<NotificationChange>(context, listen: false)
-        .setUnreadCount(unreadCount);
-    setState(() {}); // Cập nhật giao diện
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {});
   }
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
