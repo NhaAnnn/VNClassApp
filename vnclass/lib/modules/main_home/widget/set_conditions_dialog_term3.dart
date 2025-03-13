@@ -37,6 +37,7 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
       if (doc.exists) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         setState(() {
+          // Khi load dữ liệu, ta giữ isEnabled là false (vô hiệu chức năng thay đổi)
           isEnabled = false;
           goodConditions = _loadConditions(data['conditions']['good']);
           fairConditions = _loadConditions(data['conditions']['fair']);
@@ -284,17 +285,20 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
                   style: TextStyle(fontSize: 12, color: Color(0xFF78909C)),
                 ),
                 const SizedBox(height: 4),
-                DropMenuWidget<String>(
-                  items: rankOptions,
-                  hintText: 'HKI',
-                  selectedItem: condition['hki'],
-                  onChanged: isEnabled
-                      ? (value) => setState(() => condition['hki'] = value!)
-                      : null,
-                  fillColor: Colors.white,
-                  borderColor: const Color(0xFFE0E0E0),
-                  textStyle: theme.textTheme.bodyMedium
-                      ?.copyWith(color: const Color(0xFF263238)),
+                // Sử dụng IgnorePointer để vô hiệu hoá khi isEnabled == false
+                IgnorePointer(
+                  ignoring: !isEnabled,
+                  child: DropMenuWidget<String>(
+                    items: rankOptions,
+                    hintText: 'HKI',
+                    selectedItem: condition['hki'],
+                    onChanged: (value) =>
+                        setState(() => condition['hki'] = value!),
+                    fillColor: Colors.white,
+                    borderColor: const Color(0xFFE0E0E0),
+                    textStyle: theme.textTheme.bodyMedium
+                        ?.copyWith(color: const Color(0xFF263238)),
+                  ),
                 ),
               ],
             ),
@@ -309,17 +313,19 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
                   style: TextStyle(fontSize: 12, color: Color(0xFF78909C)),
                 ),
                 const SizedBox(height: 4),
-                DropMenuWidget<String>(
-                  items: rankOptions,
-                  hintText: 'HKII',
-                  selectedItem: condition['hkii'],
-                  onChanged: isEnabled
-                      ? (value) => setState(() => condition['hkii'] = value!)
-                      : null,
-                  fillColor: Colors.white,
-                  borderColor: const Color(0xFFE0E0E0),
-                  textStyle: theme.textTheme.bodyMedium
-                      ?.copyWith(color: const Color(0xFF263238)),
+                IgnorePointer(
+                  ignoring: !isEnabled,
+                  child: DropMenuWidget<String>(
+                    items: rankOptions,
+                    hintText: 'HKII',
+                    selectedItem: condition['hkii'],
+                    onChanged: (value) =>
+                        setState(() => condition['hkii'] = value!),
+                    fillColor: Colors.white,
+                    borderColor: const Color(0xFFE0E0E0),
+                    textStyle: theme.textTheme.bodyMedium
+                        ?.copyWith(color: const Color(0xFF263238)),
+                  ),
                 ),
               ],
             ),
@@ -341,20 +347,3 @@ class _SetConditionsDialogTerm3State extends State<SetConditionsDialogTerm3> {
     );
   }
 }
-// {
-
-//   "conditions": {
-//     "good": [
-//       {"hki": "Tốt", "hkii": "Tốt"}
-//     ],
-//     "fair": [
-//       {"hki": "Tốt", "hkii": "Khá"}
-//     ],
-//     "pass": [
-//       {"hki": "Khá", "hkii": "Đạt"}
-//     ],
-//     "fail": [
-//       {"hki": "Chưa Đạt", "hkii": "Chưa Đạt"}
-//     ]
-//   }
-// }

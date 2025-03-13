@@ -16,7 +16,8 @@ class YearProvider with ChangeNotifier {
       print('Năm học đã được tải: $years'); // In ra danh sách năm học
       notifyListeners(); // Thông báo cho các listener rằng dữ liệu đã thay đổi
     } catch (e) {
-      print('Lỗi khi tải năm học: $e'); // In ra lỗi nếu có
+      print('Lỗi khi tải năm học: $e');
+      // In ra lỗi nếu có
     }
   }
 }

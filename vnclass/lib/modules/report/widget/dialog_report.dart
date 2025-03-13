@@ -9,6 +9,11 @@ import 'package:excel/excel.dart' as excel;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:provider/provider.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
+import 'package:vnclass/modules/main_home/controller/class_provider.dart';
+import 'package:vnclass/modules/main_home/controller/teacher_provider.dart';
+import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 
 class DialogReport extends StatefulWidget {
   final String reportType;
@@ -2151,6 +2156,27 @@ class _DialogReport extends State<DialogReport> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final year = Provider.of<YearProvider>(context).years;
+    final classs = Provider.of<ClassProvider>(context).classNames;
+    if (!classs.contains('Tất cả')) {
+      classs.add('Tất cả');
+    }
+    final account = Provider.of<AccountProvider>(context).account;
+    final idclass = Provider.of<TeacherProvider>(context).classIdTeacher;
+
+    String yearc = '';
+    String namec = '';
+
+    if (idclass.length >= 9) {
+      yearc = idclass.substring(idclass.length - 9);
+      namec = idclass.substring(0, idclass.length - 9).toUpperCase();
+    }
+
+    // Set default values if account.goupID == 'giaoVien'
+    if (account!.goupID == 'giaoVien') {
+      selectedClass = namec;
+      selectedYear = yearc;
+    }
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -2174,35 +2200,38 @@ class _DialogReport extends State<DialogReport> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Chọn lớp
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: 'Chọn lớp',
-                  labelStyle: const TextStyle(color: Color(0xFF78909C)),
-                  fillColor: const Color(0xFFF1F5F9),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Color(0xFFB0BEC5)),
+              // Chọn lớp (ẩn nếu reportType == 'school')
+              if (widget.reportType != 'school')
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: 'Chọn lớp',
+                    labelStyle: const TextStyle(color: Color(0xFF78909C)),
+                    fillColor: const Color(0xFFF1F5F9),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFFB0BEC5)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF1E88E5), width: 2),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide:
-                        const BorderSide(color: Color(0xFF1E88E5), width: 2),
-                  ),
+                  items: classs
+                      .map((className) => DropdownMenuItem(
+                            value: className,
+                            child: Text(className),
+                          ))
+                      .toList(),
+                  value: selectedClass,
+                  onChanged: account.goupID == 'giaoVien'
+                      ? null
+                      : (value) => setState(() {
+                            selectedClass = value;
+                            errorMessage = null;
+                          }),
                 ),
-                items: ['Tất cả', '10a6', '11a1', '12a2']
-                    .map((className) => DropdownMenuItem(
-                          value: className,
-                          child: Text(className),
-                        ))
-                    .toList(),
-                value: selectedClass,
-                onChanged: (value) => setState(() {
-                  selectedClass = value;
-                  errorMessage = null;
-                }),
-              ),
               const SizedBox(height: 16),
               // Chọn năm học
               DropdownButtonFormField<String>(
@@ -2221,17 +2250,19 @@ class _DialogReport extends State<DialogReport> {
                         const BorderSide(color: Color(0xFF1E88E5), width: 2),
                   ),
                 ),
-                items: ['2024-2025', '2023-2024', '2022-2023']
+                items: year
                     .map((year) => DropdownMenuItem(
                           value: year,
                           child: Text(year),
                         ))
                     .toList(),
                 value: selectedYear,
-                onChanged: (value) => setState(() {
-                  selectedYear = value;
-                  errorMessage = null;
-                }),
+                onChanged: account.goupID == 'giaoVien'
+                    ? null
+                    : (value) => setState(() {
+                          selectedYear = value;
+                          errorMessage = null;
+                        }),
               ),
               const SizedBox(height: 16),
               _buildSectionHeader('Loại báo cáo', context),

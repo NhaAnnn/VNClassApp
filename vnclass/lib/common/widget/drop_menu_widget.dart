@@ -55,12 +55,12 @@ class _DropMenuWidgetState<T> extends State<DropMenuWidget<T>> {
       decoration: BoxDecoration(
         color: widget.enabled
             ? widget.fillColor
-            : Colors.grey.shade600, // Nền thay đổi khi disabled
+            : Colors.grey.shade200, // Nền thay đổi khi disabled
         borderRadius: BorderRadius.circular(12), // Bo góc mềm mại
         border: Border.all(
           color: widget.enabled
               ? widget.borderColor ?? const Color(0xFF666666) // Viền xám đen
-              : Colors.grey.shade600, // Viền nhạt hơn khi disabled
+              : Colors.grey.shade400, // Viền nhạt hơn khi disabled
           width: 1.0, // Mảnh hơn
         ),
         boxShadow: [
@@ -128,10 +128,18 @@ class _DropMenuWidgetState<T> extends State<DropMenuWidget<T>> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Text(
                   value.toString(),
-                  style: widget.textStyle ??
-                      const TextStyle(
+                  style: widget.textStyle?.copyWith(
+                        color: widget.enabled
+                            ? Colors.black87
+                            : Colors
+                                .grey.shade600, // Màu chữ thay đổi khi disabled
+                      ) ??
+                      TextStyle(
                         fontSize: 16,
-                        color: Colors.black87,
+                        color: widget.enabled
+                            ? Colors.black87
+                            : Colors
+                                .grey.shade600, // Màu chữ thay đổi khi disabled
                         fontWeight: FontWeight.w500,
                       ),
                 ),

@@ -64,4 +64,24 @@ class MistakeRepository {
       return [];
     }
   }
+
+  Future<List<ClassMistakeModel>> fetchFilteredMistakeClassesByY({
+    String? year,
+  }) async {
+    Query query = firestore.collection('CLASS');
+
+    // Lọc theo _className
+
+    query = query.where('_id', isEqualTo: year);
+
+    try {
+      QuerySnapshot snapshot = await query.get();
+      return snapshot.docs
+          .map((doc) => ClassMistakeModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print("Error fetching filtered mistake classes: $e");
+      return [];
+    }
+  }
 }

@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:excel/excel.dart' as excel;
-import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
@@ -11,31 +8,30 @@ import 'package:vnclass/common/widget/radio_button_widget.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
+import 'dart:html' as html; // Thêm import cho web
 
-class DialogExportAcc extends StatefulWidget {
-  const DialogExportAcc({super.key});
+class DialogExportAccWeb extends StatefulWidget {
+  const DialogExportAccWeb({super.key});
 
   @override
-  State<DialogExportAcc> createState() => _DialogExportAccState();
+  State<DialogExportAccWeb> createState() => _DialogExportAccWebState();
 }
 
-class _DialogExportAccState extends State<DialogExportAcc> {
+class _DialogExportAccWebState extends State<DialogExportAccWeb> {
   String? selectedOption;
   bool isExporting = false;
   String? selectedYear;
   String? selectedClass;
-  List<String>? classes = []; // Ví dụ
-  List<String>? years = []; // Ví dụ
+  List<String>? classes = [];
+  List<String>? years = [];
+
   @override
   Widget build(BuildContext context) {
     final yearsProvider = Provider.of<YearProvider>(context);
     final classesProvider = Provider.of<ClassProvider>(context);
-    final years =
-        List<String>.from(yearsProvider.years); // Tạo bản sao của danh sách
-    final classes = List<String>.from(
-        classesProvider.classNames); // Tạo bản sao của danh sách
+    final years = List<String>.from(yearsProvider.years);
+    final classes = List<String>.from(classesProvider.classNames);
 
-    // Kiểm tra và chỉ thêm "Tất cả" nếu chưa tồn tại
     if (!classes.contains('Tất cả')) {
       classes.add('Tất cả');
     }
@@ -65,8 +61,7 @@ class _DialogExportAccState extends State<DialogExportAcc> {
           textAlign: TextAlign.center,
         ),
       ),
-      contentPadding:
-          const EdgeInsets.all(8), // Giảm padding mặc định của content
+      contentPadding: const EdgeInsets.all(8),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -295,43 +290,32 @@ class _DialogExportAccState extends State<DialogExportAcc> {
   }
 
   Future<void> exportToExcel(BuildContext context) async {
-    if (Platform.isAndroid) {
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
-      if (androidInfo.version.sdkInt >= 33) {
-        await _handleAndroid13Permissions(context);
-      } else {
-        await _handleLegacyAndroidPermissions(context);
-      }
-    }
-
     var excelFile = excel.Excel.createExcel();
     await _createSheetsByClassId(excelFile);
+
+    // Chuyển đổi file Excel thành Uint8List
+    final excelBytes = excelFile.encode()!;
+
+    // Tạo blob và liên kết tải file trên web
+    final blob = html.Blob([excelBytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute('download', _getFileName())
+      ..click();
+
+    // Giải phóng bộ nhớ
+    html.Url.revokeObjectUrl(url);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('File đã được tải xuống: ${_getFileName()}')),
+    );
   }
 
-  Future<void> _handleAndroid13Permissions(BuildContext context) async {
-    final status = await Permission.photos.status;
-    if (!status.isGranted) {
-      final result = await Permission.photos.request();
-      if (result.isDenied || result.isPermanentlyDenied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng cấp quyền để lưu file')),
-        );
-        if (result.isPermanentlyDenied) await openAppSettings();
-      }
-    }
-  }
-
-  Future<void> _handleLegacyAndroidPermissions(BuildContext context) async {
-    final status = await Permission.storage.status;
-    if (!status.isGranted) {
-      final result = await Permission.storage.request();
-      if (result.isDenied || result.isPermanentlyDenied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Vui lòng cấp quyền để lưu file')),
-        );
-        if (result.isPermanentlyDenied) await openAppSettings();
-      }
-    }
+  String _getFileName() {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return selectedOption == 'Học sinh - PHHS'
+        ? 'st_report_$timestamp.xlsx'
+        : 'nvxxreport_$timestamp.xlsx';
   }
 
   Future<List<Map<String, dynamic>>> _batchQuery(
@@ -447,25 +431,8 @@ class _DialogExportAccState extends State<DialogExportAcc> {
           await _fillStudentExcelTable(sheet, results[i], excelFile);
         }
       }
-
-      // Lưu file duy nhất sau khi xử lý tất cả sheet
-      try {
-        final directory = Directory('/storage/emulated/0/Download');
-        final path =
-            '${directory.path}/st_report_${DateTime.now().millisecondsSinceEpoch}.xlsx';
-        final file = File(path);
-        await file.writeAsBytes(excelFile.encode()!);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File đã được lưu tại: $path')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi xuất file: ${e.toString()}')),
-        );
-      }
     } else {
-      // Logic cho Giáo viên/Ban giám hiệu (giữ nguyên không thay đổi)
+      // Logic cho Giáo viên/Ban giám hiệu
       final accountSnapshot = await FirebaseFirestore.instance
           .collection('ACCOUNT')
           .where('_groupID',
@@ -480,7 +447,7 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       final accIds = accountMap.keys.toList();
 
       final teacherDocs = await _batchQuery(
-          selectedOption == 'Giáo viên' ? 'TEACHER' : 'TEACHER',
+          selectedOption == 'Giáo viên' ? 'TEACHER' : 'MANAGEMENT',
           'ACC_id',
           accIds);
       final teacherMap = {
@@ -491,23 +458,6 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       final sheet = excelFile[excelFile.getDefaultSheet()!];
       _fillStaffInfo(sheet);
       await _fillStaffExcelTable(sheet, accountMap, teacherMap, excelFile);
-
-      // Lưu file cho Giáo viên/Ban giám hiệu
-      try {
-        final directory = Directory('/storage/emulated/0/Download');
-        final path =
-            '${directory.path}/nvxxreport_${DateTime.now().millisecondsSinceEpoch}.xlsx';
-        final file = File(path);
-        await file.writeAsBytes(excelFile.encode()!);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File đã được lưu tại: $path')),
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi xuất file: ${e.toString()}')),
-        );
-      }
     }
   }
 
@@ -530,7 +480,6 @@ class _DialogExportAccState extends State<DialogExportAcc> {
     sheet.cell(excel.CellIndex.indexByString("C4")).value =
         excel.TextCellValue(DateFormat('dd/MM/yyyy').format(DateTime.now()));
 
-    // Định dạng tiêu đề
     for (int row = 1; row <= 4; row++) {
       sheet.cell(excel.CellIndex.indexByString("A$row")).cellStyle =
           excel.CellStyle(
@@ -573,7 +522,6 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       "Mật khẩu PHHS",
     ];
 
-    // Ghi header
     for (int col = 0; col < headers.length; col++) {
       final cellAddress = "${getColumnLetter(col)}$headerRowIndex";
       sheet.cell(excel.CellIndex.indexByString(cellAddress)).value =
@@ -585,10 +533,8 @@ class _DialogExportAccState extends State<DialogExportAcc> {
         textWrapping: excel.TextWrapping.WrapText,
       );
     }
-    // Thiết lập chiều cao tự động cho hàng chứa header
     sheet.setRowHeight(headerRowIndex, 0);
 
-    // Ghi dữ liệu
     int currentRow = headerRowIndex + 1;
     for (var studentData in data) {
       final account = studentData['account'];
@@ -608,13 +554,11 @@ class _DialogExportAccState extends State<DialogExportAcc> {
           excel.TextCellValue(account['_userName'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
           excel.TextCellValue(account['_password'] ?? '123');
-      // Giả sử PHHS có tài khoản riêng, cần lấy từ collection khác nếu có
       sheet.cell(excel.CellIndex.indexByString("G$currentRow")).value =
           excel.TextCellValue(student['P_id'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("H$currentRow")).value =
           excel.TextCellValue(student['P_password'] ?? '123');
 
-      // Định dạng dữ liệu
       for (int col = 0; col < headers.length; col++) {
         final cellAddress = "${getColumnLetter(col)}$currentRow";
         sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =
@@ -664,10 +608,8 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       "Giới tính",
       "Tên đăng nhập",
       "Mật khẩu",
-      // "Lớp phụ trách",
     ];
 
-    // Ghi header
     for (int col = 0; col < headers.length; col++) {
       final cellAddress = "${getColumnLetter(col)}$headerRowIndex";
       sheet.cell(excel.CellIndex.indexByString(cellAddress)).value =
@@ -679,7 +621,6 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       );
     }
 
-    // Ghi dữ liệu
     int currentRow = headerRowIndex + 1;
     int stt = 1;
     for (var staffId in staffMap.keys) {
@@ -699,7 +640,6 @@ class _DialogExportAccState extends State<DialogExportAcc> {
       sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
           excel.TextCellValue(account['_password'] ?? '123');
 
-      // Định dạng dữ liệu
       for (int col = 0; col < headers.length; col++) {
         final cellAddress = "${getColumnLetter(col)}$currentRow";
         sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =

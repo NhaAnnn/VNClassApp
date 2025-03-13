@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/report/widget/dialog_report.dart';
 
 class ReportMainPage extends StatefulWidget {
@@ -15,6 +17,9 @@ class _ReportMainPageState extends State<ReportMainPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final accountProvider = Provider.of<AccountProvider>(context);
+    final account = accountProvider.account;
+    // print('acc ${account!.goupID}');
 
     return AppBarWidget(
       implementLeading: true,
@@ -35,18 +40,20 @@ class _ReportMainPageState extends State<ReportMainPage> {
               accentColor: const Color(0xFF1976D2),
               onTap: () => _showReportDialog(context, 'class'),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-            _buildReportCard(
-              context,
-              title: 'Xuất Báo Cáo Vi Phạm Trường Học',
-              icon: Icons.account_balance_outlined,
-              gradientColors: [
-                const Color(0xFFE8F5E9),
-                const Color(0xFFC8E6C9)
-              ],
-              accentColor: const Color(0xFF2E7D32),
-              onTap: () => _showReportDialog(context, 'school'),
-            ),
+            if (account!.goupID == 'banGH') ...[
+              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              _buildReportCard(
+                context,
+                title: 'Xuất Báo Cáo Vi Phạm Trường Học',
+                icon: Icons.account_balance_outlined,
+                gradientColors: [
+                  const Color(0xFFE8F5E9),
+                  const Color(0xFFC8E6C9)
+                ],
+                accentColor: const Color(0xFF2E7D32),
+                onTap: () => _showReportDialog(context, 'school'),
+              ),
+            ]
           ],
         ),
       ),

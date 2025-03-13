@@ -9,6 +9,7 @@ import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/login/view/login_page.dart';
+import 'package:vnclass/modules/main_home/controller/permission_provider.dart';
 import 'package:vnclass/modules/main_home/views/user_change_pass_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_change_type_mistake_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_set_points_screen.dart';
@@ -27,6 +28,7 @@ class _UserScreenState extends State<UserScreen> {
     final accountProvider = Provider.of<AccountProvider>(context);
     final account = accountProvider.account;
     final theme = Theme.of(context);
+    final pers = Provider.of<PermissionProvider>(context);
 
     return AppBarWidget(
       titleString: 'Thông tin tài khoản',
@@ -101,13 +103,26 @@ class _UserScreenState extends State<UserScreen> {
               ),
               const SizedBox(height: 32),
               // Options
+
               _buildMenuItem(context, 'Chính sách', null),
-              _buildMenuItem(context, 'Tùy chỉnh vi phạm',
-                  UserChangeTypeMistakeScreen.routeName),
               _buildMenuItem(
                   context, 'Đổi mật khẩu', UserChangePassScreen.routeName),
-              _buildMenuItem(
-                  context, 'Thiết lập mức điểm', UserSetPointsScreen.routeName),
+
+              if (account.goupID == 'banGH') ...[
+                _buildMenuItem(context, 'Tùy chỉnh vi phạm',
+                    UserChangeTypeMistakeScreen.routeName),
+                _buildMenuItem(context, 'Thiết lập mức điểm',
+                    UserSetPointsScreen.routeName),
+              ] else if (pers.permission
+                  .contains('Thiết lập loại và các vi phạm')) ...[
+                _buildMenuItem(context, 'Tùy chỉnh vi phạm',
+                    UserChangeTypeMistakeScreen.routeName),
+              ] else if (pers.permission
+                  .contains('Thiết lập công thức tính điểm')) ...[
+                _buildMenuItem(context, 'Thiết lập mức điểm',
+                    UserSetPointsScreen.routeName),
+              ],
+
               const SizedBox(height: 32),
               // Bouton
               SizedBox(
