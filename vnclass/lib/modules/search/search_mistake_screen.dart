@@ -1,64 +1,77 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
+
 import 'package:vnclass/modules/classes/class_detail/widget/class_detail_card.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
+import 'package:vnclass/modules/mistake/controllers/mistake_repository.dart';
+import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
+import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
+import 'package:vnclass/modules/mistake/view/mistake_class_detail_page.dart';
+import 'package:vnclass/modules/mistake/widget/item_class_mistake.dart';
+import 'package:vnclass/modules/mistake/widget/item_class_mistake_student.dart';
 
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
-  static String routeName = 'search';
+class SearchMistakeScreen extends StatefulWidget {
+  const SearchMistakeScreen({super.key});
+  static String routeName = 'search_mistake';
 
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  _SearchMistakeScreenState createState() => _SearchMistakeScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen>
+class _SearchMistakeScreenState extends State<SearchMistakeScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   List<StudentDetailModel> _students = [];
-  List<ClassModel> _classes = [];
+  List<ClassMistakeModel> _classes = [];
   late TabController _tabController;
 
   final Map<String, List<dynamic>> _filteredResults = {};
   final List<String> _filteredCategories = [
     'Lớp Học',
-    'Hạnh Kiểm HS',
-    'Thông Tin HS',
+    'Học Sinh',
   ];
 
   Future<void> getList() async {
-    final accountProvider =
-        Provider.of<AccountProvider>(context, listen: false);
+    final mistakeRepository = MistakeRepository();
 
-    if (accountProvider.account!.goupID == 'giaoVien') {
-      _classes = await ClassController.fetchAllClassesByTearcherID(
-          accountProvider.account!.idAcc);
-
-      if (_classes.isNotEmpty) {
-        List<StudentDetailModel> allStudents = [];
-        for (var classItem in _classes) {
-          final students =
-              await StudentDetailController.fetchStudentsByClass(classItem.id!);
-          allStudents.addAll(students);
-        }
-        _students = allStudents;
+    _classes = await mistakeRepository.fetchMistakeClasses('CLASS');
+    if (_classes.isNotEmpty) {
+      List<StudentDetailModel> allStudents = [];
+      for (var classItem in _classes) {
+        final students = await fetchStudentMistakeClasses(classItem.idClass);
+        allStudents.addAll(students
+            .where((student) => student != null)
+            .cast<StudentDetailModel>());
       }
-    } else {
-      _classes = await ClassController.fetchAllClasses();
-      _students = await StudentDetailController.fetchAllStudents();
+      _students = allStudents;
     }
 
     print('Số học sinh: ${_students.length}');
     print('Số lớp học: ${_classes.length}');
 
     setState(() {});
+  }
+
+  Future<List<StudentDetailModel?>> fetchStudentMistakeClasses(
+      String idClass) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('STUDENT_DETAIL')
+        .where('Class_id', isEqualTo: idClass)
+        .get();
+
+    final data = await Future.wait(
+      snapshot.docs
+          .map((doc) => StudentDetailModel.fromFirestoreTotalErrors(doc)),
+    );
+
+    return data;
   }
 
   void filterResults(String query) {
@@ -71,21 +84,22 @@ class _SearchScreenState extends State<SearchScreen>
 
     final studentResults = _students
         .where((student) =>
-            student.studentName!.toLowerCase().contains(query.toLowerCase()))
+            student.nameStudent.toLowerCase().contains(query.toLowerCase()))
         .toList();
 
     final classResults = _classes
         .where((classItem) =>
-            classItem.className!.toLowerCase().contains(query.toLowerCase()))
+            classItem.className.toLowerCase().contains(query.toLowerCase()))
         .toList();
 
     if (studentResults.isNotEmpty) {
-      _filteredResults['Thông Tin HS'] = studentResults;
-      _filteredResults['Hạnh Kiểm HS'] = studentResults;
+      _filteredResults['Học Sinh'] = studentResults;
     }
     if (classResults.isNotEmpty) {
       _filteredResults['Lớp Học'] = classResults;
     }
+    print('Số học sinh: ${_students.length}');
+    print('Số lớp học: ${_classes.length}');
 
     setState(() {});
   }
@@ -152,25 +166,27 @@ class _SearchScreenState extends State<SearchScreen>
                         itemCount: _filteredResults[category]!.length,
                         itemBuilder: (context, index) {
                           final result = _filteredResults[category]![index];
-                          if (result is ClassModel) {
-                            return AllClassesCard(classModel: result);
+                          if (result is ClassMistakeModel) {
+                            return ItemClassModels(classMistakeModel: result);
                           } else if (result is StudentDetailModel) {
-                            if (category == 'Thông Tin HS') {
-                              return ClassDetailCard(
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ItemClassMistakeStudent(
                                 studentDetailModel: result,
-                              );
-                            }
-                            List<String> months = [
-                              'Học kì 1',
-                              'Học kì 2',
-                              'Cả năm',
-                            ];
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: months.map((month) {
-                                return studentSearch(month, result);
-                              }).toList(),
+                              ),
                             );
+
+                            // List<String> months = [
+                            //   'Học kì 1',
+                            //   'Học kì 2',
+                            //   'Cả năm',
+                            // ];
+                            // return Column(
+                            //   crossAxisAlignment: CrossAxisAlignment.start,
+                            //   children: months.map((month) {
+                            //     return studentSearch(month, result);
+                            //   }).toList(),
+                            // );
                           }
                           return SizedBox.shrink();
                         },

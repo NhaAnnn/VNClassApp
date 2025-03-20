@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert'; // for utf8.encode
-import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';

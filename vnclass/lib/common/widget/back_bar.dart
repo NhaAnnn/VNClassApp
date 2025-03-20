@@ -5,21 +5,26 @@ class BackBar extends StatelessWidget {
   const BackBar({
     super.key,
     this.title,
+    this.shape,
+    this.backgroundColor,
   });
 
+  final ShapeBorder? shape;
+  final Color? backgroundColor;
   final String? title;
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.blue,
+      backgroundColor: backgroundColor ?? Colors.blue,
       title: Text(title!),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(10),
-          bottomRight: Radius.circular(10),
-        ),
-      ),
+      shape: shape ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(10),
+              bottomRight: Radius.circular(10),
+            ),
+          ),
       leading: IconButton(
         icon: Transform.rotate(
             angle: -1.57,

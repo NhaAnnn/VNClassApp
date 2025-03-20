@@ -15,12 +15,14 @@ class DropMenuWidget<T> extends StatefulWidget {
       fontWeight: FontWeight.w500,
     ),
     this.enabled = true,
+    this.hintColor,
   });
 
   final List<T> items;
   final T? selectedItem;
   final ValueChanged<T?>? onChanged;
   final String? hintText;
+  final Color? hintColor;
   final Color? fillColor;
   final Color? borderColor;
   final TextStyle? textStyle;
@@ -61,7 +63,7 @@ class _DropMenuWidgetState<T> extends State<DropMenuWidget<T>> {
           color: widget.enabled
               ? widget.borderColor ?? const Color(0xFF666666) // Viền xám đen
               : Colors.grey.shade400, // Viền nhạt hơn khi disabled
-          width: 1.0, // Mảnh hơn
+          width: 1.5, // Mảnh hơn
         ),
         boxShadow: [
           BoxShadow(
@@ -79,7 +81,8 @@ class _DropMenuWidgetState<T> extends State<DropMenuWidget<T>> {
             child: Text(
               widget.hintText ?? 'Chọn một mục',
               style: widget.textStyle?.copyWith(
-                    color: Colors.grey.shade500, // Hint nhạt hơn, tinh tế
+                    color: widget.hintColor ??
+                        Colors.grey.shade500, // Hint nhạt hơn, tinh tế
                     fontWeight: FontWeight.w400, // Nhẹ hơn khi là hint
                   ) ??
                   TextStyle(

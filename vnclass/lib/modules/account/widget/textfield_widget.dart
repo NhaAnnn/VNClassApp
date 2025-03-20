@@ -15,6 +15,7 @@ class TextfieldWidget extends StatelessWidget {
       fontSize: 16,
       color: Colors.black87,
     ),
+    this.maxLines = 1,
   });
 
   final TextEditingController? controller;
@@ -26,6 +27,7 @@ class TextfieldWidget extends StatelessWidget {
   final TextStyle? textStyle;
   final String? errorText;
   final Color? colorBorder;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class TextfieldWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
+          maxLines: maxLines,
           controller: controller,
           obscureText: obscureText,
           onChanged: onChanged,
@@ -89,7 +92,7 @@ class TextfieldWidget extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4.0),
             child: Text(
               errorText!,
-              style: TextStyle(color: Colors.red, fontSize: 12),
+              style: TextStyle(color: Colors.red, fontSize: 14),
             ),
           ),
       ],

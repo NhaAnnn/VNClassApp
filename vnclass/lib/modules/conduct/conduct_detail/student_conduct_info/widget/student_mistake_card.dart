@@ -43,7 +43,7 @@ class _StudentMistakeCardState extends State<StudentMistakeCard> {
                                 fontWeight: FontWeight.bold, fontSize: 16)),
                       ),
                       Expanded(
-                        flex: 8,
+                        flex: 7,
                         child: Text(widget.mistake!.m_name.toString(),
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,

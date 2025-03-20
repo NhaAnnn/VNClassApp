@@ -1,14 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
 import 'package:vnclass/modules/conduct/widget/choose_year_dialog.dart';
-import 'package:vnclass/modules/notification/controller/notification_controller.dart';
-import 'package:vnclass/modules/notification/funtion/notification_change.dart';
-import 'package:vnclass/modules/notification/funtion/notification_service.dart';
 import 'package:vnclass/modules/notification/model/notification_model.dart';
-import 'package:vnclass/modules/notification/view/notification_screen.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});

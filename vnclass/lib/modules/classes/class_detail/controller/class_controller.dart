@@ -49,6 +49,57 @@ class ClassController {
     }
   }
 
+  static Future<List<ClassModel>> fetchAllClassesByTearcherID(
+      String teacherId) async {
+    try {
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('CLASS')
+          .where('T_id', isEqualTo: teacherId)
+          .get();
+
+      // Tạo danh sách các Future để thực hiện song song
+      List<Future<ClassModel>> classFutures =
+          querySnapshot.docs.map((doc) async {
+        return await ClassModel.fetchClassFromFirestore(doc);
+      }).toList();
+
+      // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
+      List<ClassModel> classes = await Future.wait(classFutures);
+
+      return classes;
+    } catch (e) {
+      // Xử lý lỗi nếu có
+      print('Failed to fetch classes: $e');
+      return []; // Trả về danh sách rỗng trong trường hợp có lỗi
+    }
+  }
+
+  static Future<List<ClassModel>> fetchAllClassesByYearAndTearcher(
+      String year, String teacherId) async {
+    try {
+      final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('CLASS')
+          .where('_year', isEqualTo: year)
+          .where('T_id', isEqualTo: teacherId)
+          .get();
+
+      // Tạo danh sách các Future để thực hiện song song
+      List<Future<ClassModel>> classFutures =
+          querySnapshot.docs.map((doc) async {
+        return await ClassModel.fetchClassFromFirestore(doc);
+      }).toList();
+
+      // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
+      List<ClassModel> classes = await Future.wait(classFutures);
+
+      return classes;
+    } catch (e) {
+      // Xử lý lỗi nếu có
+      print('Failed to fetch classes: $e');
+      return []; // Trả về danh sách rỗng trong trường hợp có lỗi
+    }
+  }
+
   static Future<bool> classExists(String classId) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('CLASS')

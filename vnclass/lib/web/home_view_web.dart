@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:vnclass/web/class_view_web.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vnclass/web/classes/class_view_web.dart';
 
 class HomeViewWeb extends StatefulWidget {
   const HomeViewWeb({super.key});
@@ -12,6 +12,26 @@ class HomeViewWeb extends StatefulWidget {
 
 class _HomeViewWebState extends State<HomeViewWeb> {
   int selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedIndex(); // Load the saved index
+  }
+
+  Future<void> _loadSelectedIndex() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedIndex =
+          prefs.getInt('selectedIndex') ?? 0; // Default to 0 if not set
+    });
+  }
+
+  Future<void> _saveSelectedIndex(int index) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedIndex', index); // Save the index
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,14 +39,14 @@ class _HomeViewWebState extends State<HomeViewWeb> {
         title: const Text('@@@'),
       ),
       body: Row(children: [
-        // Menu bên trái
         NavigationRail(
           backgroundColor: Colors.blueGrey,
-          extended: true, // Mở rộng NavigationRail
+          extended: true,
           selectedIndex: selectedIndex,
           onDestinationSelected: (int index) {
             setState(() {
               selectedIndex = index;
+              _saveSelectedIndex(index); // Save the selected index
             });
           },
           destinations: <NavigationRailDestination>[
@@ -48,7 +68,6 @@ class _HomeViewWebState extends State<HomeViewWeb> {
             ),
           ],
         ),
-        // Nội dung chính
         Expanded(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -62,15 +81,15 @@ class _HomeViewWebState extends State<HomeViewWeb> {
   Widget _buildContent(int index) {
     switch (index) {
       case 0:
-        return _buildHomeContent(); // Content for Trang Chủ
+        return _buildHomeContent();
       case 1:
-        return ClassViewWeb(); // Content for Quản Lý Lớp
+        return ClassViewWeb();
       case 2:
-        return _buildStudentManagementContent(); // Content for Học Sinh
+        return _buildHomeContent();
       case 3:
-        return _buildSettingsContent(); // Content for Cài Đặt
+        return _buildSettingsContent();
       default:
-        return _buildHomeContent(); // Fallback to home content
+        return _buildHomeContent();
     }
   }
 

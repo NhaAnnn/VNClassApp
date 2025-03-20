@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
@@ -8,6 +9,7 @@ import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/conduct/widget/all_conduct_card.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 
 class AllConduct extends StatefulWidget {
@@ -103,6 +105,8 @@ class _AllConductState extends State<AllConduct> {
   @override
   Widget build(BuildContext context) {
     double paddingValue = MediaQuery.of(context).size.width * 1;
+    final accountProvider = Provider.of<AccountProvider>(context);
+
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
@@ -158,7 +162,10 @@ class _AllConductState extends State<AllConduct> {
                       ),
                     ),
                     FutureBuilder<List<ClassModel>>(
-                      future: ClassController.fetchAllClassesByYear(year),
+                      future: accountProvider.account!.goupID == 'giaoVien'
+                          ? ClassController.fetchAllClassesByYearAndTearcher(
+                              year, accountProvider.account!.idAcc)
+                          : ClassController.fetchAllClassesByYear(year),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {

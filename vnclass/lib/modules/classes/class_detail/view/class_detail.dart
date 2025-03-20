@@ -3,7 +3,7 @@ import 'package:skeleton_loader/skeleton_loader.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
 import 'package:vnclass/modules/classes/class_detail/widget/class_detail_card.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 
@@ -69,7 +69,7 @@ class _ClassDetailState extends State<ClassDetail> {
                           left: MediaQuery.of(context).size.width * 0.01,
                           right: MediaQuery.of(context).size.width * 0.01,
                           top: MediaQuery.of(context).size.width * 0.02),
-                      child: FutureBuilder<List<StudentModel>>(
+                      child: FutureBuilder<List<StudentDetailModel>>(
                         future: StudentDetailController.fetchStudentsByClass(
                             classID),
                         builder: (context, snapshot) {
@@ -105,12 +105,12 @@ class _ClassDetailState extends State<ClassDetail> {
                           }
 
                           // Dữ liệu đã được lấy thành công
-                          List<StudentModel> students = snapshot.data!;
+                          List<StudentDetailModel> students = snapshot.data!;
                           return SingleChildScrollView(
                             child: Column(
-                              children: students.map((studentModel) {
+                              children: students.map((StudentDetailModel) {
                                 return ClassDetailCard(
-                                  studentModel: studentModel,
+                                  studentDetailModel: StudentDetailModel,
                                   className: className,
                                 ); // Truyền dữ liệu vào ClassDetailCard
                               }).toList(),

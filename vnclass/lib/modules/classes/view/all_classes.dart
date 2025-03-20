@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +11,7 @@ import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
 import 'package:vnclass/modules/classes/widget/create_list_class_dialog.dart';
 import 'package:vnclass/modules/classes/widget/create_one_class_dialog.dart';
+import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 
@@ -24,77 +24,61 @@ class AllClasses extends StatefulWidget {
 }
 
 class _AllClassesState extends State<AllClasses> {
-  List<String> years = [];
+  // List<String> years = [];
   String? selectedGrade; // Biến trạng thái cho khối
-  String? selectedYear = Provider.of<YearProvider>(context, listen: false)
-      .years
-      .last; // Biến trạng thái cho năm học
+  String? selectedYear; // Biến trạng thái cho năm học
 
   @override
   void initState() {
     super.initState();
     // getYear();
-    // selectedYear = Provider.of<YearProvider>(context).years.last;
+    selectedYear = Provider.of<YearProvider>(context, listen: false).years.last;
+    selectedGrade = 'Tất cả';
   }
 
   Future<void> _refreshClasses() async {
     setState(() {});
   }
 
-  // Future<void> getYear() async {
-  //   final QuerySnapshot querySnapshot =
-  //       await FirebaseFirestore.instance.collection('YEAR').get();
-
-  //   for (var doc in querySnapshot.docs) {
-  //     years.add(doc['_year']);
-  //   }
-
-  //   setState(() {}); // Cập nhật lại giao diện sau khi lấy dữ liệu
-  // }
-
   Future<List<ClassModel>> _fetchFilteredClasses() async {
-    var allclasses = await ClassController.fetchAllClasses();
-    List<ClassModel> filteredClass = [];
+    final accountProvider =
+        Provider.of<AccountProvider>(context, listen: false);
+    List<ClassModel> allClasses;
 
-    if (selectedGrade == null && selectedYear == null) {
-      return allclasses; // Trả về tất cả lớp học
-    } else if (selectedGrade != null && selectedYear != null) {
-      var result = await ClassController.fetchAllClassesByYear(selectedYear!);
-
-      for (var newResult in result) {
-        if (newResult.className != null && newResult.className!.length >= 2) {
-          String firstTwoChars = newResult.className!.substring(0, 2);
-          if (selectedGrade!.contains('Khối 10') &&
-              firstTwoChars.contains('10')) {
-            filteredClass.add(newResult);
-          } else if (selectedGrade!.contains('Khối 11') &&
-              firstTwoChars.contains('11')) {
-            filteredClass.add(newResult);
-          } else if (selectedGrade!.contains('Khối 12') &&
-              firstTwoChars.contains('12')) {
-            filteredClass.add(newResult);
-          }
-        }
-      }
-      return filteredClass;
+    if (accountProvider.account!.goupID == 'giaoVien') {
+      allClasses = await ClassController.fetchAllClassesByYearAndTearcher(
+          selectedYear!, accountProvider.account!.idAcc);
     } else {
-      for (var newResult in allclasses) {
-        if (newResult.className != null && newResult.className!.length >= 2) {
-          String firstTwoChars = newResult.className!.substring(0, 2);
-          if (selectedGrade!.contains('Khối 10') &&
-              firstTwoChars.contains('10')) {
-            filteredClass.add(newResult);
-          } else if (selectedGrade!.contains('Khối 11') &&
-              firstTwoChars.contains('11')) {
-            filteredClass.add(newResult);
-          } else if (selectedGrade!.contains('Khối 12') &&
-              firstTwoChars.contains('12')) {
-            filteredClass.add(newResult);
-          }
+      allClasses = await ClassController.fetchAllClassesByYear(selectedYear!);
+    }
+
+    // If 'Tất cả' is selected, return all classes
+    if (selectedGrade == 'Tất cả') {
+      return allClasses;
+    }
+
+    // Filter classes based on selected grade
+    return _filterClassesByGrade(allClasses);
+  }
+
+  List<ClassModel> _filterClassesByGrade(List<ClassModel> classes) {
+    List<ClassModel> filteredClasses = [];
+
+    for (var classModel in classes) {
+      if (classModel.className != null && classModel.className!.length >= 2) {
+        String firstTwoChars = classModel.className!.substring(0, 2);
+        if (selectedGrade!.contains('Khối 10') &&
+                firstTwoChars.contains('10') ||
+            selectedGrade!.contains('Khối 11') &&
+                firstTwoChars.contains('11') ||
+            selectedGrade!.contains('Khối 12') &&
+                firstTwoChars.contains('12')) {
+          filteredClasses.add(classModel);
         }
       }
-      return filteredClass;
     }
+
+    return filteredClasses;
   }
 
   @override
@@ -158,7 +142,7 @@ class _AllClassesState extends State<AllClasses> {
                   children: [
                     Expanded(
                       child: DropMenuWidget(
-                        items: ['Khối 10', 'Khối 11', 'Khối 12'],
+                        items: ['Tất cả', 'Khối 10', 'Khối 11', 'Khối 12'],
                         hintText: 'Khối',
                         onChanged: (value) {
                           setState(() {

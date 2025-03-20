@@ -10,6 +10,7 @@ import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/controllers/mistake_repository.dart';
 import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
 import 'package:vnclass/modules/mistake/widget/item_class_mistake.dart';
+import 'package:vnclass/modules/search/search_mistake_screen.dart';
 
 class MistakeMainPage extends StatefulWidget {
   const MistakeMainPage({super.key});
@@ -156,7 +157,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     }
     List<String>? pers = Provider.of<PermissionProvider>(context).permission;
 
-    print('du lieu pers $pers');
+    // print('du lieu pers $pers');
 
     // Kiểm tra trường hợp đặc biệt: hocSinh với quyền 'Cập nhật vi phạm lớp học'
     bool isStudentWithClassMistakePermission = account.goupID == 'hocSinh' &&
@@ -370,6 +371,9 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onTap: () {
+                Navigator.pushNamed(context, SearchMistakeScreen.routeName);
+              },
             ),
             const SizedBox(height: 20),
             Expanded(

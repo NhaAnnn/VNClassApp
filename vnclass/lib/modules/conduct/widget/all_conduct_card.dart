@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
@@ -10,11 +11,12 @@ class AllConductCard extends StatefulWidget {
     super.key,
     required this.classModel,
     required this.monthKey,
+    this.onSelect,
   });
 
   final ClassModel classModel;
   final int monthKey;
-
+  final Function(ClassModel)? onSelect;
   @override
   State<AllConductCard> createState() => _AllConductCardState();
 }
@@ -23,99 +25,118 @@ class _AllConductCardState extends State<AllConductCard> {
   ClassModel get classModel => widget.classModel;
   int get monthKey => widget.monthKey;
 
+  void _openRightDrawer(BuildContext context) {
+    Scaffold.of(context).openEndDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     double paddingValue = MediaQuery.of(context).size.width * 1;
-    return Card(
-      elevation: 8,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: Colors.blueAccent, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  _buildRow('Lớp:', classModel.className.toString()),
-                  SizedBox(height: paddingValue * 0.02),
-                  _buildRow('Niên khóa:', classModel.year.toString()),
-                  SizedBox(height: paddingValue * 0.02),
-                  _buildRow('Sỉ số:', classModel.amount.toString()),
-                  SizedBox(height: paddingValue * 0.02),
-                  _buildRow('GVCN:', classModel.teacherName.toString()),
-                  SizedBox(height: paddingValue * 0.02),
-                  _buildConductRow('Hạnh kiểm:', 'Tốt', 'Đạt'),
-                  SizedBox(height: paddingValue * 0.02),
-                  _buildConductRow('', 'Khá', 'Chưa đạt'),
-                ],
-              ),
-            ),
-            GestureDetector(
-              onTap: () => {
-                Navigator.of(context).pushNamed(
-                  ConductDetail.routeName,
-                  arguments: {
-                    'classID': classModel.id,
-                    'className': classModel.className,
-                    'monthKey': monthKey,
-                  },
-                )
-              },
-              child: Padding(
-                padding: EdgeInsets.all(paddingValue * 0.02),
-                child: Icon(
-                  FontAwesomeIcons.angleRight,
-                  size: 36,
-                  color: Colors.black,
+    return GestureDetector(
+      onTap: () {
+        if (kIsWeb) {
+          widget.onSelect!(classModel);
+          _openRightDrawer(context);
+        }
+      },
+      child: Card(
+        elevation: 8,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: Colors.blueAccent, width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    _buildRow('Lớp:', classModel.className.toString()),
+                    _buildRow('Niên khóa:', classModel.year.toString()),
+                    _buildRow('Sỉ số:', classModel.amount.toString()),
+                    _buildRow('GVCN:', classModel.teacherName.toString()),
+                    _buildConductRow('Hạnh kiểm:', 'Tốt', 'Đạt'),
+                    _buildConductRow('', 'Khá', 'Chưa Đạt'),
+                  ],
                 ),
               ),
-            ),
-          ],
+              GestureDetector(
+                onTap: () => {
+                  Navigator.of(context).pushNamed(
+                    ConductDetail.routeName,
+                    arguments: {
+                      'classID': classModel.id,
+                      'className': classModel.className,
+                      'monthKey': monthKey,
+                    },
+                  )
+                },
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Icon(
+                    FontAwesomeIcons.angleRight,
+                    size: 36,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildRow(String label, String value) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text(
+                label,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(flex: 7, child: Text(value)),
+          ],
         ),
-        Expanded(flex: 7, child: Text(value)),
-      ],
+      ),
     );
   }
 
   Widget _buildConductRow(
       String label, String conductType1, String conductType2) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Text(
+                label,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            Expanded(
+                child: Text('$conductType1:',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            Expanded(child: _buildConductFutureBuilder(conductType1)),
+            Expanded(
+                flex: 2,
+                child: Text('$conductType2:',
+                    style: TextStyle(fontWeight: FontWeight.bold))),
+            Expanded(child: _buildConductFutureBuilder(conductType2)),
+          ],
         ),
-        Expanded(
-            child: Text('$conductType1:',
-                style: TextStyle(fontWeight: FontWeight.bold))),
-        Expanded(child: _buildConductFutureBuilder(conductType1)),
-        Expanded(
-            flex: 2,
-            child: Text('$conductType2:',
-                style: TextStyle(fontWeight: FontWeight.bold))),
-        Expanded(child: _buildConductFutureBuilder(conductType2)),
-      ],
+      ),
     );
   }
 

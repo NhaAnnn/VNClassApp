@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/modules/account/controller/account_repository.dart';
@@ -7,7 +6,6 @@ import 'package:vnclass/modules/account/view/account_creat_acc_page.dart';
 import 'package:vnclass/modules/account/widget/dialog_export_acc.dart';
 import 'package:vnclass/modules/account/widget/item_account.dart';
 import 'package:vnclass/modules/account/widget/tabar_list_acc.dart';
-import 'package:vnclass/modules/login/model/account_model.dart';
 
 class AccountMainPage extends StatefulWidget {
   const AccountMainPage({super.key});

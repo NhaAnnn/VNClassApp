@@ -4,7 +4,6 @@ import 'package:vnclass/common/widget/app_bar.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_add_mistake.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_add_type.dart';
-import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 
 class UserAddTypeMistakeScreen extends StatefulWidget {

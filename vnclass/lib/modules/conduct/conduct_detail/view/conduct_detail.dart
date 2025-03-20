@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:skeleton_loader/skeleton_loader.dart';
@@ -5,7 +6,7 @@ import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/search_bar.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 
@@ -22,8 +23,6 @@ class _ConductDetailState extends State<ConductDetail> {
   Widget build(BuildContext context) {
     final args =
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
-    // Truy cập các tham số
     final classID = args['classID'];
     final className = args['className'];
     final monthKey = args['monthKey'] as int;
@@ -78,7 +77,7 @@ class _ConductDetailState extends State<ConductDetail> {
                     ),
                   ),
                   Expanded(
-                    child: FutureBuilder<List<StudentModel>>(
+                    child: FutureBuilder<List<StudentDetailModel>>(
                       future:
                           StudentDetailController.fetchStudentsByClass(classID),
                       builder: (context, snapshot) {
@@ -112,7 +111,7 @@ class _ConductDetailState extends State<ConductDetail> {
                           return Center(child: Text('Không có học sinh'));
                         }
 
-                        List<StudentModel> students = snapshot.data!;
+                        List<StudentDetailModel> students = snapshot.data!;
                         return ListView.builder(
                           itemCount: students.length,
                           itemBuilder: (context, index) {

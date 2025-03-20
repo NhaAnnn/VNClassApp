@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:vnclass/modules/main_home/views/help_screen.dart';
 import 'package:vnclass/modules/main_home/views/home_screen.dart';

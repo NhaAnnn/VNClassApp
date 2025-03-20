@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
@@ -21,6 +22,41 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
   List<Map<String, dynamic>> newDataList = [];
   String? selectedFileName;
   bool isLoading = false;
+  String fileName = 'Lop_template.xlsx';
+
+  Future<void> downloadTemplate() async {
+    String assetPath = 'assets/files/HocSinh_template.xlsx';
+    try {
+      // Đọc dữ liệu từ assets
+      final byteData = await rootBundle.load(assetPath);
+      final buffer = byteData.buffer;
+      final bytes =
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+
+      // Lấy thư mục Downloads
+      final directory = Directory('/storage/emulated/0/Download');
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+
+      // Ghi file vào thư mục Downloads
+      await file.writeAsBytes(bytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã tải mẫu về: $filePath'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tải mẫu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tải mẫu thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   Future<void> pickExcelFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -240,49 +276,94 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
           children: [
             if (isLoading) Center(child: CircularProgressIndicator()),
             if (!isLoading) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 children: [
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        labelText: 'File danh sách lớp',
-                        labelStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w300,
-                            color: Colors.black),
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: ColorApp.primaryColor),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: const Color.fromARGB(255, 29, 92, 252),
-                              width: 2),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: ColorApp.primaryColor, width: 2.0),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Mẫu: $fileName',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                          fontStyle: FontStyle.italic,
                         ),
                       ),
-                      controller: TextEditingController(text: selectedFileName),
-                      enabled: false,
-                    ),
+                      ElevatedButton(
+                        onPressed: () => downloadTemplate(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF388E3C),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
+                          fixedSize: Size(98, 40),
+                        ),
+                        child: const Text(
+                          'Tải mẫu',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 10),
-                  ButtonN(
-                    label: 'Chọn file',
-                    color: Colors.cyanAccent.shade700,
-                    colorText: Colors.white,
-                    ontap: () {
-                      if (kIsWeb) {
-                        pickExcelFileInWeb();
-                      } else {
-                        pickExcelFile();
-                      }
-                    },
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            labelText: 'File danh sách lớp',
+                            labelStyle: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                              fontStyle: FontStyle.italic,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 8),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  BorderSide(color: ColorApp.primaryColor),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: const Color.fromARGB(255, 29, 92, 252),
+                                  width: 2),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: ColorApp.primaryColor, width: 2.0),
+                            ),
+                          ),
+                          controller:
+                              TextEditingController(text: selectedFileName),
+                          enabled: false,
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      ButtonN(
+                        label: 'Chọn file',
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: const Color(0xFF388E3C),
+                        colorText: Colors.white,
+                        textSize: 14,
+                        ontap: () {
+                          if (kIsWeb) {
+                            pickExcelFileInWeb();
+                          } else {
+                            pickExcelFile();
+                          }
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

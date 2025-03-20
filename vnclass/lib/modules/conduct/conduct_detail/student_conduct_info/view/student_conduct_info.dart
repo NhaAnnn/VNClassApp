@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
+
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/controller/conduct_month_controller.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/model/conduct_month_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/widget/student_conduct_month_card.dart';
@@ -16,6 +18,10 @@ class StudentConductInfo extends StatefulWidget {
 }
 
 class _StudentConductInfoState extends State<StudentConductInfo> {
+  String? conduct;
+  String? conduct1;
+  String? conduct2;
+  String? conduct3;
   String getTermString(int term) {
     if (term == 100) {
       return 'Học kì 1';
@@ -33,19 +39,27 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
 
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
-    accountProvider.account;
 
     // Truy cập các tham số
-    final studentID = args['studentID'];
-    final studentName = args['studentName'];
-    final conduct = args['conduct'];
+
+    final studentModel = args['studentModel'] as StudentDetailModel;
+
+    if (accountProvider.account!.goupID.contains('hocSinh') ||
+        accountProvider.account!.goupID.contains('phuHuynh')) {
+      conduct1 = args['conduct1'];
+      conduct2 = args['conduct2'];
+      conduct3 = args['conduct3'];
+    } else {
+      conduct = args['conduct'];
+    }
+
     final term = args['term'] as int;
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
-          BackBar(title: 'Hạnh kiểm của $studentName'),
+          BackBar(title: 'Hạnh kiểm của ${studentModel.studentName}'),
           Expanded(
             child: Padding(
               padding: EdgeInsets.all(20),
@@ -66,12 +80,27 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
                           children: [
-                            _buildStudentInfoRow(
-                                'Họ và tên:', studentName.toString()),
-                            _buildStudentInfoRow(
-                                'Học kì:', getTermString(term)),
-                            _buildStudentInfoRow(
-                                'Hạnh kiểm:', conduct.toString()),
+                            _buildStudentInfoRow('Họ và tên:',
+                                studentModel.studentName.toString()),
+                            if (accountProvider.account!.goupID == 'hocSinh' ||
+                                accountProvider.account!.goupID ==
+                                    'phuHuynh') ...[
+                              _buildStudentInfoRow(
+                                'Lớp:',
+                                studentModel.className.toString(),
+                              ),
+                              _buildStudentInfoRow(
+                                  'Hạnh kiểm HK1:', conduct1.toString()),
+                              _buildStudentInfoRow(
+                                  'Hạnh kiểm HK2:', conduct2.toString()),
+                              _buildStudentInfoRow(
+                                  'Hạnh kiểm CN:', conduct3.toString()),
+                            ] else ...[
+                              _buildStudentInfoRow(
+                                  'Học kì:', getTermString(term)),
+                              _buildStudentInfoRow(
+                                  'Hạnh kiểm:', conduct.toString()),
+                            ],
                           ],
                         ),
                       ),
@@ -79,8 +108,8 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                   ),
                   Expanded(
                     child: FutureBuilder<ConductMonthModel>(
-                      future:
-                          ConductMonthController.fetchConductMonth(studentID),
+                      future: ConductMonthController.fetchConductMonth(
+                          studentModel.id!),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -125,8 +154,8 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
                               List<dynamic> details = entry.value;
 
                               return StudentConductMonthCard(
-                                studentID: studentID,
-                                studentName: studentName,
+                                studentID: studentModel.id!,
+                                studentName: studentModel.studentName!,
                                 month: month,
                                 trainingScore: details[0],
                                 conduct: details[1],

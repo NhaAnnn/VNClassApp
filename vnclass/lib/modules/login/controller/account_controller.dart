@@ -51,6 +51,27 @@ class AccountController {
     }
   }
 
+  static Future<List<String>> fetchTokensByParentID(String id) async {
+    try {
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('ACCOUNT')
+          .where('P_id', isEqualTo: id)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        DocumentSnapshot doc = snapshot.docs.first;
+        AccountModel account = AccountModel.fromFirestore(doc);
+
+        return account.token ?? [];
+      } else {
+        throw Exception('No account found for the given credentials.');
+      }
+    } catch (e) {
+      print('Failed to fetch tokens: $e');
+      rethrow;
+    }
+  }
+
   static Future<void> updateToken(String id, String newToken) async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance

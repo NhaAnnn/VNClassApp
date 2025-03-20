@@ -1,22 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/student_conduct_info/controller/conduct_month_controller.dart';
 
 class StudentDetailController {
   // Phương thức để lấy tất cả học sinh
-  static Future<List<StudentModel>> fetchAllStudents() async {
+  static Future<List<StudentDetailModel>> fetchAllStudents() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('STUDENT_DETAIL') // Tên bộ sưu tập
           .get(); // Lấy tất cả tài liệu
 
-      List<StudentModel> listStu = []; // Khởi tạo danh sách học sinh
+      List<StudentDetailModel> listStu = []; // Khởi tạo danh sách học sinh
 
       for (var doc in querySnapshot.docs) {
         // Lặp qua từng tài liệu
-        StudentModel student = await StudentModel.fetchFromFirestore(
-            doc); // Gọi hàm lấy thông tin học sinh
+        StudentDetailModel student =
+            await StudentDetailModel.fetchFromFirestore(
+                doc); // Gọi hàm lấy thông tin học sinh
         listStu.add(student); // Thêm học sinh vào danh sách
       }
 
@@ -27,19 +28,21 @@ class StudentDetailController {
     }
   }
 
-  static Future<List<StudentModel>> fetchStudentsByClass(String classID) async {
+  static Future<List<StudentDetailModel>> fetchStudentsByClass(
+      String classID) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('STUDENT_DETAIL')
           .where('Class_id', isEqualTo: classID) // Tên bộ sưu tập
           .get(); // Lấy tất cả tài liệu
 
-      List<StudentModel> listStu = []; // Khởi tạo danh sách học sinh
+      List<StudentDetailModel> listStu = []; // Khởi tạo danh sách học sinh
 
       for (var doc in querySnapshot.docs) {
         // Lặp qua từng tài liệu
-        StudentModel student = await StudentModel.fetchFromFirestore(
-            doc); // Gọi hàm lấy thông tin học sinh
+        StudentDetailModel student =
+            await StudentDetailModel.fetchFromFirestore(
+                doc); // Gọi hàm lấy thông tin học sinh
         listStu.add(student); // Thêm học sinh vào danh sách
       }
 
@@ -50,13 +53,58 @@ class StudentDetailController {
     }
   }
 
+  static Future<List<StudentDetailModel>> fetchStudentsByStudentId(
+      String stuID) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('STUDENT_DETAIL')
+          .where('ST_id', isEqualTo: stuID) // Tên bộ sưu tập
+          .get(); // Lấy tất cả tài liệu
+
+      List<StudentDetailModel> listStu = []; // Khởi tạo danh sách học sinh
+
+      for (var doc in querySnapshot.docs) {
+        // Lặp qua từng tài liệu
+        StudentDetailModel student =
+            await StudentDetailModel.fetchFromFirestore(
+                doc); // Gọi hàm lấy thông tin học sinh
+        listStu.add(student); // Thêm học sinh vào danh sách
+      }
+
+      return listStu; // Trả về danh sách học sinh
+    } catch (e) {
+      print("Error fetching students: $e");
+      return []; // Trả về danh sách rỗng nếu có lỗi
+    }
+  }
+
+  static Future<StudentDetailModel> fetchStudentDetailByID(
+      String studentID) async {
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection('STUDENT_DETAIL') // Tên bộ sưu tập
+          .doc(studentID) // ID tài liệu
+          .get(); // Lấy tài liệu
+
+      // Chuyển đổi DocumentSnapshot thành StudentInfoModel
+      if (snapshot.exists) {
+        return StudentDetailModel.fetchFromFirestore(snapshot);
+      } else {
+        return StudentDetailModel(); // Hoặc một giá trị mặc định nếu không tìm thấy
+      }
+    } catch (e) {
+      print("Error fetching student info: $e");
+      return StudentDetailModel(); // Trả về giá trị mặc định nếu có lỗi
+    }
+  }
+
   static void updateStudentPositionInDatabase(
-      BuildContext context, StudentModel studentModel) {
+      BuildContext context, StudentDetailModel StudentDetailModel) {
     FirebaseFirestore.instance
         .collection('STUDENT_DETAIL')
-        .doc(studentModel.id)
+        .doc(StudentDetailModel.id)
         .update({
-      '_committee': studentModel.committee,
+      '_committee': StudentDetailModel.committee,
     }).then((_) {
       showDialog(
         context: context,
@@ -161,7 +209,7 @@ class StudentDetailController {
         String conductStudent =
             await ConductMonthController.fetchConductMonthByOneMonth(
                 studentId, month, 1);
-        return conductStudent.contains(conduct);
+        return conductStudent == conduct;
       }).toList();
 
       // Chạy tất cả các Future song song và đợi cho đến khi tất cả hoàn thành
@@ -177,11 +225,11 @@ class StudentDetailController {
     }
   }
 
-  static Future<String> fetchConductAllYearByID(String classID) async {
+  static Future<String> fetchConductAllYearByID(String studentID) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('STUDENT_DETAIL')
-          .where('_id', isEqualTo: classID)
+          .where('_id', isEqualTo: studentID)
           .get();
 
       String conductAllYear = '';
@@ -196,11 +244,11 @@ class StudentDetailController {
   }
 
   // Lấy dữ liệu hạnh kiểm học kỳ 1
-  static Future<String> fetchConductTerm1ByID(String classID) async {
+  static Future<String> fetchConductTerm1ByID(String studentID) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('STUDENT_DETAIL')
-          .where('_id', isEqualTo: classID)
+          .where('_id', isEqualTo: studentID)
           .get();
 
       for (var doc in querySnapshot.docs) {
@@ -215,11 +263,11 @@ class StudentDetailController {
   }
 
   // Lấy dữ liệu hạnh kiểm học kỳ 2
-  static Future<String> fetchConductTerm2ByID(String classID) async {
+  static Future<String> fetchConductTerm2ByID(String studentID) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('STUDENT_DETAIL')
-          .where('_id', isEqualTo: classID)
+          .where('_id', isEqualTo: studentID)
           .get();
 
       String conductTerm2 = '';

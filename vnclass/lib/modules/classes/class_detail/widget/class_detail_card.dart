@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_detail_model.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/view/student_info.dart';
 
 class ClassDetailCard extends StatefulWidget {
   const ClassDetailCard({
     super.key,
-    required this.studentModel,
+    required this.studentDetailModel,
     this.className,
   });
 
-  final StudentModel studentModel;
+  final StudentDetailModel studentDetailModel;
   final String? className;
   @override
   State<ClassDetailCard> createState() => _ClassDetailCardState();
 }
 
 class _ClassDetailCardState extends State<ClassDetailCard> {
-  StudentModel get studentModel => widget.studentModel;
+  StudentDetailModel get studentDetailModel => widget.studentDetailModel;
   String? get className => widget.className;
   @override
   Widget build(BuildContext context) {
@@ -38,11 +38,11 @@ class _ClassDetailCardState extends State<ClassDetailCard> {
               child: Column(
                 children: [
                   _buildClassDetailRow(
-                      'Mã học sinh:', studentModel.id.toString()),
+                      'Mã học sinh:', studentDetailModel.id.toString()),
                   _buildClassDetailRow(
-                      'Họ và tên:', studentModel.studentName.toString()),
+                      'Họ và tên:', studentDetailModel.studentName.toString()),
                   _buildClassDetailRow(
-                      'Chức vụ:', studentModel.committee.toString()),
+                      'Chức vụ:', studentDetailModel.committee.toString()),
                 ],
               ),
             ),
@@ -50,7 +50,7 @@ class _ClassDetailCardState extends State<ClassDetailCard> {
               onTap: () => {
                 Navigator.of(context)
                     .pushNamed(StudentInfo.routeName, arguments: {
-                  'studentModel': studentModel,
+                  'studentDetailModel': studentDetailModel,
                   'className': className,
                 }),
               },

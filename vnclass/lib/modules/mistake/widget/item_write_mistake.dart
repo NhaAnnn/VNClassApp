@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/mistake/models/package_data.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
-import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
 import 'package:vnclass/modules/mistake/view/mistake_write_mistake_page.dart';
 
 class ItemWriteMistake extends StatefulWidget {

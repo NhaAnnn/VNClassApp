@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatelessWidget {
-  const CustomSearchBar({super.key, this.hintText, required this.onTap});
+  const CustomSearchBar({
+    super.key,
+    this.hintText,
+    required this.onTap,
+  });
 
   final String? hintText;
   final void Function() onTap;
@@ -11,20 +15,22 @@ class CustomSearchBar extends StatelessWidget {
     return TextField(
       style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
       decoration: InputDecoration(
-        hintText: 'Tìm kiếm...',
+        hintText: hintText ?? 'Tìm kiếm...',
         hintStyle: const TextStyle(
-            color: Color(0xFF696969),
-            fontSize: 16,
-            fontWeight: FontWeight.w400),
+          color: Color(0xFF696969),
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+        ),
         prefixIcon: const Padding(
-          padding: EdgeInsets.all(12),
+          padding: EdgeInsets.symmetric(
+              vertical: 12, horizontal: 12), // Adjusted vertical padding
           child:
               Icon(Icons.search_outlined, color: Color(0xFF1E90FF), size: 24),
         ),
         filled: true,
         fillColor: Colors.white,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+            vertical: 12, horizontal: 16), // Adjusted vertical padding
         enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
           borderRadius: BorderRadius.circular(12),
