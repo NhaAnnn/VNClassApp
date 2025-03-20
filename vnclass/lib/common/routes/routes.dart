@@ -34,6 +34,8 @@ import 'package:vnclass/modules/notification/view/notification_screen.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
 import 'package:vnclass/modules/search/search_screen.dart';
 import 'package:vnclass/modules/splash_screen/slpash_screen.dart';
+import 'package:vnclass/web/classes/class_view_web.dart';
+import 'package:vnclass/web/conduct/conduct_view_web.dart';
 
 // Import các tệp dành cho web (chỉ khi kIsWeb là true)
 
@@ -119,5 +121,7 @@ final Map<String, WidgetBuilder> routes = {
         const MistakeViewMistakePageWeb(),
     MistakeEditMistakePageWeb.routeName: (context) =>
         const MistakeEditMistakePageWeb(),
+    ConductViewWeb.routeName: (context) => const ConductViewWeb(),
+    ClassViewWeb.routeName: (context) => const ClassViewWeb(),
   },
 };
