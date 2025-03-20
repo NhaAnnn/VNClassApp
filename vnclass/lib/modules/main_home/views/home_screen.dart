@@ -5,8 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:vnclass/common/helper/asset_helper.dart';
 import 'package:vnclass/common/helper/image_helper.dart';
 import 'package:vnclass/modules/account/view/account_main_page.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
+import 'package:vnclass/modules/classes/class_detail/student_info/view/student_info.dart';
 import 'package:vnclass/modules/classes/view/all_classes.dart';
-import 'package:vnclass/modules/conduct/view/all_conduct.dart';
 import 'package:vnclass/modules/conduct/widget/choose_year_dialog.dart';
 import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
@@ -28,6 +30,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<NotificationModel> notifications = [];
+  StudentModel? studentModel;
+  List<StudentModel>? studentModelList;
 
   @override
   void initState() {
@@ -61,6 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final permissProvider =
         Provider.of<PermissionProvider>(context, listen: false);
     permissProvider.setPermission(pers);
+
+    fetchStudent();
 
     print('du lieu list permis+$pers');
   }
@@ -97,6 +103,23 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {}); // Cập nhật giao diện
   }
 
+  Future<void> fetchStudent() async {
+    if (Provider.of<AccountProvider>(context, listen: false).account!.goupID ==
+        'hocSinh') {
+      String studentId =
+          Provider.of<AccountProvider>(context, listen: false).account!.idAcc;
+      studentModel = await StudentController.fetchStudentInfoByID(studentId);
+    } else if (Provider.of<AccountProvider>(context, listen: false)
+            .account!
+            .goupID ==
+        'phuHuynh') {
+      String parentID =
+          Provider.of<AccountProvider>(context, listen: false).account!.idAcc;
+      studentModelList =
+          await StudentController.fetchStudentInfoByParentID(parentID);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final accountProvider = Provider.of<AccountProvider>(context);
@@ -104,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final permissionProvider = Provider.of<PermissionProvider>(context);
     final pers = permissionProvider.permission;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -246,13 +270,29 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 28),
-                        if (account!.goupID == 'hocSinh' ||
-                            account.goupID == 'phuHuynh') ...[
+                        if (account!.goupID == 'hocSinh') ...[
                           _buildHomeItem(
                             context,
                             icon: FontAwesomeIcons.chartLine,
                             title: 'KQ Rèn Luyện',
                             dialog: 'Dialog',
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.school,
+                            title: 'Lớp Học',
+                            route: StudentInfo.routeName,
+                            data: {
+                              'studentModel': studentModel,
+                            },
+                          ),
+                        ] else if (account.goupID == 'phuHuynh') ...[
+                          _buildHomeItem(
+                            context,
+                            icon: FontAwesomeIcons.chartLine,
+                            title: 'KQ Rèn Luyện',
+                            dialog: 'DialogPH',
                           ),
                           const SizedBox(height: 16),
                         ] else if (account.goupID == 'hocSinh' &&
@@ -353,20 +393,34 @@ class _HomeScreenState extends State<HomeScreen> {
       {required IconData icon,
       required String title,
       String? route,
-      String? dialog}) {
+      String? dialog,
+      Map<String, dynamic>? data}) {
     final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         if (route != null) {
-          Navigator.of(context).pushNamed(route);
+          Navigator.of(context).pushNamed(route, arguments: data);
         }
         if (dialog != null) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return ChooseYearDialog();
-            },
-          );
+          if (dialog.contains('DialogPH')) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                print('du lieu list student+$studentModelList');
+
+                return ChooseYearDialog(
+                  listStudent: studentModelList,
+                );
+              },
+            );
+          } else {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return ChooseYearDialog();
+              },
+            );
+          }
         }
       },
       child: Container(
