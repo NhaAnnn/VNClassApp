@@ -20,6 +20,8 @@ import 'package:vnclass/modules/notification/funtion/notification_change.dart';
 import 'package:vnclass/modules/notification/model/notification_model.dart';
 import 'package:vnclass/modules/notification/view/notification_screen.dart';
 import 'package:vnclass/modules/report/view/report_main_page.dart';
+import 'package:vnclass/modules/main_home/controller/student_detail_provider.dart';
+import 'package:vnclass/modules/main_home/controller/teacher_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,10 +67,18 @@ class _HomeScreenState extends State<HomeScreen> {
     final permissProvider =
         Provider.of<PermissionProvider>(context, listen: false);
     permissProvider.setPermission(pers);
-
+    if (accountProvider.account!.goupID == 'giaoVien') {
+      final teacherProvider =
+          Provider.of<TeacherProvider>(context, listen: false);
+      teacherProvider.fetchClassIDTeacher(accountProvider.account!.idAcc);
+    } else if (accountProvider.account!.goupID == 'hocSinh') {
+      final studentDetailProvider =
+          Provider.of<StudentDetailProvider>(context, listen: false);
+      studentDetailProvider.fetchStudentDetail(accountProvider.account!.idAcc);
+    }
     fetchStudent();
 
-    print('du lieu list permis+$pers');
+    // print('du lieu list permis+$pers');
   }
 
   void handleIncomingNotification(RemoteMessage message) {
