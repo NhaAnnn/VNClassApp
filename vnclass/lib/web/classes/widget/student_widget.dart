@@ -22,7 +22,6 @@ class StudentWidget extends StatefulWidget {
 
 class _StudentWidgetState extends State<StudentWidget> {
   List<StudentDetailModel> students = [];
-  StudentModel? studentModel;
 
   // Sample Committees (replace it with your real data)
   List<String> committees = ['Học sinh', 'Ban cán sự'];
@@ -35,8 +34,9 @@ class _StudentWidgetState extends State<StudentWidget> {
     });
   }
 
-  Future<void> getStudent(String studentID) async {
-    studentModel = await StudentController.fetchStudentInfoByID(studentID);
+  Future<StudentModel> getStudent(String studentID) async {
+    var studentModel = await StudentController.fetchStudentInfoByID(studentID);
+    return studentModel;
   }
 
   @override
@@ -72,7 +72,6 @@ class _StudentWidgetState extends State<StudentWidget> {
                 ],
                 rows: students.isNotEmpty
                     ? students.map((student) {
-                        getStudent(student.studentID!);
                         return DataRow(cells: <DataCell>[
                           DataCell(Text(student.studentID!)),
                           DataCell(Text(student.studentName!)),
@@ -106,24 +105,38 @@ class _StudentWidgetState extends State<StudentWidget> {
                             DataCell(
                               Center(
                                 child: Tooltip(
-                                  message:
-                                      'Gửi thông báo đến phụ huynh', // Your tooltip message
-                                  child: ButtonN(
-                                    label: 'Phụ huynh',
-                                    colorText: Colors.white,
-                                    color: Colors.blueAccent,
-                                    size: Size(100, 40),
-                                    ontap: () {
+                                  message: 'Gửi thông báo đến phụ huynh',
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      StudentModel studentModel =
+                                          await getStudent(student.studentID!);
                                       showDialog(
                                         context: context,
                                         builder: (context) {
-                                          print(studentModel!.pID!);
                                           return SendNotificationParentDialog(
-                                            pID: studentModel!.pID!,
+                                            pID: studentModel.pID!,
                                           );
                                         },
                                       );
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blueAccent,
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 8),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      elevation: 2,
+                                      fixedSize: Size(100, 40),
+                                    ),
+                                    child: const Text(
+                                      'Thông báo',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

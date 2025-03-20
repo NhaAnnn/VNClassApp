@@ -320,13 +320,11 @@ class _ClassViewWebState extends State<ClassViewWeb> {
       ),
       endDrawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.7,
-        child: selectedClass != null // Kiểm tra xem selectedClass có null không
+        child: selectedClass != null
             ? StudentWidget(
-                classModel: selectedClass!, // Truyền ClassModel đã chọn
+                classModel: selectedClass!,
               )
-            : Center(
-                child:
-                    Text('Chưa chọn lớp học')), // Hiển thị thông báo nếu null
+            : Center(child: Text('Chưa chọn lớp học')),
       ),
     );
   }

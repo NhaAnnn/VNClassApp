@@ -14,6 +14,8 @@ import 'package:vnclass/modules/notification/funtion/notification_change.dart';
 import 'package:vnclass/modules/notification/model/notification_model.dart';
 import 'package:vnclass/modules/notification/view/notification_screen.dart';
 import 'package:vnclass/web/account/account_main_page_web.dart';
+import 'package:vnclass/web/classes/class_view_web.dart';
+import 'package:vnclass/web/conduct/conduct_view_web.dart';
 import 'package:vnclass/web/login/login_web_page.dart';
 import 'package:vnclass/web/mistake/mistake_main_page_web.dart';
 import 'package:vnclass/web/set_up_mistake/user_change_type_mistake_screen_web.dart';
@@ -143,6 +145,10 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
         return const MistakeMainPageWeb();
       case '/update_violation':
         return const MistakeMainPageWeb();
+      case '/student':
+        return const ClassViewWeb();
+      case '/conduct':
+        return const ConductViewWeb();
       case '/settings':
         return const UserScreenWeb();
       case '/mistake_settings':
@@ -285,9 +291,12 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
                         _buildSidebarItem(Icons.warning, 'Cập nhật vi phạm',
                             '/update_violation',
                             isSelected: _selectedRoute == '/update_violation'),
-                        _buildSidebarItem(Icons.bar_chart, 'Kết quả rèn luyện',
-                            '/training_result',
-                            isSelected: _selectedRoute == '/training_result'),
+                        _buildSidebarItem(
+                            Icons.bar_chart, 'Kết quả rèn luyện', '/conduct',
+                            isSelected: _selectedRoute == '/conduct'),
+                        _buildSidebarItem(
+                            Icons.class_rounded, 'Quản lý lớp học', '/student',
+                            isSelected: _selectedRoute == '/student'),
                         _buildSidebarItem(Icons.person, 'Quản lý tài khoản',
                             '/account_management',
                             isSelected:

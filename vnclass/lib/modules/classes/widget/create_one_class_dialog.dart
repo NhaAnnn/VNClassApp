@@ -110,8 +110,8 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
         ),
       ),
       actions: [
-        ButtonN(
-          ontap: () async {
+        ElevatedButton(
+          onPressed: () async {
             _validateInputs(); // Kiểm tra các trường
 
             if (classNameError != null ||
@@ -183,31 +183,55 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
               );
             }
           },
-          size: Size(
-            kIsWeb
-                ? MediaQuery.of(context).size.width * 0.05
-                : MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
           ),
-          label: 'Thêm',
-          textSize: 13,
-          color: Colors.blue,
-          colorText: Colors.white,
+          child: const Text(
+            'Thêm',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        ButtonN(
-          ontap: () {
+        ElevatedButton(
+          onPressed: () {
             Navigator.of(context).pop();
           },
-          size: Size(
-            kIsWeb
-                ? MediaQuery.of(context).size.width * 0.05
-                : MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
           ),
-          textSize: 13,
-          label: 'Đóng',
-          color: Colors.red,
-          colorText: Colors.white,
+          child: const Text(
+            'Đóng',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );

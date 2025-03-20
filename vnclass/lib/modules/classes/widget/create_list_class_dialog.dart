@@ -33,12 +33,10 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       final bytes =
           buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
 
-      // Lấy thư mục Downloads
       final directory = Directory('/storage/emulated/0/Download');
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
 
-      // Ghi file vào thư mục Downloads
       await file.writeAsBytes(bytes);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -349,19 +347,32 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                         ),
                       ),
                       SizedBox(width: 20),
-                      ButtonN(
-                        label: 'Chọn file',
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        color: const Color(0xFF388E3C),
-                        colorText: Colors.white,
-                        textSize: 14,
-                        ontap: () {
+                      ElevatedButton(
+                        onPressed: () {
                           if (kIsWeb) {
                             pickExcelFileInWeb();
                           } else {
                             pickExcelFile();
                           }
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF388E3C),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
+                          fixedSize: Size(98, 40),
+                        ),
+                        child: const Text(
+                          'Chọn file',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -372,105 +383,129 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
         ),
       ),
       actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            if (!isLoading) ...[
-              Flexible(
-                child: ButtonN(
-                  ontap: () async {
-                    if (selectedFileName == null || selectedFileName!.isEmpty) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Thông báo'),
-                          content: Text('Vui lòng chọn file trước khi lưu.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
-                      return;
-                    }
+        if (!isLoading) ...[
+          ElevatedButton(
+            onPressed: () async {
+              if (selectedFileName == null || selectedFileName!.isEmpty) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Thông báo'),
+                    content: Text('Vui lòng chọn file trước khi lưu.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+                return;
+              }
 
-                    setState(() {
-                      isLoading = true;
-                    });
+              setState(() {
+                isLoading = true;
+              });
 
-                    try {
-                      for (var newData in newDataList) {
-                        await ClassController.createClass(
-                          context,
-                          newData['_className'],
-                          newData['T_name'],
-                          newData['T_id'],
-                          newData['_year'],
-                        );
-                      }
-                      widget.onCreate();
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Thông báo'),
-                          content: Text('Đã thêm danh sách lớp thành công.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
-                    } catch (e) {
-                      print(e);
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: Text('Lỗi'),
-                          content: Text('Thêm danh sách lớp thất bại: $e'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('OK'),
-                            ),
-                          ],
-                        ),
-                      );
-                    } finally {
-                      setState(() {
-                        isLoading = false;
-                      });
-                    }
-                  },
-                  size: Size(MediaQuery.of(context).size.width * 0.2,
-                      MediaQuery.of(context).size.height * 0.05),
-                  label: 'Lưu',
-                  colorText: Colors.white,
-                  color: Colors.blueAccent,
-                ),
+              try {
+                for (var newData in newDataList) {
+                  await ClassController.createClass(
+                    context,
+                    newData['_className'],
+                    newData['T_name'],
+                    newData['T_id'],
+                    newData['_year'],
+                  );
+                }
+                widget.onCreate();
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Thông báo'),
+                    content: Text('Đã thêm danh sách lớp thành công.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              } catch (e) {
+                print(e);
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Lỗi'),
+                    content: Text('Thêm danh sách lớp thất bại: $e'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
+              } finally {
+                setState(() {
+                  isLoading = false;
+                });
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-              SizedBox(width: 10),
-              Flexible(
-                child: ButtonN(
-                  ontap: () {
-                    Navigator.of(context).pop();
-                  },
-                  size: Size(MediaQuery.of(context).size.width * 0.2,
-                      MediaQuery.of(context).size.height * 0.05),
-                  label: 'Đóng',
-                  colorText: Colors.white,
-                  color: Colors.red,
-                ),
+              elevation: 2,
+              fixedSize: Size(
+                kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.05
+                    : MediaQuery.of(context).size.width * 0.2,
+                MediaQuery.of(context).size.height * 0.05,
               ),
-            ]
-          ],
-        ),
+            ),
+            child: const Text(
+              'Lưu',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 2,
+              fixedSize: Size(
+                kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.05
+                    : MediaQuery.of(context).size.width * 0.2,
+                MediaQuery.of(context).size.height * 0.05,
+              ),
+            ),
+            child: const Text(
+              'Đóng',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

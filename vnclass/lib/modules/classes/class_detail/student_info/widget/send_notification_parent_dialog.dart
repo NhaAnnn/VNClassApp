@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
@@ -74,14 +75,20 @@ class _SendNotificationParentDialogState
         ),
       ),
       actions: [
-        ButtonN(
-          ontap: () async {
+        ElevatedButton(
+          onPressed: () async {
             _validateInputs();
             if (titleError != null || contentError != null) {
               return; // Dừng lại nếu có lỗi
             }
 
             try {
+              List<String> deviceTokens =
+                  await AccountController.fetchTokens(widget.pID);
+              NotificationService.sendNotification(
+                  widget.pID, deviceTokens, title, content);
+              await NotificationController.createNotification(
+                  widget.pID, title, content);
               Navigator.of(context).pop();
               showDialog(
                 context: context,
@@ -100,39 +107,63 @@ class _SendNotificationParentDialogState
                   );
                 },
               );
-
-              List<String> deviceTokens =
-                  await AccountController.fetchTokens(widget.pID);
-              NotificationService.sendNotification(
-                  widget.pID, deviceTokens, title, content);
             } catch (e) {
               print('Error: $e');
             }
-            // Implement your send logic
             print('Tiêu đề: $title');
             print('Nội dung: $content');
 
-            Navigator.of(context).pop(); // Close the dialog after sending
-          },
-          size: Size(
-            MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
-          ),
-          label: 'Gửi',
-          color: Colors.blue,
-          colorText: Colors.white,
-        ),
-        ButtonN(
-          ontap: () {
             Navigator.of(context).pop();
           },
-          size: Size(
-            MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
           ),
-          label: 'Đóng',
-          color: Colors.red,
-          colorText: Colors.white,
+          child: const Text(
+            'Gửi',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
+          ),
+          child: const Text(
+            'Đóng',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );
