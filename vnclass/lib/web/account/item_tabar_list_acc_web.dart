@@ -1,25 +1,28 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show File;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show Uint8List, rootBundle;
 import 'package:excel/excel.dart' as excel;
-import 'package:vnclass/common/widget/button_widget.dart';
+import 'package:path_provider/path_provider.dart'
+    show getExternalStorageDirectory;
+import 'package:vnclass/web/file_utils.dart'; // Import file_utils.dart
 
-class ItemTabarListAcc extends StatefulWidget {
-  const ItemTabarListAcc({super.key, required this.title, this.typeAcc});
+// Xóa conditional import, xử lý logic trong mã
+
+class ItemTabarListAccWeb extends StatefulWidget {
+  const ItemTabarListAccWeb({super.key, required this.title, this.typeAcc});
   final String title;
   final String? typeAcc;
 
   @override
-  _ItemTabarListAccState createState() => _ItemTabarListAccState();
+  _ItemTabarListAccWebState createState() => _ItemTabarListAccWebState();
 }
 
-class _ItemTabarListAccState extends State<ItemTabarListAcc> {
+class _ItemTabarListAccWebState extends State<ItemTabarListAccWeb> {
   String fileName = '';
   List<Map<String, dynamic>> students = [];
   List<Map<String, dynamic>> teachers = [];
@@ -46,32 +49,26 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     }
 
     try {
-      // Đọc dữ liệu từ assets
+      // Tải dữ liệu từ assets
       final byteData = await rootBundle.load(assetPath);
-      final buffer = byteData.buffer;
-      final bytes =
-          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+      final bytes = byteData.buffer.asUint8List();
 
-      // Lấy thư mục Downloads
-      final directory = Directory('/storage/emulated/0/Download');
-      final filePath = '${directory.path}/$fileName';
-      final file = File(filePath);
-
-      // Ghi file vào thư mục Downloads
-      await file.writeAsBytes(bytes);
+      // Sử dụng file_utils.downloadFile để xử lý tải/lưu file
+      downloadFile(bytes, fileName);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Đã tải mẫu về: $filePath'),
+          content:
+              Text(kIsWeb ? 'Đã tải mẫu: $fileName' : 'Đã lưu mẫu: $fileName'),
           duration: const Duration(seconds: 3),
         ),
       );
     } catch (e) {
       print('Lỗi khi tải mẫu: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tải mẫu thất bại!'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('Tải mẫu thất bại: $e'),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -81,16 +78,19 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx'],
+      withData: true, // Ensure file data is loaded for web
     );
-    if (result != null) {
+
+    if (result != null && result.files.single.bytes != null) {
       setState(() {
-        fileName = path.basename(result.files.single.path!);
+        fileName = result.files.single.name;
       });
-      print('Đường dẫn file: ${result.files.single.path}');
+      print('Tên file: $fileName');
+      final bytes = result.files.single.bytes!;
       if (typeAcc == 'hs') {
-        await readExcel(result.files.single.path!);
+        await readExcel(bytes);
       } else {
-        await readExcelTeacher(result.files.single.path!);
+        await readExcelTeacher(bytes);
       }
     }
   }
@@ -98,7 +98,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
   void countStudentsByClassAndAcademicYear() {
     Map<String, int> countMap = {};
     for (var student in students) {
-      String? className = student['class'].toString().toLowerCase();
+      String? className = student['class']?.toString().toLowerCase();
       String? academicYear = student['academicYear'];
       if (academicYear != null) {
         String key = '$className$academicYear';
@@ -124,8 +124,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     }
   }
 
-  Future<void> readExcel(String filePath) async {
-    var bytes = File(filePath).readAsBytesSync();
+  Future<void> readExcel(Uint8List bytes) async {
     var excelFile = excel.Excel.decodeBytes(bytes);
     students.clear();
 
@@ -217,8 +216,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     print('Danh sách sinh viên: $students');
   }
 
-  Future<void> readExcelTeacher(String filePath) async {
-    var bytes = File(filePath).readAsBytesSync();
+  Future<void> readExcelTeacher(Uint8List bytes) async {
     var excelFile = excel.Excel.decodeBytes(bytes);
     teachers.clear();
 
@@ -469,14 +467,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
   Future<void> setFormDataTeacher(String posi) async {
     print('Dữ liệu giáo viên trước khi tải lên: ${teachers.length}');
-    print('type $posi');
-    String position = '';
-    if (posi == 'gv') {
-      position = 'giaoVien';
-    } else if (posi == 'bgh') {
-      position = 'banGH';
-    }
-    print('position $position');
+    String position = posi == 'gv' ? 'giaoVien' : 'banGH';
     List<Map<String, dynamic>> teachersUp = [];
     List<Map<String, dynamic>> accountsUp = [];
     List<String> init = [];
@@ -534,9 +525,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
-    // Xác định tên file mẫu dựa trên typeAcc
     String templateName;
     switch (widget.typeAcc) {
       case 'bgh':
@@ -558,7 +546,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Tiêu đề
             Text(
               widget.title,
               style: const TextStyle(
@@ -568,7 +555,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
               ),
             ),
             const SizedBox(height: 8),
-            // Tên file mẫu và nút tải mẫu
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -580,7 +566,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                       color: Colors.grey.shade700,
                       fontStyle: FontStyle.italic,
                     ),
-                    overflow: TextOverflow.visible, // Cho phép xuống dòng
+                    overflow: TextOverflow.visible,
                   ),
                 ),
                 ElevatedButton(
@@ -592,7 +578,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    elevation: 2,
                   ),
                   child: const Text(
                     'Tải mẫu',
@@ -606,16 +591,12 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
               ],
             ),
             const SizedBox(height: 20),
-            // Khu vực chọn file (giữ nguyên)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.shade400,
-                  width: 1.5,
-                ),
+                border: Border.all(color: Colors.grey.shade400, width: 1.5),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -644,17 +625,13 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                   Expanded(
                     flex: 4,
                     child: ElevatedButton(
-                      onPressed: () {
-                        pickFile(widget.typeAcc ?? '');
-                      },
+                      onPressed: () => pickFile(widget.typeAcc ?? ''),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 2),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        elevation: 2,
                       ),
                       child: const Text(
                         'Chọn file',
@@ -670,7 +647,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
               ),
             ),
             const SizedBox(height: 24),
-            // Nút điều khiển (giữ nguyên)
             Row(
               children: [
                 Expanded(
@@ -691,7 +667,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 4,
                     ),
                     child: const Text(
                       'Tải lên',
@@ -713,7 +688,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 4,
                     ),
                     child: const Text(
                       'Thoát',
@@ -727,7 +701,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                 ),
               ],
             ),
-            // Số lượng dữ liệu (giữ nguyên)
             if (fileName.isNotEmpty &&
                 (students.isNotEmpty || teachers.isNotEmpty))
               Padding(

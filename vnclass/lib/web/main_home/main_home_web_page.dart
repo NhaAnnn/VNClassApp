@@ -19,6 +19,7 @@ import 'package:vnclass/web/mistake/mistake_main_page_web.dart';
 import 'package:vnclass/web/set_up_mistake/user_change_type_mistake_screen_web.dart';
 import 'package:vnclass/web/set_up_point/user_set_points_screen_web.dart';
 import 'package:vnclass/web/setting/user_screen_web.dart';
+import 'home_page_content.dart'; // Import file mới
 
 class MainHomeWebPage extends StatefulWidget {
   const MainHomeWebPage({super.key});
@@ -32,41 +33,6 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
   List<NotificationModel> notifications = [];
   String _selectedRoute = '/dashboard';
   bool _isLoading = true;
-
-  // Dữ liệu giả lập cho dashboard
-  final Map<String, int> attendanceStats = {
-    'Jan': 50000,
-    'Feb': 60000,
-    'Mar': 55000,
-    'Apr': 52000,
-    'Aug': 58000,
-    'Sep': 59000,
-    'Nov': 54000,
-    'Dec': 53000,
-  };
-
-  final Map<String, double> recruitmentSource = {
-    'Direct': 0.80,
-    'Google': 0.15,
-    'Refer': 0.05,
-  };
-
-  final List<Map<String, dynamic>> leaveApplications = [
-    {'name': 'Dawash King', 'date': '29-03-2024', 'status': 'Approved'},
-    {'name': 'Musad Rana', 'date': '29-03-2024', 'status': 'Approved'},
-    {'name': 'Jalil Hossain', 'date': '29-03-2024', 'status': 'Pending'},
-  ];
-
-  final List<Map<String, dynamic>> notices = [
-    {'title': 'Get ready for meeting at 6', 'date': '29-03-2024'},
-    {'title': 'Dashboard updated', 'date': '29-03-2024'},
-  ];
-
-  final List<Map<String, dynamic>> recruitment = [
-    {'name': 'Noman Khan', 'status': 'Recruited'},
-    {'name': 'Aslam Islam', 'status': 'Recruited'},
-    {'name': 'Musad Rana', 'status': 'Recruited'},
-  ];
 
   @override
   void initState() {
@@ -172,7 +138,7 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
 
     switch (_selectedRoute) {
       case '/dashboard':
-        return _buildHomePage();
+        return HomePageContent();
       case MistakeMainPageWeb.routeName:
         return const MistakeMainPageWeb();
       case '/update_violation':
@@ -246,246 +212,8 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
         );
 
       default:
-        return _buildHomePage(); // Mặc định quay về dashboard nếu route không hợp lệ
+        return HomePageContent(); // Mặc định quay về dashboard nếu route không hợp lệ
     }
-  }
-
-  Widget _buildHomePage() {
-    return _buildPage('Dashboard', Icons.dashboard, [
-      // Thống kê
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildStatCard('Total Employee', '26', '+1%'),
-          _buildStatCard('Total Absent', '16', '-1%'),
-          _buildStatCard('Today Present', '2', '+1%'),
-          _buildStatCard('Total Leave', '26', '+1%'),
-        ],
-      ),
-      const SizedBox(height: 24),
-      // Biểu đồ cột
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 8,
-                spreadRadius: 1)
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('This Daily Attendance Statistic',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E3A8A))),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 200,
-              child: Row(
-                children: attendanceStats.entries.map((entry) {
-                  return Expanded(
-                    child: Column(
-                      children: [
-                        Text(entry.key,
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade700)),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 150 * (entry.value / 60000),
-                          width: 30,
-                          decoration: BoxDecoration(
-                            color: Colors.blue[700],
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        Text('${entry.value ~/ 1000}k',
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade700)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 24),
-      // Biểu đồ tròn
-      Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 8,
-                      spreadRadius: 1)
-                ],
-              ),
-              child: Column(
-                children: [
-                  const Text('Loan Payment Received',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3A8A))),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 150,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          value: 0.8,
-                          backgroundColor: Colors.grey.shade200,
-                          color: Colors.blue[700],
-                          strokeWidth: 20,
-                        ),
-                        const Text('80%',
-                            style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1E3A8A))),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Column(
-                    children: recruitmentSource.entries
-                        .map((e) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 12,
-                                    height: 12,
-                                    color: e.key == 'Direct'
-                                        ? Colors.blue[700]
-                                        : e.key == 'Google'
-                                            ? Colors.green[700]
-                                            : Colors.red[700],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text('${e.key}: ${e.value * 100}%',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey.shade800)),
-                                ],
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      const SizedBox(height: 24),
-      // Đơn xin nghỉ phép và thông báo
-      Row(
-        children: [
-          Expanded(
-            child: _buildSection('Leave Application', [
-              for (var app in leaveApplications)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue[700],
-                    radius: 20,
-                    child: Text(app['name'][0],
-                        style: const TextStyle(color: Colors.white)),
-                  ),
-                  title: Text(app['name'],
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w500)),
-                  subtitle: Text(app['date'],
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                  trailing: Text(app['status'],
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: app['status'] == 'Approved'
-                              ? Colors.green
-                              : Colors.orange)),
-                ),
-            ]),
-          ),
-          const SizedBox(width: 24),
-          Expanded(
-            child: _buildSection('Notice', [
-              for (var noti in notices)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(noti['title'],
-                      style: const TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w500)),
-                  subtitle: Text(noti['date'],
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                ),
-            ]),
-          ),
-        ],
-      ),
-      const SizedBox(height: 24),
-      // Tuyển dụng
-      _buildSection('Recruitment', [
-        for (var rec in recruitment)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue[700],
-              radius: 20,
-              child: Text(rec['name'][0],
-                  style: const TextStyle(color: Colors.white)),
-            ),
-            title: Text(rec['name'],
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-            trailing: Text(rec['status'],
-                style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.green,
-                    fontWeight: FontWeight.w500)),
-          ),
-      ]),
-    ]);
-  }
-
-  Widget _buildPage(String title, IconData icon, List<Widget> content) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 28, color: const Color(0xFF1E3A8A)),
-              const SizedBox(width: 16),
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A8A))),
-            ],
-          ),
-          const SizedBox(height: 24),
-          ...content,
-        ],
-      ),
-    );
   }
 
   @override
@@ -747,70 +475,6 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, String change) {
-    return Container(
-      width: 180,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              spreadRadius: 1)
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
-          const SizedBox(height: 10),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A8A))),
-          Text(change,
-              style: TextStyle(
-                  fontSize: 12,
-                  color: change.contains('+')
-                      ? Colors.green[700]
-                      : Colors.red[700])),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection(String title, List<Widget> children) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              spreadRadius: 1)
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A8A))),
-          const SizedBox(height: 16),
-          ...children,
-        ],
       ),
     );
   }

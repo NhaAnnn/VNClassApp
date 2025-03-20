@@ -1,14 +1,17 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show File;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:excel/excel.dart' as excel;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:vnclass/common/widget/drop_menu_widget.dart';
-import 'package:vnclass/common/widget/radio_button_widget.dart';
+
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
-import 'dart:html' as html; // Thêm import cho web
+import 'package:path_provider/path_provider.dart'
+    show getExternalStorageDirectory;
+import 'package:vnclass/web/file_utils.dart'; // Import file_utils.dart
 
 class DialogExportAccWeb extends StatefulWidget {
   const DialogExportAccWeb({super.key});
@@ -22,8 +25,6 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
   bool isExporting = false;
   String? selectedYear;
   String? selectedClass;
-  List<String>? classes = [];
-  List<String>? years = [];
 
   @override
   Widget build(BuildContext context) {
@@ -155,19 +156,38 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
-            DropMenuWidget(
-              items: years,
-              hintText: 'Chọn năm học',
-              selectedItem: selectedYear,
-              onChanged: (newValue) => setState(() => selectedYear = newValue!),
+            DropdownButton<String>(
+              isExpanded: true,
+              hint: const Text('Chọn năm học'),
+              value: selectedYear,
+              items: years.map((year) {
+                return DropdownMenuItem<String>(
+                  value: year,
+                  child: Text(year),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  selectedYear = newValue;
+                });
+              },
             ),
             const SizedBox(height: 8),
-            DropMenuWidget(
-              items: classes,
-              hintText: 'Chọn lớp',
-              selectedItem: selectedClass,
-              onChanged: (newValue) =>
-                  setState(() => selectedClass = newValue!),
+            DropdownButton<String>(
+              isExpanded: true,
+              hint: const Text('Chọn lớp'),
+              value: selectedClass,
+              items: classes.map((className) {
+                return DropdownMenuItem<String>(
+                  value: className,
+                  child: Text(className),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  selectedClass = newValue;
+                });
+              },
             ),
           ],
         ),
@@ -290,32 +310,36 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
   }
 
   Future<void> exportToExcel(BuildContext context) async {
-    var excelFile = excel.Excel.createExcel();
-    await _createSheetsByClassId(excelFile);
+    try {
+      // Tạo file Excel
+      var excelFile = excel.Excel.createExcel();
+      await _createSheetsByClassId(excelFile);
 
-    // Chuyển đổi file Excel thành Uint8List
-    final excelBytes = excelFile.encode()!;
+      final bytes = excelFile.encode()!;
+      final fileName = selectedOption == 'Học sinh - PHHS'
+          ? 'st_report_${DateTime.now().millisecondsSinceEpoch}.xlsx'
+          : 'nvxxreport_${DateTime.now().millisecondsSinceEpoch}.xlsx';
 
-    // Tạo blob và liên kết tải file trên web
-    final blob = html.Blob([excelBytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.AnchorElement(href: url)
-      ..setAttribute('download', _getFileName())
-      ..click();
+      // Sử dụng file_utils.downloadFile để xử lý tải/lưu file
+      downloadFile(bytes, fileName);
 
-    // Giải phóng bộ nhớ
-    html.Url.revokeObjectUrl(url);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File đã được tải xuống: ${_getFileName()}')),
-    );
-  }
-
-  String _getFileName() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return selectedOption == 'Học sinh - PHHS'
-        ? 'st_report_$timestamp.xlsx'
-        : 'nvxxreport_$timestamp.xlsx';
+      // Hiển thị thông báo thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              kIsWeb ? 'Đã tải file: $fileName' : 'Đã lưu file: $fileName'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi xuất file Excel: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Xuất file thất bại: $e'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<List<Map<String, dynamic>>> _batchQuery(
@@ -344,7 +368,10 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
   }
 
   Future<void> _createSheetsByClassId(excel.Excel excelFile) async {
-    // Lấy dữ liệu tài khoản dựa vào selectedOption
+    print('Selected Option: $selectedOption');
+    print('Selected Year: $selectedYear');
+    print('Selected Class: $selectedClass');
+
     final accountSnapshot = await FirebaseFirestore.instance
         .collection('ACCOUNT')
         .where('_groupID',
@@ -354,6 +381,7 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
                     ? 'giaoVien'
                     : 'banGH')
         .get();
+    print('Number of accounts: ${accountSnapshot.docs.length}');
 
     if (accountSnapshot.docs.isEmpty) return;
 
@@ -363,8 +391,8 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
     final accIds = accountMap.keys.toList();
 
     if (selectedOption == 'Học sinh - PHHS') {
-      // Logic cho học sinh
       final studentDocs = await _batchQuery('STUDENT', 'ACC_id', accIds);
+      print('Number of students: ${studentDocs.length}');
       final studentMap = {
         for (var doc in studentDocs) doc['_id'] as String: doc
       };
@@ -372,30 +400,28 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
 
       final studentDetailDocs =
           await _batchQuery('STUDENT_DETAIL', 'ST_id', stIds);
+      print('Number of student details: ${studentDetailDocs.length}');
       final studentDetailMap = {
         for (var doc in studentDetailDocs) doc['ST_id'] as String: doc
       };
 
-      // Lọc lớp theo năm học và lớp được chọn
       Query<Map<String, dynamic>> classQuery =
           FirebaseFirestore.instance.collection('CLASS');
 
       if (selectedYear != null && selectedClass == null) {
-        // Chỉ chọn năm học
         classQuery = classQuery.where('_year', isEqualTo: selectedYear);
       } else if (selectedYear != null &&
           selectedClass != null &&
           selectedClass != 'Tất cả') {
-        // Chọn cả năm và lớp cụ thể
         classQuery = classQuery.where('_id',
             isEqualTo:
                 '${selectedClass.toString().toLowerCase()}${selectedYear.toString()}');
       } else if (selectedYear != null && selectedClass == 'Tất cả') {
-        // Chọn năm và tất cả lớp
         classQuery = classQuery.where('_year', isEqualTo: selectedYear);
       }
 
       final classDocs = await classQuery.get();
+      print('Number of classes: ${classDocs.docs.length}');
       final classMap = {
         for (var doc in classDocs.docs)
           doc.id: ClassMistakeModel.fromFirestore(doc)
@@ -404,35 +430,34 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
 
       if (classIds.isEmpty) return;
 
-      // Xử lý song song dữ liệu cho từng lớp
       final futures = classIds.map((classId) async {
         return _fetchStudentDataOptimized(
             classId, accountMap, studentMap, studentDetailMap);
       }).toList();
 
       final results = await Future.wait(futures);
+      print('Results length: ${results.length}');
+      for (var result in results) {
+        print('Result data length: ${result.length}');
+      }
 
-      // Tạo một file Excel duy nhất với nhiều sheet (mỗi lớp một sheet)
       final defaultSheetName = excelFile.getDefaultSheet()!;
       for (int i = 0; i < classIds.length; i++) {
         final classId = classIds[i];
         final sheetName = classId;
 
-        // Nếu là sheet đầu tiên, sử dụng sheet mặc định và đổi tên
         if (i == 0) {
           excelFile.rename(defaultSheetName, sheetName);
           final sheet = excelFile[sheetName];
           _fillClassInfo(sheet, classId, classMap[classId]);
           await _fillStudentExcelTable(sheet, results[i], excelFile);
         } else {
-          // Thêm sheet mới cho các lớp còn lại
           final sheet = excelFile[sheetName];
           _fillClassInfo(sheet, classId, classMap[classId]);
           await _fillStudentExcelTable(sheet, results[i], excelFile);
         }
       }
     } else {
-      // Logic cho Giáo viên/Ban giám hiệu
       final accountSnapshot = await FirebaseFirestore.instance
           .collection('ACCOUNT')
           .where('_groupID',
@@ -447,14 +472,13 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
       final accIds = accountMap.keys.toList();
 
       final teacherDocs = await _batchQuery(
-          selectedOption == 'Giáo viên' ? 'TEACHER' : 'MANAGEMENT',
+          selectedOption == 'Giáo viên' ? 'TEACHER' : 'TEACHER',
           'ACC_id',
           accIds);
       final teacherMap = {
         for (var doc in teacherDocs) doc['_id'] as String: doc
       };
 
-      // Tạo một sheet duy nhất
       final sheet = excelFile[excelFile.getDefaultSheet()!];
       _fillStaffInfo(sheet);
       await _fillStaffExcelTable(sheet, accountMap, teacherMap, excelFile);
@@ -508,8 +532,73 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
     );
   }
 
+  // Future<void> _fillStudentExcelTable(
+  //     excel.Sheet sheet, List<dynamic> data, excel.Excel excelFile) async {
+  //   print('Filling student data, number of entries: ${data.length}');
+  //   const int headerRowIndex = 6;
+  //   const headers = [
+  //     "STT",
+  //     "Họ và tên",
+  //     "Ngày sinh",
+  //     "Giới tính",
+  //     "Tên tài khoản HS",
+  //     "Mật khẩu HS",
+  //     "Tên tài khoản PHHS",
+  //     "Mật khẩu PHHS",
+  //   ];
+
+  //   for (int col = 0; col < headers.length; col++) {
+  //     final cellAddress = "${getColumnLetter(col)}$headerRowIndex";
+  //     sheet.cell(excel.CellIndex.indexByString(cellAddress)).value =
+  //         excel.TextCellValue(headers[col]);
+  //     sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =
+  //         excel.CellStyle(
+  //       bold: true,
+  //       horizontalAlign: excel.HorizontalAlign.Center,
+  //       textWrapping: excel.TextWrapping.WrapText,
+  //     );
+  //   }
+  //   sheet.setRowHeight(headerRowIndex, 0);
+
+  //   int currentRow = headerRowIndex + 1;
+  //   for (var studentData in data) {
+  //     final account = studentData['account'];
+  //     final student = studentData['student'];
+  //     final detail = studentData['detail'];
+
+  //     print('Adding student: ${detail['_studentName']}');
+
+  //     sheet.cell(excel.CellIndex.indexByString("A$currentRow")).value =
+  //         excel.TextCellValue((currentRow - headerRowIndex).toString());
+  //     sheet.cell(excel.CellIndex.indexByString("B$currentRow")).value =
+  //         excel.TextCellValue(
+  //             detail['_studentName'] ?? account['_accName'] ?? '');
+  //     sheet.cell(excel.CellIndex.indexByString("C$currentRow")).value =
+  //         excel.TextCellValue(detail['_birthday'] ?? account['_birth'] ?? '');
+  //     sheet.cell(excel.CellIndex.indexByString("D$currentRow")).value =
+  //         excel.TextCellValue(detail['_gender'] ?? account['_gender'] ?? '');
+  //     sheet.cell(excel.CellIndex.indexByString("E$currentRow")).value =
+  //         excel.TextCellValue(account['_userName'] ?? '');
+  //     sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
+  //         excel.TextCellValue(account['_pass'] ?? '123');
+  //     sheet.cell(excel.CellIndex.indexByString("G$currentRow")).value =
+  //         excel.TextCellValue(student['P_id'] ?? '');
+  //     sheet.cell(excel.CellIndex.indexByString("H$currentRow")).value =
+  //         excel.TextCellValue(student['P_pass'] ?? '123');
+
+  //     for (int col = 0; col < headers.length; col++) {
+  //       final cellAddress = "${getColumnLetter(col)}$currentRow";
+  //       sheet.cell(excel.CellIndex.indexByString(cellAddress)).cellStyle =
+  //           excel.CellStyle(
+  //         horizontalAlign: excel.HorizontalAlign.Left,
+  //       );
+  //     }
+  //     currentRow++;
+  //   }
+  // }
   Future<void> _fillStudentExcelTable(
       excel.Sheet sheet, List<dynamic> data, excel.Excel excelFile) async {
+    print('Filling student data, number of entries: ${data.length}');
     const int headerRowIndex = 6;
     const headers = [
       "STT",
@@ -533,13 +622,17 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
         textWrapping: excel.TextWrapping.WrapText,
       );
     }
-    sheet.setRowHeight(headerRowIndex, 0);
+    // Xóa hoặc điều chỉnh setRowHeight để hiển thị hàng tiêu đề
+    // sheet.setRowHeight(headerRowIndex, 0); // Xóa dòng này
+    sheet.setRowHeight(headerRowIndex, 20); // Đặt chiều cao hợp lý, ví dụ 20
 
     int currentRow = headerRowIndex + 1;
     for (var studentData in data) {
       final account = studentData['account'];
       final student = studentData['student'];
       final detail = studentData['detail'];
+
+      print('Adding student: ${detail['_studentName']}');
 
       sheet.cell(excel.CellIndex.indexByString("A$currentRow")).value =
           excel.TextCellValue((currentRow - headerRowIndex).toString());
@@ -553,11 +646,11 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
       sheet.cell(excel.CellIndex.indexByString("E$currentRow")).value =
           excel.TextCellValue(account['_userName'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
-          excel.TextCellValue(account['_password'] ?? '123');
+          excel.TextCellValue('123');
       sheet.cell(excel.CellIndex.indexByString("G$currentRow")).value =
           excel.TextCellValue(student['P_id'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("H$currentRow")).value =
-          excel.TextCellValue(student['P_password'] ?? '123');
+          excel.TextCellValue('123');
 
       for (int col = 0; col < headers.length; col++) {
         final cellAddress = "${getColumnLetter(col)}$currentRow";
@@ -638,7 +731,7 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
       sheet.cell(excel.CellIndex.indexByString("E$currentRow")).value =
           excel.TextCellValue(account['_userName'] ?? '');
       sheet.cell(excel.CellIndex.indexByString("F$currentRow")).value =
-          excel.TextCellValue(account['_password'] ?? '123');
+          excel.TextCellValue('123');
 
       for (int col = 0; col < headers.length; col++) {
         final cellAddress = "${getColumnLetter(col)}$currentRow";
@@ -661,14 +754,29 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
     final studentsInClass = studentDetailMap.values
         .where((detail) => detail['Class_id'] == classId);
 
+    print('Class $classId has ${studentsInClass.length} students');
+
     for (var detail in studentsInClass) {
-      final student = studentMap[detail['ST_id']];
-      final account = accountMap[student['ACC_id']];
+      final studentId = detail['ST_id'];
+      final student = studentMap[studentId];
+      if (student == null) {
+        print('Student not found for ST_id: $studentId');
+        continue;
+      }
+
+      final accId = student['ACC_id'];
+      final account = accountMap[accId];
+      if (account == null) {
+        print('Account not found for ACC_id: $accId');
+        continue;
+      }
+
       result.add({
         'account': account,
         'student': student,
         'detail': detail,
       });
+      print('Added student: ${detail['_studentName']}');
     }
     return result;
   }

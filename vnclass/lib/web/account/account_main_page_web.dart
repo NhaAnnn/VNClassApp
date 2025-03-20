@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb; // Thêm kIsWeb
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:vnclass/modules/account/controller/account_repository.dart';
 import 'package:vnclass/modules/account/model/account_edit_model.dart';
-import 'package:vnclass/modules/account/view/account_creat_acc_page.dart';
-import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
-import 'package:vnclass/modules/account/widget/dialog_export_acc.dart';
-import 'package:vnclass/modules/account/widget/tabar_list_acc.dart';
-import 'package:vnclass/modules/account/widget/item_account.dart';
-import 'package:vnclass/web/account/account_create_acc_page_web.dart';
-import 'package:vnclass/web/account/account_edit_acc_page_web.dart';
-import 'package:vnclass/web/account/dialog_export_acc_web.dart';
+
+import 'package:vnclass/web/account/account_create_acc_page_web.dart'
+    if (kIsWeb) 'package:vnclass/web/account/account_create_acc_page_web.dart';
+import 'package:vnclass/web/account/account_edit_acc_page_web.dart'
+    if (kIsWeb) 'package:vnclass/web/account/account_edit_acc_page_web.dart';
+import 'package:vnclass/web/account/dialog_export_acc_web.dart'
+    if (kIsWeb) 'package:vnclass/web/account/dialog_export_acc_web.dart';
+import 'package:vnclass/web/account/tabar_list_acc_web.dart'
+    if (kIsWeb) 'package:vnclass/web/account/tabar_list_acc_web.dart';
 
 class AccountMainPageWeb extends StatefulWidget {
   const AccountMainPageWeb({super.key});
@@ -346,7 +347,7 @@ class _AccountMainPageWebState extends State<AccountMainPageWeb> {
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       height: MediaQuery.of(context).size.height * 0.6,
-                      child: const TabarListAcc(),
+                      child: const TabarListAccWeb(),
                     ),
                   );
                 },

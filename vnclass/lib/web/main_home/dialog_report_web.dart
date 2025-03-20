@@ -1,5 +1,5 @@
 import 'dart:math';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,21 +14,22 @@ import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/teacher_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
+import 'package:vnclass/web/file_utils.dart'; // Import file_utils.dart
 
-class DialogReport extends StatefulWidget {
+class DialogReportWeb extends StatefulWidget {
   final String reportType;
 
-  const DialogReport({super.key, required this.reportType});
+  const DialogReportWeb({super.key, required this.reportType});
 
   @override
-  _DialogReport createState() => _DialogReport();
+  _DialogReportWeb createState() => _DialogReportWeb();
 }
 
 enum PeriodType { semester1, semester2, fullYear, month }
 
 enum PeriodTypes { semester1, semester2, fullYear }
 
-class _DialogReport extends State<DialogReport> {
+class _DialogReportWeb extends State<DialogReportWeb> {
   String? selectedOption;
   String? selectedMonth;
   String? selectedSemester;
@@ -51,23 +52,26 @@ class _DialogReport extends State<DialogReport> {
   Future<void> exportToExcel(BuildContext context) async {
     setState(() => isExporting = true);
     try {
-      if (Platform.isAndroid) {
-        final androidInfo = await DeviceInfoPlugin().androidInfo;
-        if (androidInfo.version.sdkInt >= 33) {
-          await _handleAndroid13Permissions(context);
-        } else {
-          await _handleLegacyAndroidPermissions(context);
+      // Chỉ xử lý quyền trên di động (không phải web)
+      if (!kIsWeb) {
+        final status = await Permission.storage.status;
+        if (!status.isGranted) {
+          final result = await Permission.storage.request();
+          if (result.isDenied || result.isPermanentlyDenied) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Vui lòng cấp quyền để lưu file')),
+            );
+            if (result.isPermanentlyDenied) await openAppSettings();
+          }
         }
       }
 
       var excelFile = excel.Excel.createExcel();
       if (widget.reportType == 'class') {
         if (selectedOption == 'Tháng') {
-          //    await _createSheetsByClassIdForMonth(excelFile, context);
           await _createSheetsByClassId(excelFile, context, PeriodType.month);
         } else if (selectedOption == 'Học kỳ' &&
             selectedSemester == 'Học kỳ 1') {
-          // await _createSheetsByClassIdForSemester1(excelFile, context);
           await _createSheetsByClassId(
               excelFile, context, PeriodType.semester1);
         } else if (selectedOption == 'Học kỳ' &&
@@ -300,21 +304,27 @@ class _DialogReport extends State<DialogReport> {
       }
     }
 
-    final directory = Directory('/storage/emulated/0/Download');
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
-    }
+    // Xuất file dựa trên nền tảng
     final fileName = _getFileName();
-    final path = '${directory.path}/$fileName';
-    final file = File(path);
-    await file.writeAsBytes(excelFile.encode()!);
+    final excelBytes = excelFile.encode()!;
 
-    debugPrint('File Excel đã được lưu tại: $path');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File đã được lưu tại: $path')),
-    );
+    if (kIsWeb) {
+      // Trên web: Gọi hàm downloadFile từ web_utils.dart
+      downloadFile(excelBytes, fileName);
+      debugPrint('File Excel đã được tải xuống trên web: $fileName');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('File đã được tải xuống: $fileName')),
+      );
+    }
+    // else {
+    //   // Trên di động: Gọi hàm downloadFile từ web_utils_stub.dart
+    //   await downloadFile(excelBytes, fileName);
+    //   debugPrint('File Excel đã được lưu tại: $fileName');
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('File đã được lưu tại: $fileName')),
+    //   );
+    // }
   }
-
   // Logic cho "Tháng" (giữ nguyên)
 
   void _fillClassInfoForMonth(excel.Sheet sheet, String classId,
@@ -1361,20 +1371,31 @@ class _DialogReport extends State<DialogReport> {
     _fillSchoolInfoForMonth(sheet, results);
     await _fillSchoolTableForMonth(sheet, results);
 
-    // Lưu file Excel
-    final directory = Directory('/storage/emulated/0/Download');
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
-    }
-    final fileName = _getFileName();
-    final path = '${directory.path}/$fileName';
-    final file = File(path);
-    await file.writeAsBytes(excelFile.encode()!);
-    debugPrint('File Excel duy nhất cho School (Tháng) đã được lưu tại: $path');
+    // // Lưu file Excel
+    // final directory = Directory('/storage/emulated/0/Download');
+    // if (!await directory.exists()) {
+    //   await directory.create(recursive: true);
+    // }
+    // final fileName = _getFileName();
+    // final path = '${directory.path}/$fileName';
+    // final file = File(path);
+    // await file.writeAsBytes(excelFile.encode()!);
+    // debugPrint('File Excel duy nhất cho School (Tháng) đã được lưu tại: $path');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File đã được lưu tại: $path')),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('File đã được lưu tại: $path')),
+    // );
+    // Xuất file dựa trên nền tảng
+    final fileName = _getFileName();
+    final excelBytes = excelFile.encode()!;
+
+    if (kIsWeb) {
+      downloadFile(excelBytes, fileName);
+      debugPrint('File Excel đã được tải xuống trên web: $fileName');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('File đã được tải xuống: $fileName')),
+      );
+    }
   }
 
   void _fillSchoolInfoForMonth(
@@ -1648,21 +1669,32 @@ class _DialogReport extends State<DialogReport> {
         break;
     }
 
-    // Lưu file Excel
-    final directory = Directory('/storage/emulated/0/Download');
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
-    }
-    final fileName = _getFileName();
-    final path = '${directory.path}/$fileName';
-    final file = File(path);
-    await file.writeAsBytes(excelFile.encode()!);
-    debugPrint(
-        'File Excel duy nhất cho School ($periodLabel) đã được lưu tại: $path');
+    // // Lưu file Excel
+    // final directory = Directory('/storage/emulated/0/Download');
+    // if (!await directory.exists()) {
+    //   await directory.create(recursive: true);
+    // }
+    // final fileName = _getFileName();
+    // final path = '${directory.path}/$fileName';
+    // final file = File(path);
+    // await file.writeAsBytes(excelFile.encode()!);
+    // debugPrint(
+    //     'File Excel duy nhất cho School ($periodLabel) đã được lưu tại: $path');
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('File đã được lưu tại: $path')),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('File đã được lưu tại: $path')),
+    // );
+    // Xuất file dựa trên nền tảng
+    final fileName = _getFileName();
+    final excelBytes = excelFile.encode()!;
+
+    if (kIsWeb) {
+      downloadFile(excelBytes, fileName);
+      debugPrint('File Excel đã được tải xuống trên web: $fileName');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('File đã được tải xuống: $fileName')),
+      );
+    }
   }
 
   Future<void> _createSheetForSchoolSemester1(

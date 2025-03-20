@@ -11,6 +11,7 @@ import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/common/widget/radio_button_widget.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
+import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 
 class ItemTabarCreatAcc extends StatefulWidget {
@@ -43,18 +44,9 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   bool _isShowPass = false;
   bool _isShowPassAgain = false;
 
-  String selectedClass = '10A1';
-  final List<String> classOptions = [
-    '10A1',
-    '10A2',
-    '10A3',
-    '11A1',
-    '11A2',
-    '11A3',
-    '12A1',
-    '12A2',
-    '12A3'
-  ];
+  String selectedClass = '';
+  String selectedYear = '';
+  final List<String> classOptions = [];
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _passwordFocusNode = FocusNode();
@@ -93,7 +85,6 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
       setState(() => _isShowPassAgain = !_isShowPassAgain);
 
   String? selectedValue;
-  String selectedYear = '2024-2025';
   String selectedGender = 'Nam';
 
   @override
@@ -112,6 +103,19 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
       if (_confirmPasswordFocusNode.hasFocus) {
         _scrollToField(_confirmPasswordFocusNode);
       }
+    });
+
+    // Lấy dữ liệu từ Provider và gán phần tử đầu tiên cho các biến
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final yearProvider = Provider.of<YearProvider>(context, listen: false);
+      final classProvider = Provider.of<ClassProvider>(context, listen: false);
+      setState(() {
+        selectedYear =
+            yearProvider.years.isNotEmpty ? yearProvider.years.first : '';
+        selectedClass = classProvider.classNames.isNotEmpty
+            ? classProvider.classNames.first
+            : '';
+      });
     });
   }
 
@@ -412,6 +416,8 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   Widget build(BuildContext context) {
     final yearProvider = Provider.of<YearProvider>(context);
     final years = yearProvider.years;
+    final classProvider = Provider.of<ClassProvider>(context);
+    final classes = classProvider.classNames;
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
@@ -423,7 +429,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           if (widget.show) ...[
             _buildSectionHeader('Thông tin lớp học'),
             DropMenuWidget(
-              items: classOptions,
+              items: classes,
               hintText: 'Lớp',
               selectedItem: selectedClass,
               onChanged: (newValue) =>
