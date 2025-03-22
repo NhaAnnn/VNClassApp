@@ -32,7 +32,6 @@ class _UserScreenState extends State<UserScreen> {
 
     return AppBarWidget(
       titleString: 'Thông tin tài khoản',
-      implementLeading: true,
       child: Container(
         color: const Color(0xFFF5F7FA),
         child: SingleChildScrollView(
