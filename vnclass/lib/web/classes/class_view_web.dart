@@ -90,27 +90,6 @@ class _ClassViewWebState extends State<ClassViewWeb> {
           accountProvider.account!.idAcc);
     }
 
-    // // Additional filters based on selectedGrade and selectedYear
-    // if (selectedGrade != null && selectedGrade!.isNotEmpty) {
-    //   fetchedClasses = fetchedClasses.where((classModel) {
-    //     // Assuming classModel has a property that indicates grade in a compatible format
-    //     return classModel.className != null &&
-    //         classModel.className!.startsWith(selectedGrade!.substring(5));
-    //   }).toList();
-    // }
-
-    // if (selectedYear != null && selectedYear!.isNotEmpty) {
-    //   fetchedClasses = fetchedClasses.where((classModel) {
-    //     return classModel.year ==
-    //         selectedYear; // Assume classModel has a 'year' property
-    //   }).toList();
-    // }
-
-    // setState(() {
-    //   _allClasses = fetchedClasses;
-    //   _filteredClasses = fetchedClasses;
-    // });
-
     return fetchedClasses;
   }
 

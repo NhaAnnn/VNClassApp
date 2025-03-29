@@ -112,7 +112,7 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
       actions: [
         ElevatedButton(
           onPressed: () async {
-            _validateInputs(); // Kiểm tra các trường
+            _validateInputs();
 
             if (classNameError != null ||
                 teacherIdError != null ||

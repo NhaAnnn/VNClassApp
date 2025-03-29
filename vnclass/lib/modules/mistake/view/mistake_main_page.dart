@@ -235,6 +235,9 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
+              onTap: () {
+                Navigator.pushNamed(context, SearchMistakeScreen.routeName);
+              },
             ),
             const SizedBox(height: 20),
             Expanded(

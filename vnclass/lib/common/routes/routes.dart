@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vnclass/modules/classes/widget/create_list_class_dialog.dart';
+import 'package:vnclass/modules/search/search_mistake_screen.dart';
 
 import 'package:vnclass/web/account/account_create_acc_page_web.dart'
     if (kIsWeb) 'package:vnclass/web/account/account_create_acc_page_web.dart';
@@ -95,7 +97,7 @@ final Map<String, WidgetBuilder> routes = {
   StudentConductInfoMonth.routeName: (context) =>
       const StudentConductInfoMonth(),
   UserSetPointsScreen.routeName: (context) => const UserSetPointsScreen(),
-
+  SearchMistakeScreen.routeName: (context) => const SearchMistakeScreen(),
   // Routes chỉ dành cho web (được thêm khi kIsWeb là true)
   if (kIsWeb) ...{
     AccountMainPageWeb.routeName: (context) => const AccountMainPageWeb(),

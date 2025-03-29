@@ -42,58 +42,12 @@ class _HelpScreenState extends State<HelpScreen> {
         padding: const EdgeInsets.all(80.0),
         child: Column(
           children: [
-            ButtonWidget(
-              title: 'Lớp học',
-              ontap: () =>
-                  Navigator.of(context).pushNamed(AllClasses.routeName),
+            Text(
+              'Liên hệ hỗ trợ',
+              style: TextStyle(fontSize: 20),
             ),
-            ButtonWidget(
-              title: 'DRL',
-              ontap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return ChooseYearDialog();
-                  },
-                );
-              },
-            ),
-            // IconButton(
-            //   icon: Stack(
-            //     children: [
-            //       Icon(
-            //         Icons.notifications,
-            //         color: Colors.blue,
-            //         size: 40,
-            //       ),
-            //       if (NotificationChange.unreadCount >
-            //           0) // Kiểm tra số lượng thông báo chưa đọc
-            //         Positioned(
-            //           right: 0,
-            //           child: Container(
-            //             padding: EdgeInsets.all(2),
-            //             decoration: BoxDecoration(
-            //               color: Colors.red,
-            //               borderRadius: BorderRadius.circular(6),
-            //             ),
-            //             constraints: BoxConstraints(
-            //               minWidth: 12,
-            //               minHeight: 12,
-            //             ),
-            //             child: Text(
-            //               '${NotificationChange.unreadCount}',
-            //               style: TextStyle(
-            //                 color: Colors.white,
-            //                 fontSize: 10,
-            //               ),
-            //               textAlign: TextAlign.center,
-            //             ),
-            //           ),
-            //         ),
-            //     ],
-            //   ),
-
-            //   ),
+            Text('Gmail:'),
+            Text('Discord:'),
           ],
         ),
       ),

@@ -108,16 +108,48 @@ class _StudentWidgetState extends State<StudentWidget> {
                                   message: 'Gửi thông báo đến phụ huynh',
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      StudentModel studentModel =
-                                          await getStudent(student.studentID!);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return SendNotificationParentDialog(
-                                            pID: studentModel.pID!,
-                                          );
-                                        },
-                                      );
+                                      try {
+                                        // Show a loading indicator (optional)
+                                        // You can use a loading dialog or any other indicator here.
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return Center(
+                                                child:
+                                                    CircularProgressIndicator());
+                                          },
+                                        );
+
+                                        // Fetch the student model asynchronously
+                                        StudentModel? studentModel =
+                                            await getStudent(
+                                                student.studentID!);
+
+                                        // Close the loading dialog
+                                        Navigator.of(context).pop();
+
+                                        // Check if studentModel is not null
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return SendNotificationParentDialog(
+                                              pID: studentModel.pID!,
+                                            );
+                                          },
+                                        );
+                                      } catch (e) {
+                                        // Handle exceptions here
+                                        print('Error fetching student: $e');
+                                        // You can also show an error message to the user
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                'An error occurred. Please try again.'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blueAccent,
@@ -151,7 +183,10 @@ class _StudentWidgetState extends State<StudentWidget> {
                           DataCell(Text('Đang tải dữ liệu')),
                           DataCell(Text('')),
                           DataCell(Text('')),
-                          DataCell(Text('')),
+                          if (accountProvider.account!.goupID
+                              .contains('giaoVien')) ...[
+                            DataCell(Text('')),
+                          ],
                         ]),
                       ],
               ),

@@ -62,26 +62,28 @@ class _AllConductCardState extends State<AllConductCard> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => {
-                  Navigator.of(context).pushNamed(
-                    ConductDetail.routeName,
-                    arguments: {
-                      'classID': classModel.id,
-                      'className': classModel.className,
-                      'monthKey': monthKey,
-                    },
-                  )
-                },
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(
-                    FontAwesomeIcons.angleRight,
-                    size: 36,
-                    color: Colors.black,
+              if (!kIsWeb) ...[
+                GestureDetector(
+                  onTap: () => {
+                    Navigator.of(context).pushNamed(
+                      ConductDetail.routeName,
+                      arguments: {
+                        'classID': classModel.id,
+                        'className': classModel.className,
+                        'monthKey': monthKey,
+                      },
+                    )
+                  },
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      FontAwesomeIcons.angleRight,
+                      size: 36,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

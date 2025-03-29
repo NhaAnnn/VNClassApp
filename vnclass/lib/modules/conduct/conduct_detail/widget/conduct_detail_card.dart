@@ -79,43 +79,45 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () => {
-                  if (monthKey >= 100)
-                    {
-                      Navigator.of(context).pushNamed(
-                        StudentConductInfo.routeName,
-                        arguments: {
-                          'studentModel': studentModel,
-                          'trainingScore': trainingScore,
-                          'conduct': conduct,
-                          'term': monthKey,
-                        },
-                      ),
-                    }
-                  else
-                    {
-                      Navigator.of(context).pushNamed(
-                        StudentConductInfoMonth.routeName,
-                        arguments: {
-                          'studentID': studentModel.id,
-                          'studentName': studentModel.studentName,
-                          'monthKey': monthKey,
-                          'trainingScore': trainingScore,
-                          'conduct': conduct,
-                        },
-                      ),
-                    }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Icon(
-                    FontAwesomeIcons.angleRight,
-                    size: 36,
-                    color: Colors.black,
+              if (!kIsWeb) ...[
+                GestureDetector(
+                  onTap: () => {
+                    if (monthKey >= 100)
+                      {
+                        Navigator.of(context).pushNamed(
+                          StudentConductInfo.routeName,
+                          arguments: {
+                            'studentModel': studentModel,
+                            'trainingScore': trainingScore,
+                            'conduct': conduct,
+                            'term': monthKey,
+                          },
+                        ),
+                      }
+                    else
+                      {
+                        Navigator.of(context).pushNamed(
+                          StudentConductInfoMonth.routeName,
+                          arguments: {
+                            'studentID': studentModel.id,
+                            'studentName': studentModel.studentName,
+                            'monthKey': monthKey,
+                            'trainingScore': trainingScore,
+                            'conduct': conduct,
+                          },
+                        ),
+                      }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Icon(
+                      FontAwesomeIcons.angleRight,
+                      size: 36,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

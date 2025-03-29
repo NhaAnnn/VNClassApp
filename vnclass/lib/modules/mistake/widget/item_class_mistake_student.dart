@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
@@ -10,12 +11,28 @@ class ItemClassMistakeStudent extends StatelessWidget {
     required this.studentDetailModel,
     this.month,
     this.onRefresh,
+    this.isSearch,
   });
 
   final StudentDetailModel studentDetailModel;
   final String? month;
+  final bool? isSearch;
   final Future<void> Function()?
       onRefresh; // Đổi VoidCallback thành Future<void> Function()
+
+  Future<List<StudentDetailModel?>> fetchStudentMistakeClasses(
+      String idClass) async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('STUDENT_DETAIL')
+        .where('Class_id', isEqualTo: idClass)
+        .get();
+
+    final data = await Future.wait(
+      snapshot.docs.map((doc) => StudentDetailModel.fromFirestore(doc, month!)),
+    );
+
+    return data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,27 +79,30 @@ class ItemClassMistakeStudent extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            flex: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 40),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD32F2F).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  studentDetailModel.numberOfErrors,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFD32F2F)),
+          if (isSearch == null) ...[
+            Expanded(
+              flex: 1,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 40),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD32F2F).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    studentDetailModel.numberOfErrors,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFD32F2F)),
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
           Expanded(
             flex: 1,
             child: ConstrainedBox(

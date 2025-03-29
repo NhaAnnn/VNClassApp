@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/modules/notification/controller/notification_controller.dart';
+
 import 'package:vnclass/modules/notification/funtion/notification_change.dart';
 import 'package:vnclass/modules/notification/model/notification_model.dart';
 
@@ -16,10 +17,11 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen> {
   List<NotificationModel> notifications = [];
   Function? onUpdate;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getNotification(); // Gọi ở đây để đảm bảo context đã sẵn sàng
+    getNotification(); // Ensure context is ready before calling
   }
 
   Future<void> toggleReadStatus(String id) async {
@@ -27,17 +29,30 @@ class _NotificationScreenState extends State<NotificationScreen> {
       final index = notifications.indexWhere((n) => n.id == id);
       if (index != -1) {
         if (!notifications[index].isRead) {
-          // Chỉ thay đổi trạng thái nếu nó chưa đọc
-          notifications[index].isRead = true; // Đánh dấu là đã đọc
+          notifications[index].isRead = true;
 
-          // Cập nhật số lượng thông báo chưa đọc
           Provider.of<NotificationChange>(context, listen: false)
               .decrementUnreadCount();
         }
-        onUpdate?.call(); // Gọi callback để thông báo sự thay đổi
+        onUpdate?.call();
       }
     });
     await NotificationController.setReadNotification(id);
+  }
+
+  Future<void> markAllAsRead() async {
+    setState(() {
+      for (var notification in notifications) {
+        if (!notification.isRead) {
+          notification.isRead = true;
+          Provider.of<NotificationChange>(context, listen: false)
+              .decrementUnreadCount();
+        }
+      }
+    });
+    await Future.wait(notifications.map((notification) async {
+      await NotificationController.setReadNotification(notification.id);
+    }));
   }
 
   void getNotification() {
@@ -46,69 +61,105 @@ class _NotificationScreenState extends State<NotificationScreen> {
     notifications = args['notifications'] as List<NotificationModel>;
 
     notifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    onUpdate = args['onUpdate']; // Nhận callback
+    onUpdate = args['onUpdate']; // Receive callback
   }
 
   @override
   Widget build(BuildContext context) {
-    double paddingValue = MediaQuery.of(context).size.width * 1;
+    double paddingValue =
+        MediaQuery.of(context).size.width * 0.05; // Improved padding
     return Scaffold(
+      backgroundColor: Colors.white, // Set background color
       body: Column(
         children: [
           BackBar(title: 'Thông báo'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: markAllAsRead,
+                child: Row(
+                  children: [
+                    Text(
+                      'Đánh dấu đã đọc tất cả ',
+                      style: TextStyle(
+                          color: const Color.fromARGB(255, 1, 86, 155),
+                          fontSize: 16),
+                    ),
+                    Icon(
+                      Icons.playlist_add_check_rounded,
+                      size: 30,
+                      color: const Color.fromARGB(255, 0, 90, 164),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: notifications.isEmpty
                 ? Center(
                     child: Text(
                       'Không có thông báo',
-                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: const Color.fromARGB(255, 2, 2, 2)),
                     ),
                   )
-                : Padding(
-                    padding: EdgeInsets.all(paddingValue * 0.02),
-                    child: ListView.builder(
-                      itemCount: notifications.length,
-                      itemBuilder: (context, index) {
-                        final notification = notifications[index];
-                        return Card(
-                          elevation: 8,
-                          margin: EdgeInsets.symmetric(
-                              vertical: paddingValue * 0.001),
-                          child: ListTile(
-                            shape: Border.symmetric(
-                                horizontal: BorderSide(color: Colors.grey)),
-                            title: Text(
-                              notification.notificationTitle,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: notification.isRead
-                                    ? FontWeight.normal
-                                    : FontWeight.bold,
-                                color: notification.isRead
-                                    ? Colors.grey
-                                    : Colors.black,
-                              ),
+                : ListView.builder(
+                    itemCount: notifications.length,
+                    padding: EdgeInsets.zero,
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return Card(
+                        color: const Color.fromARGB(255, 249, 246, 246),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                                color: const Color.fromARGB(115, 104, 104, 104),
+                                width: 1) // Rounded corners
                             ),
-                            subtitle: Text(
+                        child: ListTile(
+                          title: Text(
+                            notification.notificationTitle,
+                            style: TextStyle(
+                              fontSize: 18, // Font size for title
+                              fontWeight: notification.isRead
+                                  ? FontWeight.normal
+                                  : FontWeight.bold,
+                              color: notification.isRead
+                                  ? Colors.black54
+                                  : Colors.black,
+                            ),
+                          ),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 8.0, right: 8, bottom: 8),
+                            child: Text(
                               notification.notificationDetail,
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color:
+                                      Colors.black87), // Content text styling
                             ),
-                            tileColor: notification.isRead
-                                ? Colors.grey[300]
-                                : Colors.white,
-                            leading: Icon(
+                          ),
+                          leading: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
                               notification.isRead
                                   ? Icons.mark_email_read
                                   : Icons.mark_email_unread,
                               color: notification.isRead
                                   ? Colors.green
                                   : Colors.red,
+                              size: 30, // Slightly larger icon
                             ),
-                            onTap: () => toggleReadStatus(notification.id),
                           ),
-                        );
-                      },
-                    ),
+                          onTap: () => toggleReadStatus(notification.id),
+                        ),
+                      );
+                    },
                   ),
           ),
         ],

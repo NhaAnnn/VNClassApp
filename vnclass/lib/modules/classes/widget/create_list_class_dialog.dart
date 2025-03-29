@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vnclass/common/design/color.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vnclass/web/file_utils.dart';
 
 class CreateListClassDialog extends StatefulWidget {
   const CreateListClassDialog({super.key, required this.onCreate});
@@ -25,18 +28,34 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
   String fileName = 'Lop_template.xlsx';
 
   Future<void> downloadTemplate() async {
-    String assetPath = 'assets/files/HocSinh_template.xlsx';
+    String assetPath = 'assets/files/Lop_template.xlsx';
+    String fileName = 'Lop_template.xlsx'; // Define the filename
+
     try {
-      // Đọc dữ liệu từ assets
+      // Read data from assets
       final byteData = await rootBundle.load(assetPath);
       final buffer = byteData.buffer;
       final bytes =
           buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
 
+      // Specify the Downloads directory
       final directory = Directory('/storage/emulated/0/Download');
-      final filePath = '${directory.path}/$fileName';
-      final file = File(filePath);
 
+      // Initialize the file path
+      String filePath = '${directory.path}/$fileName';
+      File file = File(filePath);
+
+      // Check for file existence and modify the filename if it exists
+      int counter = 1;
+      while (await file.exists()) {
+        // Generate a new filename with a counter
+        String newFileName = 'Lop_template($counter).xlsx';
+        filePath = '${directory.path}/$newFileName';
+        file = File(filePath);
+        counter++;
+      }
+
+      // Write the file to the Downloads directory
       await file.writeAsBytes(bytes);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -51,6 +70,35 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
         const SnackBar(
           content: Text('Tải mẫu thất bại!'),
           duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> downloadTemplateForWeb() async {
+    String assetPath = 'assets/files/Lop_template.xlsx';
+
+    try {
+      // Tải dữ liệu từ assets
+      final byteData = await rootBundle.load(assetPath);
+      final bytes = byteData.buffer.asUint8List();
+
+      // Sử dụng file_utils.downloadFile để xử lý tải/lưu file
+      downloadFile(bytes, fileName);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text(kIsWeb ? 'Đã tải mẫu: $fileName' : 'Đã lưu mẫu: $fileName'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tải mẫu: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Tải mẫu thất bại: $e'),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -289,7 +337,13 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () => downloadTemplate(),
+                        onPressed: () {
+                          if (kIsWeb) {
+                            downloadTemplateForWeb();
+                          } else {
+                            downloadTemplate();
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF388E3C),
                           padding: const EdgeInsets.symmetric(

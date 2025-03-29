@@ -165,13 +165,9 @@ class _ConductDetailViewWebState extends State<ConductDetailViewWeb> {
                   ),
                   Expanded(
                     child: _isLoading
-                        ? Center(
-                            child:
-                                CircularProgressIndicator()) // Show loading indicator while data is loading
+                        ? Center(child: CircularProgressIndicator())
                         : _filteredStudents.isEmpty
-                            ? Center(
-                                child: Text(
-                                    'Không có học sinh')) // Message when no students found
+                            ? Center(child: Text('Không có học sinh'))
                             : SingleChildScrollView(
                                 child: Wrap(
                                   spacing: 16.0,
@@ -182,8 +178,7 @@ class _ConductDetailViewWebState extends State<ConductDetailViewWeb> {
                                           0.25, // Adjust width as needed
                                       child: ConductDetailCard(
                                         studentModel: student,
-                                        monthKey: widget
-                                            .monthKey, // Use widget.monthKey directly
+                                        monthKey: widget.monthKey,
                                         onSelect: (selectedStudentDetailModel,
                                             conductData,
                                             trainingScoreData) async {

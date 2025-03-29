@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:vnclass/modules/main_home/views/help_screen.dart';
 import 'package:vnclass/modules/main_home/views/home_screen.dart';
 import 'package:vnclass/modules/main_home/views/user_screen.dart';
+import 'package:vnclass/modules/notification/widget/notification_dialog.dart';
 
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
@@ -15,6 +17,22 @@ class MainHomePage extends StatefulWidget {
 
 class _MainHomePageState extends State<MainHomePage> {
   int _currentIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    // Check for notification permissions on app start
+    checkNotificationPermission(context);
+  }
+
+  Future<void> checkNotificationPermission(BuildContext context) async {
+    var status = await Permission.notification.status;
+
+    if (status.isDenied) {
+      notificationDialog(context);
+    } else if (status.isPermanentlyDenied) {
+      notificationDialog(context);
+    } else {}
+  }
 
   @override
   Widget build(BuildContext context) {

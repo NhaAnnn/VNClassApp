@@ -46,7 +46,7 @@ class _SendNotificationParentDialogState
               colorBorder: Color(0xFF666666),
               onChanged: (value) {
                 title = value;
-                titleError = null; // Xóa lỗi khi người dùng nhập
+                titleError = null;
               },
               errorText: titleError,
               onTap: () {

@@ -1,25 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vnclass/common/funtion/getMonthNow.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
-import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
-import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
-
-import 'package:vnclass/modules/classes/class_detail/widget/class_detail_card.dart';
-import 'package:vnclass/modules/classes/widget/all_classes_card.dart';
 import 'package:vnclass/modules/conduct/conduct_detail/widget/conduct_detail_card.dart';
-import 'package:vnclass/modules/login/controller/provider.dart';
 import 'package:vnclass/modules/mistake/controllers/mistake_repository.dart';
 import 'package:vnclass/modules/mistake/models/class_mistake_model.dart';
 import 'package:vnclass/modules/mistake/models/student_detail_model.dart';
-import 'package:vnclass/modules/mistake/view/mistake_class_detail_page.dart';
 import 'package:vnclass/modules/mistake/widget/item_class_mistake.dart';
 import 'package:vnclass/modules/mistake/widget/item_class_mistake_student.dart';
 
 class SearchMistakeScreen extends StatefulWidget {
   const SearchMistakeScreen({super.key});
-  static String routeName = 'search_mistake';
+  static String routeName = 'search_mistake_screen';
 
   @override
   _SearchMistakeScreenState createState() => _SearchMistakeScreenState();
@@ -42,24 +34,25 @@ class _SearchMistakeScreenState extends State<SearchMistakeScreen>
     final mistakeRepository = MistakeRepository();
 
     _classes = await mistakeRepository.fetchMistakeClasses('CLASS');
-    if (_classes.isNotEmpty) {
-      List<StudentDetailModel> allStudents = [];
-      for (var classItem in _classes) {
-        final students = await fetchStudentMistakeClasses(classItem.idClass);
-        allStudents.addAll(students
-            .where((student) => student != null)
-            .cast<StudentDetailModel>());
-      }
+
+    List<StudentDetailModel> allStudents = [];
+    for (var classItem in _classes) {
+      final students = await fetchStudentMistakeClass(classItem.idClass);
+      allStudents.addAll(students
+          .where((student) => student != null)
+          .cast<StudentDetailModel>());
+
       _students = allStudents;
     }
 
     print('Số học sinh: ${_students.length}');
     print('Số lớp học: ${_classes.length}');
+    print('Số học sinh: $_students');
 
     setState(() {});
   }
 
-  Future<List<StudentDetailModel?>> fetchStudentMistakeClasses(
+  Future<List<StudentDetailModel?>> fetchStudentMistakeClass(
       String idClass) async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('STUDENT_DETAIL')
@@ -98,9 +91,6 @@ class _SearchMistakeScreenState extends State<SearchMistakeScreen>
     if (classResults.isNotEmpty) {
       _filteredResults['Lớp Học'] = classResults;
     }
-    print('Số học sinh: ${_students.length}');
-    print('Số lớp học: ${_classes.length}');
-
     setState(() {});
   }
 
@@ -163,30 +153,56 @@ class _SearchMistakeScreenState extends State<SearchMistakeScreen>
                         ),
                       )
                     : ListView.builder(
-                        itemCount: _filteredResults[category]!.length,
+                        itemCount: _filteredResults[category]?.length ?? 0,
                         itemBuilder: (context, index) {
-                          final result = _filteredResults[category]![index];
+                          var result = _filteredResults[category]![index];
+                          List<String> semesters = [
+                            'Học kỳ 1',
+                            'Học kỳ 2',
+                            'Cả năm',
+                          ];
                           if (result is ClassMistakeModel) {
-                            return ItemClassModels(classMistakeModel: result);
-                          } else if (result is StudentDetailModel) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ItemClassMistakeStudent(
-                                studentDetailModel: result,
-                              ),
+                            return Column(
+                              children: semesters.map((semester) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        semester,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      ItemClassModels(
+                                        classMistakeModel: result,
+                                        hocKy: semester,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(), // Convert the iterable to a list
                             );
-
-                            // List<String> months = [
-                            //   'Học kì 1',
-                            //   'Học kì 2',
-                            //   'Cả năm',
-                            // ];
-                            // return Column(
-                            //   crossAxisAlignment: CrossAxisAlignment.start,
-                            //   children: months.map((month) {
-                            //     return studentSearch(month, result);
-                            //   }).toList(),
-                            // );
+                          } else if (result is StudentDetailModel) {
+                            List<String> months = [
+                              'Tháng 1',
+                              'Tháng 2',
+                              'Tháng 3',
+                              'Tháng 4',
+                              'Tháng 5',
+                              'Tháng 9',
+                              'Tháng 10',
+                              'Tháng 11',
+                              'Tháng 12',
+                            ];
+                            return Column(
+                              children: months.map((month) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: studentSearch(month, result),
+                                );
+                              }).toList(),
+                            );
                           }
                           return SizedBox.shrink();
                         },
@@ -199,12 +215,7 @@ class _SearchMistakeScreenState extends State<SearchMistakeScreen>
     );
   }
 
-  Widget studentSearch(String month, dynamic result) {
-    int monthKey = Getmonthnow.getMonthNumber(month);
-    if (month.contains('Học kì 1')) monthKey = 100;
-    if (month.contains('Học kì 2')) monthKey = 200;
-    if (month.contains('Cả năm')) monthKey = 300;
-
+  Widget studentSearch(String month, StudentDetailModel result) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -215,9 +226,10 @@ class _SearchMistakeScreenState extends State<SearchMistakeScreen>
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
-        ConductDetailCard(
-          monthKey: monthKey,
-          studentModel: result,
+        ItemClassMistakeStudent(
+          month: month,
+          studentDetailModel: result,
+          isSearch: true,
         ),
       ],
     );
