@@ -49,6 +49,124 @@ class ItemClassMistakeStudent extends StatelessWidget {
           ),
         ],
       ),
+      // child: Row(
+      //   children: [
+      //     Expanded(
+      //       flex: 3,
+      //       child: ConstrainedBox(
+      //         constraints: const BoxConstraints(minWidth: 100),
+      //         child: Text(
+      //           studentDetailModel.idStudent,
+      //           textAlign: TextAlign.left,
+      //           style: const TextStyle(
+      //               fontSize: 14,
+      //               fontWeight: FontWeight.w600,
+      //               color: Colors.black87),
+      //         ),
+      //       ),
+      //     ),
+      //     Expanded(
+      //       flex: 5,
+      //       child: ConstrainedBox(
+      //         constraints: const BoxConstraints(minWidth: 150),
+      //         child: Text(
+      //           studentDetailModel.nameStudent,
+      //           textAlign: TextAlign.left,
+      //           style: const TextStyle(
+      //               fontSize: 14,
+      //               fontWeight: FontWeight.w600,
+      //               color: Colors.black87),
+      //         ),
+      //       ),
+      //     ),
+      //     if (isSearch == null) ...[
+      //       Expanded(
+      //         flex: 1,
+      //         child: ConstrainedBox(
+      //           constraints: const BoxConstraints(minWidth: 40),
+      //           child: Container(
+      //             padding:
+      //                 const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+      //             decoration: BoxDecoration(
+      //               color: const Color(0xFFD32F2F).withOpacity(0.12),
+      //               borderRadius: BorderRadius.circular(6),
+      //             ),
+      //             child: Text(
+      //               studentDetailModel.numberOfErrors,
+      //               textAlign: TextAlign.center,
+      //               style: const TextStyle(
+      //                   fontSize: 14,
+      //                   fontWeight: FontWeight.w600,
+      //                   color: Color(0xFFD32F2F)),
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+      //     ],
+      //     Expanded(
+      //       flex: 1,
+      //       child: ConstrainedBox(
+      //         constraints: const BoxConstraints(minWidth: 36),
+      //         child: GestureDetector(
+      //           onTap: () async {
+      //             await Navigator.pushNamed(
+      //               context,
+      //               MistakeViewMistakePage.routeName,
+      //               arguments: {
+      //                 'studentDetailModel': studentDetailModel,
+      //                 'month': month
+      //               },
+      //             );
+      //             if (onRefresh != null && context.mounted) {
+      //               await onRefresh!(); // Gọi hàm bất đồng bộ
+      //             }
+      //           },
+      //           child: Center(
+      //             child: Container(
+      //               padding: const EdgeInsets.all(6),
+      //               decoration: BoxDecoration(
+      //                 color: const Color(0xFF0288D1).withOpacity(0.15),
+      //                 borderRadius: BorderRadius.circular(6),
+      //               ),
+      //               child: const Icon(FontAwesomeIcons.eye,
+      //                   size: 18, color: Color(0xFF0288D1)),
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //     Expanded(
+      //       flex: 1,
+      //       child: ConstrainedBox(
+      //         constraints: const BoxConstraints(minWidth: 36),
+      //         child: GestureDetector(
+      //           onTap: () async {
+      //             await Navigator.pushNamed(
+      //               context,
+      //               MistakeTypeMistakePage.routeName,
+      //               arguments: studentDetailModel,
+      //             );
+      //             if (onRefresh != null && context.mounted) {
+      //               await onRefresh!(); // Gọi hàm bất đồng bộ
+      //             }
+      //           },
+      //           child: Center(
+      //             child: Container(
+      //               padding: const EdgeInsets.all(6),
+      //               decoration: BoxDecoration(
+      //                 color: const Color(0xFF2E7D32).withOpacity(0.15),
+      //                 borderRadius: BorderRadius.circular(6),
+      //               ),
+      //               child: const Icon(FontAwesomeIcons.pen,
+      //                   size: 18, color: Color(0xFF2E7D32)),
+      //             ),
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
+
       child: Row(
         children: [
           Expanded(
@@ -59,9 +177,10 @@ class ItemClassMistakeStudent extends StatelessWidget {
                 studentDetailModel.idStudent,
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
@@ -73,20 +192,21 @@ class ItemClassMistakeStudent extends StatelessWidget {
                 studentDetailModel.nameStudent,
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
           if (isSearch == null) ...[
             Expanded(
-              flex: 1,
+              flex: 2,
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 40),
+                constraints: const BoxConstraints(minWidth: 48),
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFD32F2F).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(6),
@@ -94,19 +214,22 @@ class ItemClassMistakeStudent extends StatelessWidget {
                   child: Text(
                     studentDetailModel.numberOfErrors,
                     textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFFD32F2F)),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFD32F2F),
+                    ),
                   ),
                 ),
               ),
             ),
           ],
+          SizedBox(width: 8),
           Expanded(
             flex: 1,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 36),
+              constraints: const BoxConstraints(minWidth: 44),
               child: GestureDetector(
                 onTap: () async {
                   await Navigator.pushNamed(
@@ -118,27 +241,25 @@ class ItemClassMistakeStudent extends StatelessWidget {
                     },
                   );
                   if (onRefresh != null && context.mounted) {
-                    await onRefresh!(); // Gọi hàm bất đồng bộ
+                    await onRefresh!();
                   }
                 },
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0288D1).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(FontAwesomeIcons.eye,
-                        size: 18, color: Color(0xFF0288D1)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    FontAwesomeIcons.eye,
+                    size: 18,
+                    color: Color(0xFF0288D1),
                   ),
                 ),
               ),
             ),
           ),
+          SizedBox(width: 8),
           Expanded(
             flex: 1,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 36),
+              constraints: const BoxConstraints(minWidth: 44),
               child: GestureDetector(
                 onTap: () async {
                   await Navigator.pushNamed(
@@ -147,18 +268,15 @@ class ItemClassMistakeStudent extends StatelessWidget {
                     arguments: studentDetailModel,
                   );
                   if (onRefresh != null && context.mounted) {
-                    await onRefresh!(); // Gọi hàm bất đồng bộ
+                    await onRefresh!();
                   }
                 },
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2E7D32).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(FontAwesomeIcons.pen,
-                        size: 18, color: Color(0xFF2E7D32)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(
+                    FontAwesomeIcons.pen,
+                    size: 18,
+                    color: Color(0xFF2E7D32),
                   ),
                 ),
               ),

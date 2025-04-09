@@ -94,7 +94,24 @@ class _MistakeWriteMistakePageState extends State<MistakeWriteMistakePage> {
             const SizedBox(height: 12),
             DropMenuWidget<String>(
               hintText: 'Chọn môn học',
-              items: ['Lớp 10', 'Lớp 11', 'Lớp 12'],
+              items: [
+                'Ngữ văn',
+                'Toán',
+                'Ngoại ngữ',
+                'Giáo dục công dân',
+                'Lịch sử',
+                'Địa lý',
+                'Sinh học',
+                'Hóa học',
+                'Vật lý',
+                'Thể dục',
+                'Tin học',
+                'Nghệ thuật',
+                'Khoa học tự nhiên',
+                'Khoa học xã hội',
+                'Giáo dục QP&AN',
+                'Khác...'
+              ],
               selectedItem: selectedItem,
               onChanged: (newValue) {
                 setState(() {

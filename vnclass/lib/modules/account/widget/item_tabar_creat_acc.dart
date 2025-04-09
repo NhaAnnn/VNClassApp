@@ -459,7 +459,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
           ),
           const SizedBox(height: 16),
           TextfieldWidget(
-            labelText: 'Mã viên chức',
+            labelText: 'Mã người dùng',
             controller: _employeeCodeController,
           ),
           const SizedBox(height: 16),

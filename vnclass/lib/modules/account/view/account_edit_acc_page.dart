@@ -9,6 +9,7 @@ import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/common/widget/radio_button_widget.dart';
 import 'package:vnclass/modules/account/model/account_edit_model.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
+import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -77,15 +78,18 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
               : null;
 
       // Kiểm tra className với danh sách classes
-      final List<String> classes = [
-        'Lớp 6A',
-        'Lớp 6B',
-        'Lớp 7A',
-        'Lớp 7B',
-        'Lớp 8A',
-        'Lớp 8B',
-      ];
-      String? className = accountEditModel.classMistakeModel?.className;
+      // final List<String> classes = [
+      //   'Lớp 6A',
+      //   'Lớp 6B',
+      //   'Lớp 7A',
+      //   'Lớp 7B',
+      //   'Lớp 8A',
+      //   'Lớp 8B',
+      // ];
+      final classProvider = Provider.of<ClassProvider>(context);
+      final classes = classProvider.classNames.toString().toUpperCase();
+      String? className =
+          accountEditModel.classMistakeModel?.className.toUpperCase();
       _selectedClass =
           (className != null && classes.contains(className)) ? className : null;
 
@@ -149,7 +153,7 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
       },
       body: jsonEncode({
         'From': 'suongb2103561@student.ctu.edu.vn',
-        'To': 'dosuong16203@gmail.com',
+        'To': 'nhanb2110134@student.ctu.edu.vn',
         'Subject': 'Cấp lại mật khẩu',
         'TextBody': 'Mật khẩu mới của bạn là: 123',
       }),
@@ -192,14 +196,18 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
 
   Widget _buildInfoTab(BuildContext context, List years) {
     // Thêm vào _AccountEditAccPageState
-    final List<String> classes = [
-      'Lớp 6A',
-      'Lớp 6B',
-      'Lớp 7A',
-      'Lớp 7B',
-      'Lớp 8A',
-      'Lớp 8B',
-    ]; // Thay bằng danh sách thực tế của bạn
+    // final List<String> classes = [
+    //   'Lớp 6A',
+    //   'Lớp 6B',
+    //   'Lớp 7A',
+    //   'Lớp 7B',
+    //   'Lớp 8A',
+    //   'Lớp 8B',
+    // ]; // Thay bằng danh sách thực tế của bạn
+    final yearProvider = Provider.of<YearProvider>(context);
+    final years = yearProvider.years;
+    final classProvider = Provider.of<ClassProvider>(context);
+    final classes = classProvider.classNames;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -274,17 +282,17 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
                 child: ElevatedButton(
                   onPressed: _isEditing
                       ? () {
-                          print(
-                              "Loại tài khoản: ${_accountTypeController.text}");
-                          print(
-                              "Tên tài khoản: ${_accountNameController.text}");
-                          print("Tên người dùng: ${_userNameController.text}");
-                          print("Ngày: ${_dateController.text}");
-                          print("Email: ${_emailController.text}");
-                          print("SĐT: ${_phoneController.text}");
-                          print("Lớp: $_selectedClass");
-                          print("Năm học: $_selectedAcademicYear");
-                          print("Giới tính: $_selectedGender");
+                          // print(
+                          //     "Loại tài khoản: ${_accountTypeController.text}");
+                          // print(
+                          //     "Tên tài khoản: ${_accountNameController.text}");
+                          // print("Tên người dùng: ${_userNameController.text}");
+                          // print("Ngày: ${_dateController.text}");
+                          // print("Email: ${_emailController.text}");
+                          // print("SĐT: ${_phoneController.text}");
+                          // print("Lớp: $_selectedClass");
+                          // print("Năm học: $_selectedAcademicYear");
+                          // print("Giới tính: $_selectedGender");
                           CustomDialogWidget.showConfirmationDialog(
                             context,
                             'Xác nhận lưu thay đổi?',

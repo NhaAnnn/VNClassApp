@@ -96,7 +96,7 @@ class AppBarWidget extends StatelessWidget {
           ),
           Container(
             margin: const EdgeInsets.only(top: 90),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),

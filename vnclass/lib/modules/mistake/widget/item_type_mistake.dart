@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:vnclass/common/widget/custom_dialog_widget.dart';
+import 'package:vnclass/common/widget/confirmation_dialog.dart';
 import 'package:vnclass/modules/main_home/controller/controller_change_type_mistake_sreen.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 import 'package:vnclass/modules/main_home/widget/user_dialog_edit_type.dart';
@@ -54,9 +54,8 @@ class ItemTypeMistakeState extends State<ItemTypeMistake> {
       );
 
       await refreshData(); // Làm mới dữ liệu sau khi cập nhật
-      Navigator.of(context).pop(); // Đóng dialog
+      // Xóa dòng Navigator.pop(context) để không thoát trang
     } catch (e) {
-      // Xử lý lỗi
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi khi cập nhật: $e')),
       );
@@ -83,13 +82,21 @@ class ItemTypeMistakeState extends State<ItemTypeMistake> {
           ),
           child: ExpansionTile(
             leading: GestureDetector(
-              onTap: () => CustomDialogWidget.showConfirmationDialog(
-                context,
-                'title',
-                onTapOK: () {
-                  _updateTypeMistake(item, false);
-                },
-              ),
+              onTap: () {
+                ConfirmationDialog.show(
+                  context: context,
+                  title: 'Xác nhận xóa',
+                  message:
+                      'Bạn có chắc chắn muốn xóa loại vi phạm "${item.nameType}" không?',
+                  confirmText: 'Xóa',
+                  cancelText: 'Hủy',
+                  confirmColor: Colors.redAccent,
+                ).then((confirmed) {
+                  if (confirmed == true) {
+                    _updateTypeMistake(item, false);
+                  }
+                });
+              },
               child: Icon(Icons.delete),
             ),
             title: Text(item.nameType),

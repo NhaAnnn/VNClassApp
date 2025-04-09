@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_widget.dart';
+import 'package:vnclass/common/widget/confirmation_dialog.dart';
 import 'package:vnclass/modules/login/controller/account_controller.dart';
 import 'package:vnclass/modules/mistake/models/edit_mistake_model.dart';
 import 'package:vnclass/modules/mistake/models/package_data.dart';
@@ -308,6 +309,40 @@ class _ItemEditMistakeState extends State<ItemEditMistake> {
                       ),
                     ),
                     const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: ButtonWidget(
+                    //     title: 'Xóa',
+                    //     color: Colors.redAccent,
+                    //     ontap: _isDeleting
+                    //         ? null
+                    //         : () async {
+                    //             _deleteItem(context, item);
+                    //             String accid = await NotificationController
+                    //                 .fetchAccIdFromStudentDetail(item.std_id);
+                    //             List<String> deviceTokens =
+                    //                 await AccountController.fetchTokens(accid);
+                    //             await NotificationService.sendNotification(
+                    //                 accid, //tim id accacc
+                    //                 deviceTokens,
+                    //                 'Thông báo vi phạm',
+                    //                 'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
+                    //             await NotificationController.createNotification(
+                    //                 accid,
+                    //                 'Thông báo vi phạm',
+                    //                 'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
+                    //           },
+                    //     child: _isDeleting
+                    //         ? const SizedBox(
+                    //             height: 20,
+                    //             width: 20,
+                    //             child: CircularProgressIndicator(
+                    //               color: Colors.white,
+                    //               strokeWidth: 2,
+                    //             ),
+                    //           )
+                    //         : null,
+                    //   ),
+                    // ),
                     Expanded(
                       child: ButtonWidget(
                         title: 'Xóa',
@@ -315,20 +350,38 @@ class _ItemEditMistakeState extends State<ItemEditMistake> {
                         ontap: _isDeleting
                             ? null
                             : () async {
-                                _deleteItem(context, item);
-                                String accid = await NotificationController
-                                    .fetchAccIdFromStudentDetail(item.std_id);
-                                List<String> deviceTokens =
-                                    await AccountController.fetchTokens(accid);
-                                await NotificationService.sendNotification(
-                                    accid, //tim id accacc
+                                // Hiển thị dialog xác nhận
+                                bool? confirmed = await ConfirmationDialog.show(
+                                  context: context,
+                                  title: 'Xác nhận xóa',
+                                  message:
+                                      'Bạn có chắc chắn muốn xóa vi phạm "${item.m_name}" vào ${item.mm_time}?',
+                                  confirmText: 'Xóa',
+                                  cancelText: 'Hủy',
+                                  confirmColor: Colors.redAccent,
+                                );
+
+                                // Nếu người dùng đồng ý thì thực hiện xóa
+                                if (confirmed == true) {
+                                  _deleteItem(context, item);
+                                  String accid = await NotificationController
+                                      .fetchAccIdFromStudentDetail(item.std_id);
+                                  List<String> deviceTokens =
+                                      await AccountController.fetchTokens(
+                                          accid);
+                                  await NotificationService.sendNotification(
+                                    accid,
                                     deviceTokens,
                                     'Thông báo vi phạm',
-                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
-                                await NotificationController.createNotification(
+                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa',
+                                  );
+                                  await NotificationController
+                                      .createNotification(
                                     accid,
                                     'Thông báo vi phạm',
-                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa');
+                                    'Một vi phạm của bạn đã được xóa: Vi phạm ${item.m_name} vào ${item.mm_time} đã được xóa',
+                                  );
+                                }
                               },
                         child: _isDeleting
                             ? const SizedBox(

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/common/widget/confirmation_dialog.dart';
 import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/modules/account/model/account_edit_model.dart';
 import 'package:vnclass/modules/account/view/account_edit_acc_page.dart';
@@ -117,13 +118,15 @@ class ItemAccount extends StatelessWidget {
           onTap: () => _handleEdit(context),
         ),
         const SizedBox(width: 12),
-        _buildActionButton(
-          context: context,
-          icon: FontAwesomeIcons.trash,
-          color: Colors.redAccent,
-          tooltip: 'Xóa',
-          onTap: () => _handleDelete(context),
-        ),
+        if (accountEditModel?.accountModel.goupID != 'phuHuynh') ...[
+          _buildActionButton(
+            context: context,
+            icon: FontAwesomeIcons.trash,
+            color: Colors.redAccent,
+            tooltip: 'Xóa',
+            onTap: () => _handleDelete(context),
+          ),
+        ]
       ],
     );
   }
@@ -171,6 +174,179 @@ class ItemAccount extends StatelessWidget {
             result is AccountEditModel &&
             onDataChanged != null) {
           onDataChanged!(result, false); // Chỉnh sửa, không xóa
+        }
+      });
+    }
+  }
+
+  // Future<void> _deleteAccount(BuildContext context) async {
+  //   if (accountEditModel == null) return;
+
+  //   final String groupId = accountEditModel!.accountModel.goupID;
+  //   final String accountId = accountEditModel!.accountModel.idAcc;
+
+  //   try {
+  //     if (groupId == 'banGH' || groupId == 'giaoVien') {
+  //       await Future.wait([
+  //         FirebaseFirestore.instance
+  //             .collection('ACCOUNT')
+  //             .doc(accountId)
+  //             .delete(),
+  //         FirebaseFirestore.instance
+  //             .collection('TEACHER')
+  //             .doc(accountId)
+  //             .delete(),
+  //       ]);
+  //     } else if (groupId == 'hocSinh') {
+  //       final studentDoc = await FirebaseFirestore.instance
+  //           .collection('STUDENT')
+  //           .doc(accountId)
+  //           .get();
+  //       final String? parentId = studentDoc.data()?['P_id'];
+
+  //       final String? classId = accountEditModel!.studentDetailModel?.classID;
+  //       if (classId != null) {
+  //         final classDoc = await FirebaseFirestore.instance
+  //             .collection('CLASS')
+  //             .doc(classId)
+  //             .get();
+  //         if (classDoc.exists) {
+  //           final currentAmount = classDoc.data()!['_amount'] as num? ?? 0;
+  //           final newAmount = currentAmount > 0 ? currentAmount.toInt() - 1 : 0;
+  //           await FirebaseFirestore.instance
+  //               .collection('CLASS')
+  //               .doc(classId)
+  //               .update({'_amount': newAmount});
+  //         }
+  //       }
+
+  //       await Future.wait([
+  //         FirebaseFirestore.instance
+  //             .collection('ACCOUNT')
+  //             .doc(accountId)
+  //             .delete(),
+  //         FirebaseFirestore.instance
+  //             .collection('STUDENT')
+  //             .doc(accountId)
+  //             .delete(),
+  //         if (accountEditModel!.classMistakeModel?.academicYear != null)
+  //           FirebaseFirestore.instance
+  //               .collection('STUDENT_DETAIL')
+  //               .doc(
+  //                   '$accountId${accountEditModel!.classMistakeModel!.academicYear}')
+  //               .delete(),
+  //         if (accountEditModel!.classMistakeModel?.academicYear != null)
+  //           FirebaseFirestore.instance
+  //               .collection('CONDUCT_MONTH')
+  //               .doc(
+  //                   '$accountId${accountEditModel!.classMistakeModel!.academicYear}')
+  //               .delete(),
+  //         if (parentId != null)
+  //           FirebaseFirestore.instance
+  //               .collection('ACCOUNT')
+  //               .doc(parentId)
+  //               .delete(),
+  //         if (parentId != null)
+  //           FirebaseFirestore.instance
+  //               .collection('PARENT')
+  //               .doc(parentId)
+  //               .delete(),
+  //       ]);
+  //     } else if (groupId == 'phuHuynh') {
+  //       final studentQuery = await FirebaseFirestore.instance
+  //           .collection('STUDENT')
+  //           .where('P_id', isEqualTo: accountId)
+  //           .get();
+  //       final studentDocs = studentQuery.docs;
+
+  //       await Future.wait([
+  //         FirebaseFirestore.instance
+  //             .collection('ACCOUNT')
+  //             .doc(accountId)
+  //             .delete(),
+  //         FirebaseFirestore.instance
+  //             .collection('PARENT')
+  //             .doc(accountId)
+  //             .delete(),
+  //         ...studentDocs.map((studentDoc) async {
+  //           final studentId = studentDoc.id;
+  //           final studentDetailQuery = await FirebaseFirestore.instance
+  //               .collection('STUDENT_DETAIL')
+  //               .where('ST_id', isEqualTo: studentId)
+  //               .get();
+  //           final studentDetailDocs = studentDetailQuery.docs;
+
+  //           if (studentDetailDocs.isNotEmpty) {
+  //             final classId = studentDetailDocs.first.data()['Class_id'];
+  //             final classDoc = await FirebaseFirestore.instance
+  //                 .collection('CLASS')
+  //                 .doc(classId)
+  //                 .get();
+  //             if (classDoc.exists) {
+  //               final currentAmount = classDoc.data()!['_amount'] as num? ?? 0;
+  //               final newAmount =
+  //                   currentAmount > 0 ? currentAmount.toInt() - 1 : 0;
+  //               await FirebaseFirestore.instance
+  //                   .collection('CLASS')
+  //                   .doc(classId)
+  //                   .update({'_amount': newAmount});
+  //             }
+  //           }
+
+  //           await Future.wait([
+  //             FirebaseFirestore.instance
+  //                 .collection('ACCOUNT')
+  //                 .doc(studentId)
+  //                 .delete(),
+  //             FirebaseFirestore.instance
+  //                 .collection('STUDENT')
+  //                 .doc(studentId)
+  //                 .delete(),
+  //             ...studentDetailDocs.map((doc) => FirebaseFirestore.instance
+  //                 .collection('STUDENT_DETAIL')
+  //                 .doc(doc.id)
+  //                 .delete()),
+  //             ...studentDetailDocs.map((doc) => FirebaseFirestore.instance
+  //                 .collection('CONDUCT_MONTH')
+  //                 .doc(
+  //                     '$studentId${doc.data()['Class_id'].substring(doc.data()['Class_id'].length - 4)}')
+  //                 .delete()),
+  //           ]);
+  //         }),
+  //       ]);
+  //     }
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Xóa tài khoản thành công!'),
+  //         duration: Duration(seconds: 2),
+  //       ),
+  //     );
+  //     if (onDataChanged != null) {
+  //       onDataChanged!(accountEditModel, true); // Báo rằng tài khoản đã bị xóa
+  //     }
+  //   } catch (e) {
+  //     print('Lỗi khi xóa tài khoản: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Xóa tài khoản thất bại!'),
+  //         duration: Duration(seconds: 2),
+  //       ),
+  //     );
+  //   }
+  // }
+  void _handleDelete(BuildContext context) {
+    if (accountEditModel != null) {
+      ConfirmationDialog.show(
+        context: context,
+        title: 'Xác nhận xóa',
+        message: 'Bạn có chắc chắn muốn xóa tài khoản này không?',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy',
+        confirmColor: Colors.redAccent,
+      ).then((confirmed) {
+        if (confirmed == true) {
+          _deleteAccount(context); // Gọi xóa mà không pop thêm
         }
       });
     }
@@ -313,36 +489,47 @@ class ItemAccount extends StatelessWidget {
         ]);
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Xóa tài khoản thành công!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xóa tài khoản thành công!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
       if (onDataChanged != null) {
         onDataChanged!(accountEditModel, true); // Báo rằng tài khoản đã bị xóa
       }
     } catch (e) {
       print('Lỗi khi xóa tài khoản: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Xóa tài khoản thất bại!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xóa tài khoản thất bại!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
-
-  void _handleDelete(BuildContext context) {
-    if (accountEditModel != null) {
-      CustomDialogWidget.showConfirmationDialog(
-        context,
-        'Xác nhận xóa tài khoản?',
-        onTapOK: () async {
-          await _deleteAccount(context);
-          Navigator.of(context).pop(); // Đóng dialog
-        },
-      );
-    }
-  }
+  // void _handleDelete(BuildContext context) {
+  //   if (accountEditModel != null) {
+  //     ConfirmationDialog.show(
+  //       context: context,
+  //       title: 'Xác nhận xóa',
+  //       message: 'Bạn có chắc chắn muốn xóa tài khoản này không?',
+  //       confirmText: 'Xóa',
+  //       cancelText: 'Hủy',
+  //       confirmColor: Colors.redAccent,
+  //     ).then((confirmed) {
+  //       if (confirmed == true) {
+  //         _deleteAccount(context).then((_) {
+  //           if (context.mounted) {
+  //             Navigator.pop(context); // Đóng dialog hoặc màn hình trước đó
+  //           }
+  //         });
+  //       }
+  //     });
+  //   }
+  // }
 }

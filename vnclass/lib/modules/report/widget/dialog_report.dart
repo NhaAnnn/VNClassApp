@@ -2515,7 +2515,13 @@ class _DialogReport extends State<DialogReport> {
                 elevation: 2,
               ),
               onPressed: canExport && !isExporting
-                  ? () => exportToExcel(context)
+                  ? () async {
+                      await exportToExcel(context); // Gọi hàm xuất file
+                      if (context.mounted) {
+                        Navigator.pop(
+                            context); // Đóng dialog sau khi xuất file thành công
+                      }
+                    }
                   : null,
             ),
           ),

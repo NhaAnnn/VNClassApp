@@ -100,7 +100,7 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
       titleString: 'Cập nhật vi phạm lớp ${classMistakeModel?.className ?? ""}',
       implementLeading: true,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -155,10 +155,10 @@ class _MistakeClassDetailPageState extends State<MistakeClassDetailPage> {
               child: Row(
                 children: [
                   Expanded(flex: 3, child: _buildHeaderText('Mã HS')),
-                  Expanded(flex: 5, child: _buildHeaderText('Họ và Tên')),
+                  Expanded(flex: 4, child: _buildHeaderText('Họ và Tên')),
                   Expanded(flex: 1, child: _buildHeaderText('Lần VP')),
                   Expanded(flex: 1, child: _buildHeaderText('Xem')),
-                  Expanded(flex: 1, child: _buildHeaderText('Sửa')),
+                  Expanded(flex: 1, child: _buildHeaderText('Thêm')),
                 ],
               ),
             ),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:vnclass/common/widget/button_widget.dart';
 import 'package:vnclass/common/widget/drop_menu_widget.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
 import 'package:vnclass/modules/mistake/models/mistake_model.dart';
 import 'package:vnclass/modules/mistake/models/type_mistake_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vnclass/common/widget/confirmation_dialog.dart'; // Import ConfirmationDialog
 
 class UserDialogEditType extends StatefulWidget {
   const UserDialogEditType({
@@ -13,14 +13,14 @@ class UserDialogEditType extends StatefulWidget {
     this.mistakeDialog = false,
     this.mistake,
     this.typeItems,
-    this.onUpdate, // Add this line
+    this.onUpdate,
   });
 
   final bool showBtnDelete;
   final bool mistakeDialog;
   final MistakeModel? mistake;
   final List<TypeMistakeModel>? typeItems;
-  final VoidCallback? onUpdate; // Add this line for the callback
+  final VoidCallback? onUpdate;
 
   @override
   State<UserDialogEditType> createState() => _UserDialogEditTypeState();
@@ -65,27 +65,57 @@ class _UserDialogEditTypeState extends State<UserDialogEditType> {
       status: status,
     );
 
-    await FirebaseFirestore.instance
-        .collection('MISTAKE')
-        .doc(updatedMistake.idMistake)
-        .update(updatedMistake.toMap());
+    try {
+      await FirebaseFirestore.instance
+          .collection('MISTAKE')
+          .doc(updatedMistake.idMistake)
+          .update(updatedMistake.toMap());
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Cập nhật thành công!')),
-    );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Cập nhật thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
 
-    // Call the onUpdate callback to reload data
-    widget.onUpdate!();
+      widget.onUpdate?.call(); // Gọi callback để làm mới dữ liệu
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Đóng dialog chỉnh sửa
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi cập nhật: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
-    // Close the dialog
-    Navigator.of(context).pop();
+  void _handleDelete() {
+    ConfirmationDialog.show(
+      context: context,
+      title: 'Xác nhận xóa',
+      message:
+          'Bạn có chắc chắn muốn xóa vi phạm "${widget.mistake?.nameMistake}" không?',
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+    ).then((confirmed) {
+      if (confirmed == true) {
+        _updateMistake(false); // Gọi hàm cập nhật với status = false để xóa
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'Chọn Thông Tin',
+        'Chỉnh Sửa Vi Phạm',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
       ),
       content: SizedBox(
@@ -105,7 +135,7 @@ class _UserDialogEditTypeState extends State<UserDialogEditType> {
                       selectedItem: selectedOption,
                       onChanged: (value) {
                         setState(() {
-                          selectedOption = value; // Update selected value
+                          selectedOption = value;
                         });
                       },
                     ),
@@ -139,19 +169,49 @@ class _UserDialogEditTypeState extends State<UserDialogEditType> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: ButtonWidget(
-                      title: 'Chỉnh sửa',
-                      ontap: () async {
-                        await _updateMistake(true); // Call the update method
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _updateMistake(true);
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent, // Màu nút chỉnh sửa
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        'Chỉnh sửa',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(width: 8),
                   Expanded(
-                    child: ButtonWidget(
-                      title: 'Thoát',
-                      color: Colors.red,
-                      ontap: () => Navigator.of(context).pop(),
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        backgroundColor:
+                            Colors.grey.shade100, // Màu nền nhẹ cho Thoát
+                      ),
+                      child: Text(
+                        'Thoát',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -161,11 +221,24 @@ class _UserDialogEditTypeState extends State<UserDialogEditType> {
                 Row(
                   children: [
                     Expanded(
-                      child: ButtonWidget(
-                        title: 'Xóa Vi Phạm',
-                        ontap: () async {
-                          await _updateMistake(false);
-                        },
+                      child: ElevatedButton(
+                        onPressed: _handleDelete,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent, // Màu nút xóa
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: Text(
+                          'Xóa Vi Phạm',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ),
                   ],

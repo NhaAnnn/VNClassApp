@@ -221,6 +221,42 @@ class _AccountMainPageState extends State<AccountMainPage>
                         ),
                       ),
                       const SizedBox(width: 12),
+                      // ElevatedButton.icon(
+                      //   onPressed: () {
+                      //     showDialog(
+                      //       context: context,
+                      //       builder: (BuildContext context) {
+                      //         return Dialog(
+                      //           backgroundColor: Colors.transparent,
+                      //           insetPadding:
+                      //               const EdgeInsets.symmetric(horizontal: 6),
+                      //           child: SizedBox(
+                      //             width:
+                      //                 MediaQuery.of(context).size.width * 0.85,
+                      //             height: MediaQuery.of(context).size.height *
+                      //                 0.65, // Tăng chiều cao lên 65%
+                      //             child: const DialogExportAcc(),
+                      //           ),
+                      //         );
+                      //       },
+                      //     );
+                      //   },
+                      //   icon: const Icon(Icons.file_download,
+                      //       color: Colors.white),
+                      //   label: const Text(
+                      //     'Xuất DS',
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: const Color(0xFF388E3C),
+                      //     padding: const EdgeInsets.symmetric(
+                      //         horizontal: 16, vertical: 14),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(12),
+                      //     ),
+                      //     elevation: 4,
+                      //   ),
+                      // ),
                       ElevatedButton.icon(
                         onPressed: () {
                           showDialog(
@@ -228,14 +264,20 @@ class _AccountMainPageState extends State<AccountMainPage>
                             builder: (BuildContext context) {
                               return Dialog(
                                 backgroundColor: Colors.transparent,
-                                insetPadding:
-                                    const EdgeInsets.symmetric(horizontal: 6),
-                                child: SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.85,
-                                  height: MediaQuery.of(context).size.height *
-                                      0.65, // Tăng chiều cao lên 65%
-                                  child: const DialogExportAcc(),
+                                insetPadding: const EdgeInsets.symmetric(
+                                    horizontal:
+                                        16), // Tăng padding ngang cho đẹp hơn
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width *
+                                            0.85, // Chiều ngang tối đa
+                                    maxHeight:
+                                        MediaQuery.of(context).size.height *
+                                            0.7, // Chiều cao tối đa 70%
+                                  ),
+                                  child:
+                                      const DialogExportAcc(), // Widget chứa nội dung dialog
                                 ),
                               );
                             },
