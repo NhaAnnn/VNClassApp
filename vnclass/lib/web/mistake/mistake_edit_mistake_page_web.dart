@@ -452,7 +452,24 @@ class _MistakeEditMistakePageWebState extends State<MistakeEditMistakePageWeb> {
                                     ),
                                   ),
                                   value: selectedItem,
-                                  items: ['Lớp 10', 'Lớp 11', 'Lớp 12']
+                                  items: [
+                                    'Ngữ văn',
+                                    'Toán',
+                                    'Ngoại ngữ',
+                                    'Giáo dục công dân',
+                                    'Lịch sử',
+                                    'Địa lý',
+                                    'Sinh học',
+                                    'Hóa học',
+                                    'Vật lý',
+                                    'Thể dục',
+                                    'Tin học',
+                                    'Nghệ thuật',
+                                    'Khoa học tự nhiên',
+                                    'Khoa học xã hội',
+                                    'Giáo dục QP&AN',
+                                    'Khác...'
+                                  ]
                                       .map((e) => DropdownMenuItem(
                                             value: e,
                                             child: Text(e),

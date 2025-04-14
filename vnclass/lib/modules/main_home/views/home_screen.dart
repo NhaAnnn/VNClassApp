@@ -35,6 +35,51 @@ class _HomeScreenState extends State<HomeScreen> {
   StudentModel? studentModel;
   List<StudentModel>? studentModelList;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   final yearProvider = Provider.of<YearProvider>(context, listen: false);
+  //   yearProvider.fetchYears();
+  //   final classProvider = Provider.of<ClassProvider>(context, listen: false);
+  //   classProvider.fetchClassNames();
+  //   final accountProvider =
+  //       Provider.of<AccountProvider>(context, listen: false);
+  //   accountProvider.account;
+
+  //   fetchNotifications(accountProvider.account!.idAcc, context);
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     handleIncomingNotification(message);
+  //   });
+
+  //   List<String> groupPermissions = [];
+  //   List<String> accountPermissions =
+  //       List.from(accountProvider.account!.permission);
+
+  //   // Lấy permissions từ group
+  //   accountProvider.account!.groupModel!.permission.forEach((key, value) {
+  //     if (value.length > 1) groupPermissions.add(value[1]);
+  //   });
+
+  //   List<String> pers = [];
+  //   pers.addAll(accountPermissions);
+  //   pers.addAll(groupPermissions);
+
+  //   final permissProvider =
+  //       Provider.of<PermissionProvider>(context, listen: false);
+  //   permissProvider.setPermission(pers);
+  //   if (accountProvider.account!.goupID == 'giaoVien') {
+  //     final teacherProvider =
+  //         Provider.of<TeacherProvider>(context, listen: false);
+  //     teacherProvider.fetchClassIDTeacher(accountProvider.account!.idAcc);
+  //   } else if (accountProvider.account!.goupID == 'hocSinh') {
+  //     final studentDetailProvider =
+  //         Provider.of<StudentDetailProvider>(context, listen: false);
+  //     studentDetailProvider.fetchStudentDetail(accountProvider.account!.idAcc);
+  //   }
+  //   fetchStudent();
+
+  //   // print('du lieu list permis+$pers');
+  // }
   @override
   void initState() {
     super.initState();
@@ -55,6 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> accountPermissions =
         List.from(accountProvider.account!.permission);
 
+    // print('Quyền tài khoản: $accountPermissions');
+    //print('Quyền nhóm: ${accountProvider.account!.groupModel!.permission}');
     // Lấy permissions từ group
     accountProvider.account!.groupModel!.permission.forEach((key, value) {
       if (value.length > 1) groupPermissions.add(value[1]);
@@ -63,10 +110,13 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> pers = [];
     pers.addAll(accountPermissions);
     pers.addAll(groupPermissions);
+    //print('Danh sách quyền gộp: $pers');
 
     final permissProvider =
         Provider.of<PermissionProvider>(context, listen: false);
-    permissProvider.setPermission(pers);
+    permissProvider
+        .setPermission(pers); // Đảm bảo setPermission nhận List<String>
+
     if (accountProvider.account!.goupID == 'giaoVien') {
       final teacherProvider =
           Provider.of<TeacherProvider>(context, listen: false);
@@ -77,8 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
       studentDetailProvider.fetchStudentDetail(accountProvider.account!.idAcc);
     }
     fetchStudent();
-
-    // print('du lieu list permis+$pers');
   }
 
   void handleIncomingNotification(RemoteMessage message) {
@@ -291,6 +339,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 28),
                         if (account!.goupID == 'hocSinh') ...[
+                          if ((pers.contains(
+                                  'Cập nhật vi phạm học sinh toàn trường') ||
+                              pers.contains('Cập nhật vi phạm lớp học'))) ...[
+                            _buildHomeItem(
+                              context,
+                              icon: FontAwesomeIcons.penToSquare,
+                              title: 'Cập Nhật Vi Phạm',
+                              route: MistakeMainPage.routeName,
+                            ),
+                            // const SizedBox(height: 16),
+                            // _buildHomeItem(
+                            //   context,
+                            //   icon: FontAwesomeIcons.chartLine,
+                            //   title: 'KQ Rèn Luyện',
+                            //   dialog: 'Dialog',
+                            // ),
+                            const SizedBox(height: 16),
+                          ],
                           _buildHomeItem(
                             context,
                             icon: FontAwesomeIcons.chartLine,
@@ -313,24 +379,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             icon: FontAwesomeIcons.chartLine,
                             title: 'KQ Rèn Luyện',
                             dialog: 'DialogPH',
-                          ),
-                          const SizedBox(height: 16),
-                        ] else if (account.goupID == 'hocSinh' &&
-                            (pers.contains(
-                                    'Cập nhật vi phạm học sinh toàn trường') ||
-                                pers.contains('Cập nhật vi phạm lớp học'))) ...[
-                          _buildHomeItem(
-                            context,
-                            icon: FontAwesomeIcons.penToSquare,
-                            title: 'Cập Nhật Vi Phạm',
-                            route: MistakeMainPage.routeName,
-                          ),
-                          const SizedBox(height: 16),
-                          _buildHomeItem(
-                            context,
-                            icon: FontAwesomeIcons.chartLine,
-                            title: 'KQ Rèn Luyện',
-                            dialog: 'Dialog',
                           ),
                           const SizedBox(height: 16),
                         ] else if (account.goupID == 'giaoVien') ...[

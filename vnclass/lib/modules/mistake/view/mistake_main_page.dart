@@ -155,10 +155,11 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     } else if (account.goupID == 'giaoVien') {
       idclass = Provider.of<TeacherProvider>(context).classIdTeacher;
     }
-    List<String>? pers = Provider.of<PermissionProvider>(context).permission;
+    // List<String>? pers = Provider.of<PermissionProvider>(context).permission;
 
-    // print('du lieu pers $pers');
-
+    // print('du lieu pers kkkyj $pers');
+    List<String> pers = Provider.of<PermissionProvider>(context).permission;
+    //print('Quyền trong build: $pers');
     // Kiểm tra trường hợp đặc biệt: hocSinh với quyền 'Cập nhật vi phạm lớp học'
     bool isStudentWithClassMistakePermission = account.goupID == 'hocSinh' &&
         pers.contains('Cập nhật vi phạm lớp học');
@@ -171,8 +172,48 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
+          if (isStudentWithClassMistakePermission ||
+              account.goupID == 'giaoVien') ...[
+            Row(
+              children: [
+                Expanded(
+                  child: DropMenuWidget<String>(
+                    hintText: 'Học kỳ',
+                    items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+                    selectedItem: selectedHocKy,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedHocKy = newValue;
+                        updateClassY(idclass ?? '');
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropMenuWidget<String>(
+                    enabled: false,
+                    hintText: 'Năm học',
+                    items: years,
+                    selectedItem: selectedYear,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedYear = newValue;
+                        updateClassY(idclass ?? '');
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: buildFutureBuilderY(classFilter: idclass ?? ''),
+            ),
+          ]
+
           // Trường hợp 1: hocSinh với quyền 'Cập nhật vi phạm học sinh toàn trường'
-          if (account.goupID == 'hocSinh' &&
+          else if (account.goupID == 'hocSinh' &&
               pers.contains('Cập nhật vi phạm học sinh toàn trường')) ...[
             Row(
               children: [
@@ -272,46 +313,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
             ),
           ]
           // Trường hợp 2: hocSinh với quyền 'Cập nhật vi phạm lớp học', giaoVien, hoặc hocSinh thông thường
-          else if (isStudentWithClassMistakePermission ||
-              account.goupID == 'giaoVien' ||
-              account.goupID == 'hocSinh') ...[
-            Row(
-              children: [
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Học kỳ',
-                    items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
-                    selectedItem: selectedHocKy,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedHocKy = newValue;
-                        updateClassY(idclass ?? '');
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    enabled: false,
-                    hintText: 'Năm học',
-                    items: years,
-                    selectedItem: selectedYear,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedYear = newValue;
-                        updateClassY(idclass ?? '');
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: buildFutureBuilderY(classFilter: idclass ?? ''),
-            ),
-          ]
+
           // Trường hợp 3: banGH
           else if (account.goupID == 'banGH') ...[
             Row(
