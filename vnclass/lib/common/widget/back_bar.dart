@@ -17,24 +17,33 @@ class BackBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: backgroundColor ?? Colors.blue,
+      centerTitle: true,
       title: Text(title!),
       shape: shape ??
           RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(10),
-              bottomRight: Radius.circular(10),
+              bottomLeft: Radius.circular(8),
+              bottomRight: Radius.circular(8),
             ),
           ),
-      leading: IconButton(
-        icon: Transform.rotate(
-            angle: -1.57,
-            child: Icon(
-              FontAwesomeIcons.turnUp,
-              color: Colors.white,
-            )), // Custom back button icon
-        onPressed: () {
-          Navigator.pop(context); // Navigate back
-        },
+      leading: Padding(
+        padding: const EdgeInsets.all(12),
+        child: IconButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.white),
+            shape: WidgetStateProperty.all(RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            )),
+          ),
+          icon: Icon(
+            FontAwesomeIcons.arrowLeft,
+            color: Colors.blueAccent,
+            size: 16,
+          ), // Custom back button icon
+          onPressed: () {
+            Navigator.pop(context); // Navigate back
+          },
+        ),
       ),
       titleSpacing: 0.5,
       titleTextStyle: TextStyle(

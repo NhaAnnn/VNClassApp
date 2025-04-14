@@ -58,13 +58,24 @@ class _StudentConductMonthCardState extends State<StudentConductMonthCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.month ?? 'Tháng không xác định',
-                      style: TextStyle(
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color.fromARGB(255, 11, 178, 255),
+                          Color.fromARGB(255, 9, 255, 230),
+                        ],
+                      ).createShader(bounds),
+                      child: Text(
+                        widget.month ?? 'Tháng không xác định',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontStyle: FontStyle.italic,
                           fontSize: 16,
-                          color: const Color.fromARGB(255, 7, 187, 1)),
+                          color: Colors.white, // Required for ShaderMask
+                        ),
+                      ),
                     ),
                     SizedBox(height: 12), // Khoảng cách giữa các dòng
 

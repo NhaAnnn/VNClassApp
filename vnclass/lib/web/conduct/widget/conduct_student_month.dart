@@ -78,16 +78,21 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
       backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
-          BackBar(title: 'Hạnh kiểm của ${studentDetailModel.studentName}'),
+          BackBar(
+            title: 'Hạnh kiểm của ${studentDetailModel.studentName}',
+            backgroundColor: Colors.blue.shade900,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
           Expanded(
             child: Column(
               children: [
                 Card(
                   elevation: 4.0,
                   margin: const EdgeInsets.only(top: 15.0, right: 15, left: 15),
-                  color: const Color(0xFF003B6F),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: const Color(0xFF003B6F), width: 1),
+                    side: BorderSide(color: Colors.transparent, width: 1),
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(10),
                         topRight: Radius.circular(10)),
@@ -96,6 +101,20 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
                     width: MediaQuery.of(context).size.width * 0.8,
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 15.0),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF003B6F),
+                          Color.fromARGB(255, 0, 166, 255)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                    ),
                     child: Text(
                       'Thông tin:',
                       style: TextStyle(fontSize: 20, color: Colors.white),
@@ -222,12 +241,17 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
               label,
               style: TextStyle(color: Colors.black, fontSize: 14),
             ),
-            Text(
-              value,
-              style: TextStyle(
-                  color: Color.fromARGB(255, 0, 81, 151),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 0, 81, 151),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14),
+                ),
+              ),
             ),
           ],
         ),
@@ -250,22 +274,23 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
               )
-            : BorderRadius.zero, // No radius for other items
+            : BorderRadius.zero,
       ),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.8,
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Adjust spacing
           children: [
             Expanded(
+              flex: 1,
               child: Text(
                 index,
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                textAlign: TextAlign.center, // Center text
+                textAlign: TextAlign.center,
               ),
             ),
             Expanded(
+              flex: 3,
               child: Text(
                 mistake.m_name.toString(),
                 style: TextStyle(
@@ -273,21 +298,26 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
                   color: Colors.red,
                   fontSize: 16,
                 ),
-                textAlign: TextAlign.left, // Center text
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Expanded(
+              flex: 2,
               child: Text(
                 mistake.acc_name,
                 style: TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center, // Center text
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             Expanded(
+              flex: 2,
               child: Text(
                 mistake.mm_time,
                 style: TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center, // Center text
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -300,49 +330,73 @@ class _ConductStudentMonthState extends State<ConductStudentMonth> {
     return Card(
       elevation: 4.0,
       margin: const EdgeInsets.only(top: 15.0, right: 15, left: 15),
-      color: const Color.fromARGB(255, 15, 149, 0),
       shape: RoundedRectangleBorder(
-        side:
-            BorderSide(color: const Color.fromARGB(255, 15, 149, 0), width: 1),
+        side: BorderSide(color: Colors.transparent, width: 1),
         borderRadius: BorderRadius.only(
             topLeft: Radius.circular(10), topRight: Radius.circular(10)),
       ),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.8,
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF003B6F), Color.fromARGB(255, 0, 166, 255)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text(
-              'STT',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
+            Expanded(
+              flex: 1,
+              child: Text(
+                'STT',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-            Text(
-              'Tên Vi Phạm',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
+            Expanded(
+              flex: 3,
+              child: Text(
+                'Tên Vi Phạm',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-            Text(
-              'Người cập nhật',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
+            Expanded(
+              flex: 2,
+              child: Text(
+                'Người cập nhật',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
-            Text(
-              'Thời gian',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
+            Expanded(
+              flex: 2,
+              child: Text(
+                'Thời gian',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],

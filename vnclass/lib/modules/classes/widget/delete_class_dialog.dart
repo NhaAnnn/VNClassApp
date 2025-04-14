@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vnclass/common/widget/button_n.dart';
 import 'package:vnclass/modules/classes/class_detail/controller/class_controller.dart';
@@ -27,22 +28,22 @@ class _DeleteClassDialogState extends State<DeleteClassDialog> {
         'Xóa lớp học:',
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
       ),
-      content: Text(
-        'Xác nhận xóa lớp học và toàn bộ thông tin về lớp học?',
-        style: TextStyle(color: Colors.black),
+      content: SizedBox(
+        width: kIsWeb
+            ? MediaQuery.of(context).size.width * 0.2
+            : MediaQuery.of(context).size.width * 0.8,
+        child: Text(
+          'Xác nhận xóa lớp học và toàn bộ thông tin về lớp học?',
+          style: TextStyle(color: Colors.black),
+        ),
       ),
       actions: [
-        ButtonN(
-          ontap: () async {
+        ElevatedButton(
+          onPressed: () async {
             try {
-              // Gọi xóa lớp học trước
               await ClassController.deleteClass(classId);
-
-              // Gọi hàm onDelete sau khi xóa thành công
               widget.onDelete();
-
-              // Hiện thông báo thành công
-              Navigator.of(context).pop(); // Đóng dialog xóa
+              Navigator.of(context).pop();
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -82,25 +83,55 @@ class _DeleteClassDialogState extends State<DeleteClassDialog> {
               );
             }
           },
-          size: Size(
-            MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
           ),
-          label: 'Xóa',
-          colorText: Colors.white,
-          color: Colors.red,
+          child: const Text(
+            'Xóa',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-        ButtonN(
-          ontap: () {
+        ElevatedButton(
+          onPressed: () {
             Navigator.of(context).pop(); // Đóng dialog
           },
-          size: Size(
-            MediaQuery.of(context).size.width * 0.2,
-            MediaQuery.of(context).size.height * 0.05,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            fixedSize: Size(
+              kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.05
+                  : MediaQuery.of(context).size.width * 0.2,
+              MediaQuery.of(context).size.height * 0.05,
+            ),
           ),
-          label: 'Hủy',
-          colorText: Colors.white,
-          color: Colors.blue,
+          child: const Text(
+            'Hủy',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );

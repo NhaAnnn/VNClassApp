@@ -61,7 +61,13 @@ class _ConductStudentTermState extends State<ConductStudentTerm> {
       backgroundColor: Colors.grey.shade100,
       body: Column(
         children: [
-          BackBar(title: 'Hạnh kiểm của ${studentDetailModel!.studentName}'),
+          BackBar(
+            title: 'Hạnh kiểm của ${studentDetailModel!.studentName}',
+            backgroundColor: Colors.blue.shade900,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,12 +232,17 @@ class _ConductStudentTermState extends State<ConductStudentTerm> {
                 fontSize: 14,
               ),
             ),
-            Text(
-              value,
-              style: TextStyle(
-                color: const Color.fromARGB(255, 0, 81, 151),
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 0, 81, 151),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
               ),
             ),
           ],

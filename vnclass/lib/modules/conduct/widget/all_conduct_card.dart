@@ -102,7 +102,11 @@ class _AllConductCardState extends State<AllConductCard> {
               flex: 3,
               child: Text(
                 label,
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: kIsWeb
+                    ? TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 27, 78, 121))
+                    : TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(flex: 7, child: Text(value)),
@@ -124,17 +128,33 @@ class _AllConductCardState extends State<AllConductCard> {
               flex: 2,
               child: Text(
                 label,
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: kIsWeb
+                    ? TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 27, 78, 121))
+                    : TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(
-                child: Text('$conductType1:',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                child: Text(
+              '$conductType1:',
+              style: kIsWeb
+                  ? TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: const Color.fromARGB(255, 27, 78, 121))
+                  : TextStyle(fontWeight: FontWeight.bold),
+            )),
             Expanded(child: _buildConductFutureBuilder(conductType1)),
             Expanded(
                 flex: 2,
-                child: Text('$conductType2:',
-                    style: TextStyle(fontWeight: FontWeight.bold))),
+                child: Text(
+                  '$conductType2:',
+                  style: kIsWeb
+                      ? TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(255, 27, 78, 121))
+                      : TextStyle(fontWeight: FontWeight.bold),
+                )),
             Expanded(child: _buildConductFutureBuilder(conductType2)),
           ],
         ),
