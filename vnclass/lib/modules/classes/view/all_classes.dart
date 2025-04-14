@@ -97,15 +97,15 @@ class _AllClassesState extends State<AllClasses> {
                 Padding(
                     padding: EdgeInsets.all(12),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment
-                          .spaceAround, // Distribute buttons evenly
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         ButtonN(
-                          label: 'Thêm 1 lớp',
+                          label: 'Tạo 1 lớp',
                           icon: Icon(FontAwesomeIcons.circlePlus,
                               color: Colors.black),
                           color: Colors.cyan.shade200,
                           colorText: Colors.black,
+                          textSize: 13,
                           borderRadius: BorderRadius.circular(10),
                           ontap: () {
                             showDialog(
@@ -117,14 +117,14 @@ class _AllClassesState extends State<AllClasses> {
                             );
                           },
                         ),
-                        // Spacing between buttons
                         ButtonN(
-                          label: 'Thêm DS lớp',
+                          label: 'Tạo DS lớp',
                           icon: Icon(FontAwesomeIcons.upload,
                               color: Colors.black),
                           color: Colors.cyan.shade200,
-                          borderRadius: BorderRadius.circular(10),
                           colorText: Colors.black,
+                          textSize: 13,
+                          borderRadius: BorderRadius.circular(10),
                           ontap: () {
                             showDialog(
                               context: context,

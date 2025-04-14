@@ -65,46 +65,60 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
               padding: EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text(
-                    'Thông tin học sinh:',
-                    style: TextStyle(fontSize: 20),
-                  ),
                   Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(20.0),
-                          color: Colors.blue.shade100),
-                      child: Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: Column(
-                          children: [
-                            _buildStudentInfoRow('Họ và tên:',
-                                studentModel.studentName.toString()),
-                            if (accountProvider.account!.goupID == 'hocSinh' ||
-                                accountProvider.account!.goupID ==
-                                    'phuHuynh') ...[
-                              _buildStudentInfoRow(
-                                'Lớp:',
-                                studentModel.className.toString(),
-                              ),
-                              _buildStudentInfoRow(
-                                  'Hạnh kiểm HK1:', conduct1.toString()),
-                              _buildStudentInfoRow(
-                                  'Hạnh kiểm HK2:', conduct2.toString()),
-                              _buildStudentInfoRow(
-                                  'Hạnh kiểm CN:', conduct3.toString()),
-                            ] else ...[
-                              _buildStudentInfoRow(
-                                  'Học kì:', getTermString(term)),
-                              _buildStudentInfoRow(
-                                  'Hạnh kiểm:', conduct.toString()),
-                            ],
-                          ],
-                        ),
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Thông tin học sinh:',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(20.0),
+                      color: Colors.blue.shade100,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color.fromARGB(
+                              255, 72, 195, 252), // Xanh Lam (Light Blue)
+                          Color.fromARGB(255, 6, 240, 217), // Xanh Lục (Teal)
+                        ],
                       ),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Column(
+                        children: [
+                          _buildStudentInfoRow('Họ và tên:',
+                              studentModel.studentName.toString()),
+                          if (accountProvider.account!.goupID == 'hocSinh' ||
+                              accountProvider.account!.goupID ==
+                                  'phuHuynh') ...[
+                            _buildStudentInfoRow(
+                              'Lớp:',
+                              studentModel.className.toString(),
+                            ),
+                            _buildStudentInfoRow(
+                                'Hạnh kiểm HK1:', conduct1.toString()),
+                            _buildStudentInfoRow(
+                                'Hạnh kiểm HK2:', conduct2.toString()),
+                            _buildStudentInfoRow(
+                                'Hạnh kiểm CN:', conduct3.toString()),
+                          ] else ...[
+                            _buildStudentInfoRow(
+                                'Học kì:', getTermString(term)),
+                            _buildStudentInfoRow(
+                                'Hạnh kiểm:', conduct.toString()),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.05,
                   ),
                   Expanded(
                     child: FutureBuilder<ConductMonthModel>(
@@ -179,7 +193,7 @@ class _StudentConductInfoState extends State<StudentConductInfo> {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(5),
         child: Row(
           children: [
             Expanded(

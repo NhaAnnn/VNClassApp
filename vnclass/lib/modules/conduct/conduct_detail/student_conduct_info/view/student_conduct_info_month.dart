@@ -71,32 +71,44 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
               padding: EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Text(
-                    'Thông tin học sinh:',
-                    style: TextStyle(fontSize: 20),
-                  ),
                   Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(20.0),
-                        color: Colors.blue.shade100,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: Column(
-                          children: [
-                            _buildStudentInfoRow('Họ và tên:', studentName),
-                            _buildStudentInfoRow(
-                                'Tháng:', Getmonthnow.getMonthName(monthKey)),
-                            _buildStudentInfoRow(
-                                'Điểm rèn luyện:', trainingScore.toString()),
-                            _buildStudentInfoRow('Hạnh kiểm:', conduct),
-                          ],
-                        ),
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'Thông tin học sinh:',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(20.0),
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color.fromARGB(
+                              255, 72, 195, 252), // Xanh Lam (Light Blue)
+                          Color.fromARGB(255, 6, 240, 217), // Xanh Lục (Teal)
+                        ],
                       ),
                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          _buildStudentInfoRow('Họ và tên:', studentName),
+                          _buildStudentInfoRow(
+                              'Tháng:', Getmonthnow.getMonthName(monthKey)),
+                          _buildStudentInfoRow(
+                              'Điểm rèn luyện:', trainingScore.toString()),
+                          _buildStudentInfoRow('Hạnh kiểm:', conduct),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.05,
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.width * 0.14,
@@ -108,6 +120,15 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
                         ),
                         color: Colors.blue.shade100,
                         border: Border.all(color: Colors.grey),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.fromARGB(
+                                255, 72, 195, 252), // Xanh Lam (Light Blue)
+                            Color.fromARGB(255, 6, 240, 217), // Xanh Lục (Teal)
+                          ],
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -221,7 +242,7 @@ class _StudentConductInfoMonthState extends State<StudentConductInfoMonth> {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(5),
         child: Row(
           children: [
             Expanded(

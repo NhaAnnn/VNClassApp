@@ -34,6 +34,7 @@ class _SendNotificationParentDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: Colors.white,
       title: Text(
         'Gửi Thông Báo',
         style: TextStyle(fontSize: 18),

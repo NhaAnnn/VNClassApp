@@ -71,7 +71,7 @@ class _AllConductState extends State<AllConduct> {
   List<String> _getValidMonths(String term) {
     if (term == 'Học kỳ 2') {
       return [
-        'Tất cả tháng HK2',
+        'Học kỳ 2',
         'Tháng 1',
         'Tháng 2',
         'Tháng 3',
@@ -79,21 +79,15 @@ class _AllConductState extends State<AllConduct> {
         'Tháng 5'
       ];
     } else if (term == 'Học kỳ 1') {
-      return [
-        'Tất cả tháng HK1',
-        'Tháng 9',
-        'Tháng 10',
-        'Tháng 11',
-        'Tháng 12'
-      ];
+      return ['Học kỳ 1', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
     }
     return ['Cả năm'];
   }
 
   int _getMonthKey(String selectedMonth) {
-    if (selectedMonth.contains('Tất cả tháng HK1')) {
+    if (selectedMonth.contains('Học kỳ 1')) {
       return 100;
-    } else if (selectedMonth.contains('Tất cả tháng HK2')) {
+    } else if (selectedMonth.contains('Học kỳ 2')) {
       return 200;
     } else if (selectedMonth.contains('Cả năm')) {
       return 300;

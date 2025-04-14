@@ -136,9 +136,11 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
               flex: 4,
               child: Text(
                 label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: kIsWeb
+                    ? TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 27, 78, 121))
+                    : TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(
@@ -166,9 +168,11 @@ class _ConductDetailCardState extends State<ConductDetailCard> {
               flex: 4,
               child: Text(
                 label,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: kIsWeb
+                    ? TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: const Color.fromARGB(255, 27, 78, 121))
+                    : TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Expanded(

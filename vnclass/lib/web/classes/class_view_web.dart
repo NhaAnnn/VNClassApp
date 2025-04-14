@@ -103,7 +103,7 @@ class _ClassViewWebState extends State<ClassViewWeb> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(padding * 0.01),
+            padding: EdgeInsets.only(top: padding * 0.03, left: padding * 0.03),
             child: Text(
               'Danh sách lớp học:',
               style: TextStyle(fontSize: 20),

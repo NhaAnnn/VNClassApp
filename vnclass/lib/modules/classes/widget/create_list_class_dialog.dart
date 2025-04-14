@@ -328,14 +328,18 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Mẫu: $fileName',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade700,
-                          fontStyle: FontStyle.italic,
+                      Flexible(
+                        child: Text(
+                          'Mẫu: $fileName',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      SizedBox(width: 10),
                       ElevatedButton(
                         onPressed: () {
                           if (kIsWeb) {
@@ -352,7 +356,10 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           elevation: 2,
-                          fixedSize: Size(98, 40),
+                          fixedSize: Size(
+                            MediaQuery.of(context).size.width * 0.2,
+                            MediaQuery.of(context).size.height * 0.05,
+                          ),
                         ),
                         child: const Text(
                           'Tải mẫu',

@@ -174,6 +174,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     top: 40,
                     right: 16,
                     child: IconButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          Colors.white.withOpacity(0.2),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
                       icon: Stack(
                         children: [
                           Icon(
