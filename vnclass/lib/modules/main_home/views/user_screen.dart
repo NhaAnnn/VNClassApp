@@ -103,7 +103,7 @@ class _UserScreenState extends State<UserScreen> {
               const SizedBox(height: 32),
               // Options
 
-              _buildMenuItem(context, 'Chính sách', null),
+              //  _buildMenuItem(context, 'Chính sách', null),
               _buildMenuItem(
                   context, 'Đổi mật khẩu', UserChangePassScreen.routeName),
 

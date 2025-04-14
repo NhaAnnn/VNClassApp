@@ -124,6 +124,232 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     }
   }
 
+//   Future<void> readExcel(String filePath) async {
+//     var bytes = File(filePath).readAsBytesSync();
+//     var excelFile = excel.Excel.decodeBytes(bytes);
+//     students.clear();
+
+//     List<String> requiredHeaders = [
+//       'STT',
+//       'Mã HS',
+//       'Lớp',
+//       'Niên Khóa',
+//       'Họ và tên',
+//       'Ngày sinh',
+//       'Giới tính',
+//       'Email',
+//       'SĐT',
+//       'SĐT PHHS'
+//     ];
+//     bool headerFound = false;
+//     for (var table in excelFile.tables.keys) {
+//       var rows = excelFile.tables[table]!.rows;
+//       if (rows.isEmpty) continue;
+
+//       int headerRowIndex = -1;
+//       for (int i = 0; i < rows.length; i++) {
+//         var rowValues = rows[i]
+//             .map((cell) => cell?.value?.toString().trim() ?? '')
+//             .toList();
+//         bool isHeader =
+//             requiredHeaders.every((header) => rowValues.contains(header));
+//         if (isHeader) {
+//           headerRowIndex = i;
+//           headerFound = true;
+//           break;
+//         }
+//       }
+
+//       if (headerRowIndex == -1) {
+//         // print("Không tìm thấy dòng header trong sheet: $table");
+//         continue;
+//       }
+
+//       List<String> headers = rows[headerRowIndex]
+//           .map((cell) => cell?.value?.toString().trim() ?? '')
+//           .toList();
+//       //  print('Header row: $headers');
+// // Kiểm tra định dạng header
+//       if (headers.length != requiredHeaders.length ||
+//           !requiredHeaders.every((header) => headers.contains(header))) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(
+//             content: Text('Định dạng header không đúng với mẫu yêu cầu!'),
+//             duration: Duration(seconds: 3),
+//           ),
+//         );
+//         setState(() {
+//           fileName = '';
+//         });
+//         return;
+//       }
+//       for (int i = headerRowIndex + 1; i < rows.length; i++) {
+//         var row = rows[i];
+//         if (row.isEmpty ||
+//             row.every((cell) =>
+//                 cell?.value == null || cell?.value.toString().trim() == '')) {
+//           continue;
+//         }
+//         List<String> persionList = [];
+//         Map<String, dynamic> student = {
+//           'stt': headers.contains('STT')
+//               ? row[headers.indexOf('STT')]?.value?.toString()
+//               : null,
+//           'class': headers.contains('Lớp')
+//               ? row[headers.indexOf('Lớp')]?.value?.toString()
+//               : null,
+//           'idstudent': headers.contains('Mã HS')
+//               ? row[headers.indexOf('Mã HS')]?.value?.toString()
+//               : null,
+//           'academicYear': headers.contains('Niên Khóa')
+//               ? row[headers.indexOf('Niên Khóa')]?.value?.toString()
+//               : null,
+//           'fullName': headers.contains('Họ và tên')
+//               ? row[headers.indexOf('Họ và tên')]?.value?.toString()
+//               : null,
+//           'birthDate': headers.contains('Ngày sinh')
+//               ? row[headers.indexOf('Ngày sinh')]?.value?.toString()
+//               : null,
+//           'gender': headers.contains('Giới tính')
+//               ? row[headers.indexOf('Giới tính')]?.value?.toString()
+//               : null,
+//           'email': headers.contains('Email')
+//               ? row[headers.indexOf('Email')]?.value?.toString()
+//               : null,
+//           'phone': headers.contains('SĐT')
+//               ? row[headers.indexOf('SĐT')]?.value?.toString()
+//               : null,
+//           'phoneParent': headers.contains('SĐT PHHS')
+//               ? row[headers.indexOf('SĐT PHHS')]?.value?.toString()
+//               : null,
+//           'persion': persionList,
+//         };
+//         students.add(student);
+//       }
+//     }
+//     if (!headerFound) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+//           duration: Duration(seconds: 3),
+//         ),
+//       );
+//       setState(() {
+//         fileName = '';
+//       });
+//       return;
+//     }
+//     setState(() {});
+//     // print('Danh sách sinh viên: $students');
+//   }
+
+//   Future<void> readExcelTeacher(String filePath) async {
+//     var bytes = File(filePath).readAsBytesSync();
+//     var excelFile = excel.Excel.decodeBytes(bytes);
+//     teachers.clear();
+
+//     List<String> requiredHeaders = [
+//       'STT',
+//       'Mã GV',
+//       'Họ và tên',
+//       'Ngày sinh',
+//       'Giới tính',
+//       'Email',
+//       'SĐT',
+//     ];
+//     bool headerFound = false;
+//     for (var table in excelFile.tables.keys) {
+//       var rows = excelFile.tables[table]!.rows;
+//       if (rows.isEmpty) continue;
+
+//       int headerRowIndex = -1;
+//       for (int i = 0; i < rows.length; i++) {
+//         var rowValues = rows[i]
+//             .map((cell) => cell?.value?.toString().trim() ?? '')
+//             .toList();
+//         bool isHeader =
+//             requiredHeaders.every((header) => rowValues.contains(header));
+//         if (isHeader) {
+//           headerRowIndex = i;
+//           break;
+//         }
+//       }
+
+//       if (headerRowIndex == -1) {
+//         //  print("Không tìm thấy dòng header trong sheet: $table");
+//         continue;
+//       }
+
+//       List<String> headers = rows[headerRowIndex]
+//           .map((cell) => cell?.value?.toString().trim() ?? '')
+//           .toList();
+//       //  print('Header row: $headers');
+//       // Kiểm tra định dạng header
+//       if (headers.length != requiredHeaders.length ||
+//           !requiredHeaders.every((header) => headers.contains(header))) {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(
+//             content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+//             duration: Duration(seconds: 3),
+//           ),
+//         );
+//         setState(() {
+//           fileName = '';
+//         });
+//         return;
+//       }
+
+//       for (int i = headerRowIndex + 1; i < rows.length; i++) {
+//         var row = rows[i];
+//         if (row.isEmpty ||
+//             row.every((cell) =>
+//                 cell?.value == null || cell?.value.toString().trim() == '')) {
+//           continue;
+//         }
+//         List<String> persionList = [];
+//         Map<String, dynamic> teacher = {
+//           'stt': headers.contains('STT')
+//               ? row[headers.indexOf('STT')]?.value?.toString()
+//               : null,
+//           'idteacher': headers.contains('Mã GV')
+//               ? row[headers.indexOf('Mã GV')]?.value?.toString()
+//               : null,
+//           'fullName': headers.contains('Họ và tên')
+//               ? row[headers.indexOf('Họ và tên')]?.value?.toString()
+//               : null,
+//           'birthDate': headers.contains('Ngày sinh')
+//               ? row[headers.indexOf('Ngày sinh')]?.value?.toString()
+//               : null,
+//           'gender': headers.contains('Giới tính')
+//               ? row[headers.indexOf('Giới tính')]?.value?.toString()
+//               : null,
+//           'email': headers.contains('Email')
+//               ? row[headers.indexOf('Email')]?.value?.toString()
+//               : null,
+//           'phone': headers.contains('SĐT')
+//               ? row[headers.indexOf('SĐT')]?.value?.toString()
+//               : null,
+//         };
+//         teachers.add(teacher);
+//       }
+//     }
+//     if (!headerFound) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(
+//           content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+//           duration: Duration(seconds: 3),
+//         ),
+//       );
+//       setState(() {
+//         fileName = '';
+//       });
+//       return;
+//     }
+//     setState(() {});
+
+//     // print('Danh sách GV: $teachers');
+//   }
+
   Future<void> readExcel(String filePath) async {
     var bytes = File(filePath).readAsBytesSync();
     var excelFile = excel.Excel.decodeBytes(bytes);
@@ -142,6 +368,8 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       'SĐT PHHS'
     ];
 
+    bool headerFound = false;
+
     for (var table in excelFile.tables.keys) {
       var rows = excelFile.tables[table]!.rows;
       if (rows.isEmpty) continue;
@@ -155,6 +383,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
             requiredHeaders.every((header) => rowValues.contains(header));
         if (isHeader) {
           headerRowIndex = i;
+          headerFound = true;
           break;
         }
       }
@@ -168,6 +397,30 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
           .map((cell) => cell?.value?.toString().trim() ?? '')
           .toList();
       print('Header row: $headers');
+
+      // Lọc bỏ các cột rỗng trong headers để so sánh
+      List<String> filteredHeaders =
+          headers.where((header) => header.isNotEmpty).toList();
+
+      // Kiểm tra định dạng header
+      if (filteredHeaders.length != requiredHeaders.length ||
+          !requiredHeaders.asMap().entries.every((entry) {
+            int index = entry.key;
+            String header = entry.value;
+            return index < filteredHeaders.length &&
+                filteredHeaders[index] == header;
+          })) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        setState(() {
+          fileName = '';
+        });
+        return;
+      }
 
       for (int i = headerRowIndex + 1; i < rows.length; i++) {
         var row = rows[i];
@@ -213,6 +466,20 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         students.add(student);
       }
     }
+
+    if (!headerFound) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      setState(() {
+        fileName = '';
+      });
+      return;
+    }
+
     setState(() {});
     print('Danh sách sinh viên: $students');
   }
@@ -232,6 +499,8 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       'SĐT',
     ];
 
+    bool headerFound = false;
+
     for (var table in excelFile.tables.keys) {
       var rows = excelFile.tables[table]!.rows;
       if (rows.isEmpty) continue;
@@ -245,6 +514,7 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
             requiredHeaders.every((header) => rowValues.contains(header));
         if (isHeader) {
           headerRowIndex = i;
+          headerFound = true;
           break;
         }
       }
@@ -259,6 +529,30 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
           .toList();
       print('Header row: $headers');
 
+      // Lọc bỏ các cột rỗng trong headers để so sánh
+      List<String> filteredHeaders =
+          headers.where((header) => header.isNotEmpty).toList();
+
+      // Kiểm tra định dạng header
+      if (filteredHeaders.length != requiredHeaders.length ||
+          !requiredHeaders.asMap().entries.every((entry) {
+            int index = entry.key;
+            String header = entry.value;
+            return index < filteredHeaders.length &&
+                filteredHeaders[index] == header;
+          })) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+        setState(() {
+          fileName = '';
+        });
+        return;
+      }
+
       for (int i = headerRowIndex + 1; i < rows.length; i++) {
         var row = rows[i];
         if (row.isEmpty ||
@@ -266,7 +560,6 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
                 cell?.value == null || cell?.value.toString().trim() == '')) {
           continue;
         }
-        List<String> persionList = [];
         Map<String, dynamic> teacher = {
           'stt': headers.contains('STT')
               ? row[headers.indexOf('STT')]?.value?.toString()
@@ -293,6 +586,20 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         teachers.add(teacher);
       }
     }
+
+    if (!headerFound) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('File không đúng định dạng vui lòng kiểm tra lại!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      setState(() {
+        fileName = '';
+      });
+      return;
+    }
+
     setState(() {});
     print('Danh sách GV: $teachers');
   }
@@ -301,6 +608,37 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
     final bytes = utf8.encode(password);
     final digest = sha256.convert(bytes);
     return digest.toString();
+  }
+
+  Future<bool> showDuplicateDialog(List<String> duplicateIds) async {
+    String message = '';
+    if (duplicateIds.isNotEmpty) {
+      message += 'Các mã sau đã tồn tại:\n${duplicateIds.join(', ')}';
+    }
+
+    message +=
+        '\n\nBạn có muốn tiếp tục tải lên với các mã chưa sử dụng không?';
+
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Mã đã tồn tại'),
+            content: SingleChildScrollView(
+              child: Text(message),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Hủy'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Tiếp tục'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   Future<void> setFormData() async {
@@ -318,8 +656,67 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
       'month11': {'100', 'Tốt'},
       'month12': {'100', 'Tốt'},
     };
-    print('Dữ liệu sinh viên trước khi tải lên: ${students.length}');
+    //print('Dữ liệu sinh viên trước khi tải lên: ${students.length}');
+    List<String> duplicateIds = [];
+    // List<String> duplicateParents = [];
+    List<Map<String, dynamic>> validStudents = [];
 
+    for (var student in students) {
+      String id = student['idstudent']?.toString() ?? '';
+      // String phoneParent = student['phoneParent']?.toString() ?? '';
+
+      if (id.isNotEmpty) {
+        final accountDoc = await FirebaseFirestore.instance
+            .collection('ACCOUNT')
+            .doc(id)
+            .get();
+        if (accountDoc.exists) {
+          duplicateIds.add(id);
+        }
+      }
+
+      // if (phoneParent.isNotEmpty) {
+      //   final parentDoc = await FirebaseFirestore.instance
+      //       .collection('ACCOUNT')
+      //       .doc(phoneParent)
+      //       .get();
+      //   if (parentDoc.exists) {
+      //     duplicateParents.add(phoneParent);
+      //   }
+      // }
+
+      if (!duplicateIds.contains(id)) {
+        validStudents.add(student);
+      }
+    }
+// Nếu có mã  hiển thị dialog
+    if (duplicateIds.isNotEmpty) {
+      bool continueUpload = await showDuplicateDialog(duplicateIds);
+      if (!continueUpload) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã hủy tải lên!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+    }
+
+    // Cập nhật danh sách students để chỉ chứa các bản ghi hợp lệ
+    setState(() {
+      students = validStudents;
+    });
+
+    if (students.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có bản ghi hợp lệ để tải lên!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
     List<Map<String, dynamic>> studentDetailsUp = [];
     List<Map<String, dynamic>> studentsUp = [];
     List<Map<String, dynamic>> accountsUp = [];
@@ -410,52 +807,68 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_studentName': studentName,
       };
     }).toList();
-
-    countStudentsByClassAndAcademicYear();
-    await Future.wait([
-      Future.wait(studentsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('STUDENT')
-            .doc(docId)
-            .set(studentup);
-      })),
-      Future.wait(studentDetailsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('STUDENT_DETAIL')
-            .doc(docId)
-            .set(studentup);
-      })),
-      Future.wait(conductsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('CONDUCT_MONTH')
-            .doc(docId)
-            .set(studentup);
-      })),
-      Future.wait(accountsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('ACCOUNT')
-            .doc(docId)
-            .set(studentup);
-      })),
-      Future.wait(accParentsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('ACCOUNT')
-            .doc(docId)
-            .set(studentup);
-      })),
-      Future.wait(parentsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('PARENT')
-            .doc(docId)
-            .set(studentup);
-      })),
-    ]);
+    try {
+      countStudentsByClassAndAcademicYear();
+      await Future.wait([
+        Future.wait(studentsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('STUDENT')
+              .doc(docId)
+              .set(studentup);
+        })),
+        Future.wait(studentDetailsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('STUDENT_DETAIL')
+              .doc(docId)
+              .set(studentup);
+        })),
+        Future.wait(conductsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('CONDUCT_MONTH')
+              .doc(docId)
+              .set(studentup);
+        })),
+        Future.wait(accountsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(docId)
+              .set(studentup);
+        })),
+        Future.wait(accParentsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(docId)
+              .set(studentup);
+        })),
+        Future.wait(parentsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('PARENT')
+              .doc(docId)
+              .set(studentup);
+        })),
+      ]);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Đã tạo ${studentsUp.length}/${studentsUp.length + duplicateIds.length} tài khoản'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tải lên: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tải lên thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Map<String, dynamic>? getTeacherIfUnique(String teacherId) {
@@ -468,15 +881,62 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
   }
 
   Future<void> setFormDataTeacher(String posi) async {
-    print('Dữ liệu giáo viên trước khi tải lên: ${teachers.length}');
-    print('type $posi');
+    // print('Dữ liệu giáo viên trước khi tải lên: ${teachers.length}');
+    // print('type $posi');
     String position = '';
     if (posi == 'gv') {
       position = 'giaoVien';
     } else if (posi == 'bgh') {
       position = 'banGH';
     }
-    print('position $position');
+
+    List<String> duplicateIds = [];
+    List<Map<String, dynamic>> validTeachers = [];
+
+    for (var teacher in teachers) {
+      String id = teacher['idteacher']?.toString() ?? '';
+      if (id.isNotEmpty) {
+        final accountDoc = await FirebaseFirestore.instance
+            .collection('ACCOUNT')
+            .doc(id)
+            .get();
+        if (accountDoc.exists) {
+          duplicateIds.add(id);
+        } else {
+          validTeachers.add(teacher);
+        }
+      }
+    }
+
+    // Nếu có mã trùng, hiển thị dialog
+    if (duplicateIds.isNotEmpty) {
+      bool continueUpload = await showDuplicateDialog(duplicateIds);
+      if (!continueUpload) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đã hủy tải lên!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+    }
+
+    // Cập nhật danh sách teachers để chỉ chứa các bản ghi hợp lệ
+    setState(() {
+      teachers = validTeachers;
+    });
+
+    if (teachers.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không có bản ghi hợp lệ để tải lên!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    //print('position $position');
     List<Map<String, dynamic>> teachersUp = [];
     List<Map<String, dynamic>> accountsUp = [];
     List<String> init = [];
@@ -513,23 +973,39 @@ class _ItemTabarListAccState extends State<ItemTabarListAcc> {
         '_teacherName': teacherName,
       };
     }).toList();
-
-    await Future.wait([
-      Future.wait(teachersUp.map((teacher) {
-        String docId = teacher['_id'];
-        return FirebaseFirestore.instance
-            .collection('TEACHER')
-            .doc(docId)
-            .set(teacher);
-      })),
-      Future.wait(accountsUp.map((studentup) {
-        String docId = studentup['_id'];
-        return FirebaseFirestore.instance
-            .collection('ACCOUNT')
-            .doc(docId)
-            .set(studentup);
-      })),
-    ]);
+    try {
+      await Future.wait([
+        Future.wait(teachersUp.map((teacher) {
+          String docId = teacher['_id'];
+          return FirebaseFirestore.instance
+              .collection('TEACHER')
+              .doc(docId)
+              .set(teacher);
+        })),
+        Future.wait(accountsUp.map((studentup) {
+          String docId = studentup['_id'];
+          return FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(docId)
+              .set(studentup);
+        })),
+      ]);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Đã tạo ${teachersUp.length}/${teachersUp.length + duplicateIds.length} tài khoản'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi tải lên: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tải lên thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override

@@ -6,6 +6,7 @@ import 'package:vnclass/modules/account/view/account_creat_acc_page.dart';
 import 'package:vnclass/modules/account/widget/dialog_export_acc.dart';
 import 'package:vnclass/modules/account/widget/item_account.dart';
 import 'package:vnclass/modules/account/widget/tabar_list_acc.dart';
+import 'dart:async';
 
 class AccountMainPage extends StatefulWidget {
   const AccountMainPage({super.key});
@@ -26,7 +27,8 @@ class _AccountMainPageState extends State<AccountMainPage>
   List<AccountEditModel> phuHuynhData = [];
 
   List<bool> isLoading = [true, true, true, true];
-
+  String searchText = ''; // Thêm biến để lưu từ khóa tìm kiếm
+  Timer? _keyboardTimer; // Biến để quản lý Timer
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,7 @@ class _AccountMainPageState extends State<AccountMainPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _keyboardTimer?.cancel();
     super.dispose();
   }
 
@@ -108,7 +111,7 @@ class _AccountMainPageState extends State<AccountMainPage>
   void _updateAccount(AccountEditModel? updatedAccount, bool isDeleted) {
     setState(() {
       int tabIndex = _tabController.index;
-      List<AccountEditModel> currentData = _getDataForTab(tabIndex);
+      List<AccountEditModel> currentData = _getDataForTab(tabIndex, false);
       if (updatedAccount != null) {
         int index = currentData.indexWhere((item) =>
             item.accountModel.idAcc == updatedAccount.accountModel.idAcc);
@@ -123,36 +126,141 @@ class _AccountMainPageState extends State<AccountMainPage>
     });
   }
 
-  List<AccountEditModel> _getDataForTab(int tabIndex) {
-    switch (tabIndex) {
-      case 0:
-        return banGHData;
-      case 1:
-        return giaoVienData;
-      case 2:
-        return hocSinhData;
-      case 3:
-        return phuHuynhData;
-      default:
-        return [];
+  List<AccountEditModel> _getDataForTab(int tabIndex, bool applySearch) {
+    List<AccountEditModel> data;
+    if (applySearch && searchText.isNotEmpty) {
+      // Gộp tất cả danh sách tài khoản để tìm kiếm
+      data = [
+        ...banGHData,
+        ...giaoVienData,
+        ...hocSinhData,
+        ...phuHuynhData,
+      ].where((acc) {
+        final nameMatch = acc.accountModel.accName
+            .toLowerCase()
+            .contains(searchText.toLowerCase());
+        final idMatch = acc.accountModel.idAcc
+            .toLowerCase()
+            .contains(searchText.toLowerCase());
+        return nameMatch || idMatch; // Tìm kiếm theo cả tên và mã
+      }).toList();
+    } else {
+      // Hiển thị dữ liệu theo tab hiện tại
+      switch (tabIndex) {
+        case 0:
+          data = banGHData;
+          break;
+        case 1:
+          data = giaoVienData;
+          break;
+        case 2:
+          data = hocSinhData;
+          break;
+        case 3:
+          data = phuHuynhData;
+          break;
+        default:
+          data = [];
+      }
     }
+    return data;
   }
 
+  // // List<AccountEditModel> _getDataForTab(int tabIndex) {
+  // //   switch (tabIndex) {
+  // //     case 0:
+  // //       return banGHData;
+  // //     case 1:
+  // //       return giaoVienData;
+  // //     case 2:
+  // //       return hocSinhData;
+  // //     case 3:
+  // //       return phuHuynhData;
+  // //     default:
+  // //       return [];
+  // //   }
+  // // }
+  // List<AccountEditModel> _getDataForTab(int tabIndex) {
+  //   List<AccountEditModel> data;
+  //   switch (tabIndex) {
+  //     case 0:
+  //       data = banGHData;
+  //       break;
+  //     case 1:
+  //       data = giaoVienData;
+  //       break;
+  //     case 2:
+  //       data = hocSinhData;
+  //       break;
+  //     case 3:
+  //       data = phuHuynhData;
+  //       break;
+  //     default:
+  //       data = [];
+  //   }
+
+  //   // Nếu có từ khóa tìm kiếm, lọc dữ liệu
+  //   if (searchText.isNotEmpty) {
+  //     data = data
+  //         .where((acc) => acc.accountModel.accName
+  //             .toLowerCase()
+  //             .contains(searchText.toLowerCase()))
+  //         .toList();
+  //   }
+  //   return data;
+  // }
+
+  // Widget _buildAccountList(int tabIndex) {
+  //   List<AccountEditModel> data = _getDataForTab(tabIndex);
+  //   if (isLoading[tabIndex] && data.isEmpty) {
+  //     return const Center(child: CircularProgressIndicator());
+  //   }
+  //   if (data.isEmpty) {
+  //     return const Center(
+  //       child: SingleChildScrollView(
+  //         physics: AlwaysScrollableScrollPhysics(),
+  //         child: Text('Không có tài khoản.'),
+  //       ),
+  //     );
+  //   }
+  //   // return ListView.builder(
+  //   //   physics: const AlwaysScrollableScrollPhysics(),
+  //   //   itemCount: data.length,
+  //   //   itemBuilder: (context, index) => ItemAccount(
+  //   //     accountEditModel: data[index],
+  //   //     onDataChanged: (updatedAccount, isDeleted) {
+  //   //       _updateAccount(updatedAccount, isDeleted);
+  //   //     },
+  //   //   ),
+  //   // );
+  //   return ListView.builder(
+  //     shrinkWrap: true, // Cho phép ListView tự điều chỉnh kích thước
+  //     physics:
+  //         const NeverScrollableScrollPhysics(), // Tắt cuộn riêng của ListView
+  //     itemCount: data.length,
+  //     itemBuilder: (context, index) => ItemAccount(
+  //       accountEditModel: data[index],
+  //       onDataChanged: (updatedAccount, isDeleted) {
+  //         _updateAccount(updatedAccount, isDeleted);
+  //       },
+  //     ),
+  //   );
+  // }
   Widget _buildAccountList(int tabIndex) {
-    List<AccountEditModel> data = _getDataForTab(tabIndex);
-    if (isLoading[tabIndex] && data.isEmpty) {
+    // Nếu có từ khóa tìm kiếm, hiển thị kết quả tìm kiếm trên tất cả tài khoản
+    List<AccountEditModel> data =
+        _getDataForTab(tabIndex, searchText.isNotEmpty);
+    if (isLoading[tabIndex] && data.isEmpty && searchText.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
     if (data.isEmpty) {
       return const Center(
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Text('Không có tài khoản.'),
-        ),
+        child: Text('Không có tài khoản.'),
       );
     }
     return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: data.length,
       itemBuilder: (context, index) => ItemAccount(
         accountEditModel: data[index],
@@ -221,42 +329,6 @@ class _AccountMainPageState extends State<AccountMainPage>
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // ElevatedButton.icon(
-                      //   onPressed: () {
-                      //     showDialog(
-                      //       context: context,
-                      //       builder: (BuildContext context) {
-                      //         return Dialog(
-                      //           backgroundColor: Colors.transparent,
-                      //           insetPadding:
-                      //               const EdgeInsets.symmetric(horizontal: 6),
-                      //           child: SizedBox(
-                      //             width:
-                      //                 MediaQuery.of(context).size.width * 0.85,
-                      //             height: MediaQuery.of(context).size.height *
-                      //                 0.65, // Tăng chiều cao lên 65%
-                      //             child: const DialogExportAcc(),
-                      //           ),
-                      //         );
-                      //       },
-                      //     );
-                      //   },
-                      //   icon: const Icon(Icons.file_download,
-                      //       color: Colors.white),
-                      //   label: const Text(
-                      //     'Xuất DS',
-                      //     style: TextStyle(color: Colors.white),
-                      //   ),
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: const Color(0xFF388E3C),
-                      //     padding: const EdgeInsets.symmetric(
-                      //         horizontal: 16, vertical: 14),
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(12),
-                      //     ),
-                      //     elevation: 4,
-                      //   ),
-                      // ),
                       ElevatedButton.icon(
                         onPressed: () {
                           showDialog(
@@ -334,6 +406,18 @@ class _AccountMainPageState extends State<AccountMainPage>
                   const SizedBox(height: 20),
                   TextField(
                     style: const TextStyle(fontSize: 16),
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value; // Cập nhật từ khóa tìm kiếm
+                      });
+                      // Hủy Timer cũ nếu có
+                      _keyboardTimer?.cancel();
+                      // Bắt đầu Timer mới
+                      _keyboardTimer = Timer(const Duration(seconds: 2), () {
+                        FocusScope.of(context)
+                            .unfocus(); // Ẩn bàn phím sau 2 giây
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Tìm kiếm tài khoản...',
                       hintStyle: TextStyle(color: Colors.grey.shade500),

@@ -173,6 +173,57 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
   }
 
   Future<void> _createAccount(String typeAcc) async {
+    // Kiểm tra các trường bắt buộc
+    if (_employeeCodeController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mã người dùng không được để trống!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tên người dùng không được để trống!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email không được để trống!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    if (typeAcc == 'Học sinh' && _phoneParentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('SĐT PHHS không được để trống!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+    // Kiểm tra xem Mã người dùng đã tồn tại trong Firestore chưa
+    final accountDoc = await FirebaseFirestore.instance
+        .collection('ACCOUNT')
+        .doc(_employeeCodeController.text.trim())
+        .get();
+    if (accountDoc.exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Mã người dùng đã tồn tại!'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
     final formData = _getFormData();
     Map<String, Set<String>> monthData = {
       'month1': {'100', 'Tốt'},
@@ -395,6 +446,7 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
       }
 
       print('Dữ liệu lưu: $formData');
+      _resetForm();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tạo tài khoản thành công!'),
@@ -561,6 +613,36 @@ class _ItemTabarCreatAccState extends State<ItemTabarCreatAcc> {
         ],
       ),
     );
+  }
+
+  void _resetForm() {
+    setState(() {
+      // Đặt lại các TextEditingController về trạng thái ban đầu
+      _nameController.text = '';
+      _employeeCodeController.text = ''; // Giả sử rỗng ban đầu
+      _usernameController.text = _employeeCodeController.text; // Như initState
+      _emailController.text = '';
+      _phoneController.text = '';
+      _phoneParentController.text = '';
+      _dateController.text = '';
+      _passwordController.text = '123'; // Như initState
+      _confirmPasswordController.text = '123'; // Như initState
+
+      // Đặt lại các giá trị trạng thái về giá trị ban đầu
+      selectedValue = widget.typeAcc; // Như initState
+      selectedGender = 'Nam'; // Giả sử null ban đầu (không có trong initState)
+      _isShowPass = false; // Giả sử false ban đầu
+      _isShowPassAgain = false; // Giả sử false ban đầu
+
+      // Lấy lại giá trị đầu tiên từ Provider cho selectedYear và selectedClass
+      final yearProvider = Provider.of<YearProvider>(context, listen: false);
+      final classProvider = Provider.of<ClassProvider>(context, listen: false);
+      selectedYear =
+          yearProvider.years.isNotEmpty ? yearProvider.years.first : '';
+      selectedClass = classProvider.classNames.isNotEmpty
+          ? classProvider.classNames.first
+          : '';
+    });
   }
 
   Widget _buildSectionHeader(String title) {
