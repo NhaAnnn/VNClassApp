@@ -43,11 +43,14 @@ class _SendNotificationParentDialogState
         child: Column(
           children: [
             TextfieldWidget(
+              maxLines: 5,
               labelText: 'Tiêu đề thông báo',
               colorBorder: Color(0xFF666666),
               onChanged: (value) {
-                title = value;
-                titleError = null;
+                setState(() {
+                  title = value;
+                  titleError = null;
+                });
               },
               errorText: titleError,
               onTap: () {
@@ -58,12 +61,14 @@ class _SendNotificationParentDialogState
             ),
             SizedBox(height: 8),
             TextfieldWidget(
-              maxLines: 3,
+              maxLines: 15,
               labelText: 'Nội dung thông báo',
               colorBorder: Color(0xFF666666),
               onChanged: (value) {
-                content = value;
-                contentError = null; // Xóa lỗi khi người dùng nhập
+                setState(() {
+                  content = value;
+                  contentError = null; // Xóa lỗi khi người dùng nhập
+                });
               },
               errorText: contentError,
               onTap: () {

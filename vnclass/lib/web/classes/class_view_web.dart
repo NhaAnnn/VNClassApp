@@ -163,46 +163,46 @@ class _ClassViewWebState extends State<ClassViewWeb> {
                           ),
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(
-                          FontAwesomeIcons.circlePlus,
-                          color: Colors.blueAccent,
+                      if (accountProvider.account!.goupID == 'banGH') ...[
+                        IconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.circlePlus,
+                            color: Colors.blueAccent,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CreateOneClassDialog(
+                                  onCreate: () {
+                                    loadClasses();
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return CreateOneClassDialog(
-                                onCreate: () {
-                                  loadClasses(); // Reload classes
-                                  // saveClasses(); // Save updated classes
-                                  setState(() {});
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          FontAwesomeIcons.upload,
-                          color: Colors.blueAccent,
+                        IconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.upload,
+                            color: Colors.blueAccent,
+                          ),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CreateListClassDialog(
+                                  onCreate: () {
+                                    loadClasses();
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            );
+                          },
                         ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return CreateListClassDialog(
-                                onCreate: () {
-                                  loadClasses(); // Reload classes
-                                  // saveClasses(); // Save updated classes
-                                  setState(() {});
-                                },
-                              );
-                            },
-                          );
-                        },
-                      ),
+                      ]
                     ],
                   ),
                   SizedBox(height: 20),
@@ -298,7 +298,7 @@ class _ClassViewWebState extends State<ClassViewWeb> {
         ],
       ),
       endDrawer: Drawer(
-        width: MediaQuery.of(context).size.width * 0.7,
+        width: MediaQuery.of(context).size.width * 0.6,
         child: selectedClass != null
             ? StudentWidget(
                 classModel: selectedClass!,

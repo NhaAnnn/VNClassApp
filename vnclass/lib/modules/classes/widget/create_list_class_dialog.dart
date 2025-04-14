@@ -316,7 +316,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
       ),
       content: SizedBox(
         width: kIsWeb
-            ? MediaQuery.of(context).size.width * 0.2
+            ? MediaQuery.of(context).size.width * 0.25
             : MediaQuery.of(context).size.width * 0.8,
         child: Wrap(
           children: [
@@ -326,9 +326,9 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                 children: [
                   SizedBox(height: 10),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Flexible(
+                      Expanded(
                         child: Text(
                           'Mẫu: $fileName',
                           style: TextStyle(
@@ -339,7 +339,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () {
                           if (kIsWeb) {
@@ -356,10 +356,7 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           elevation: 2,
-                          fixedSize: Size(
-                            MediaQuery.of(context).size.width * 0.2,
-                            MediaQuery.of(context).size.height * 0.05,
-                          ),
+                          fixedSize: Size(98, 40),
                         ),
                         child: const Text(
                           'Tải mẫu',

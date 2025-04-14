@@ -60,6 +60,7 @@ class _StudentWidgetState extends State<StudentWidget> {
           Expanded(
             child: SingleChildScrollView(
               child: DataTable(
+                columnSpacing: 20.0,
                 columns: <DataColumn>[
                   DataColumn(label: Center(child: Text('Mã'))),
                   DataColumn(label: Text('Tên')),
@@ -80,25 +81,27 @@ class _StudentWidgetState extends State<StudentWidget> {
                           DataCell(
                               Center(child: Text(student.gender.toString()))),
                           DataCell(
-                            Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: DropMenuWidget(
-                                items: committees,
-                                hintText: student.committee,
-                                borderColor: Colors.white,
-                                hintColor: Colors.black,
-                                textStyle: TextStyle(
-                                    fontSize: 14, color: Colors.black),
-                                onChanged: (value) {
-                                  setState(() {
-                                    student.committee = value;
-                                    StudentDetailController
-                                        .updateStudentPositionInDatabase(
-                                            context, student);
-                                  });
-                                },
-                              ),
-                            ),
+                            accountProvider.account!.goupID.contains('banGH')
+                                ? Center(child: Text(student.committee ?? ''))
+                                : Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: DropMenuWidget(
+                                      items: committees,
+                                      hintText: student.committee,
+                                      borderColor: Colors.white,
+                                      hintColor: Colors.black,
+                                      textStyle: TextStyle(
+                                          fontSize: 14, color: Colors.black),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          student.committee = value;
+                                          StudentDetailController
+                                              .updateStudentPositionInDatabase(
+                                                  context, student);
+                                        });
+                                      },
+                                    ),
+                                  ),
                           ),
                           if (accountProvider.account!.goupID
                               .contains('giaoVien')) ...[
@@ -109,8 +112,6 @@ class _StudentWidgetState extends State<StudentWidget> {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       try {
-                                        // Show a loading indicator (optional)
-                                        // You can use a loading dialog or any other indicator here.
                                         showDialog(
                                           context: context,
                                           builder: (context) {
@@ -120,15 +121,12 @@ class _StudentWidgetState extends State<StudentWidget> {
                                           },
                                         );
 
-                                        // Fetch the student model asynchronously
                                         StudentModel? studentModel =
                                             await getStudent(
                                                 student.studentID!);
 
-                                        // Close the loading dialog
                                         Navigator.of(context).pop();
 
-                                        // Check if studentModel is not null
                                         showDialog(
                                           context: context,
                                           builder: (context) {
@@ -138,9 +136,7 @@ class _StudentWidgetState extends State<StudentWidget> {
                                           },
                                         );
                                       } catch (e) {
-                                        // Handle exceptions here
                                         print('Error fetching student: $e');
-                                        // You can also show an error message to the user
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(

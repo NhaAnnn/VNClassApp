@@ -99,42 +99,47 @@ class _AllClassesState extends State<AllClasses> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        ButtonN(
-                          label: 'Tạo 1 lớp',
-                          icon: Icon(FontAwesomeIcons.circlePlus,
-                              color: Colors.black),
-                          color: Colors.cyan.shade200,
-                          colorText: Colors.black,
-                          textSize: 13,
-                          borderRadius: BorderRadius.circular(10),
-                          ontap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CreateOneClassDialog(
-                                    onCreate: _refreshClasses);
-                              },
-                            );
-                          },
-                        ),
-                        ButtonN(
-                          label: 'Tạo DS lớp',
-                          icon: Icon(FontAwesomeIcons.upload,
-                              color: Colors.black),
-                          color: Colors.cyan.shade200,
-                          colorText: Colors.black,
-                          textSize: 13,
-                          borderRadius: BorderRadius.circular(10),
-                          ontap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return CreateListClassDialog(
-                                    onCreate: _refreshClasses);
-                              },
-                            );
-                          },
-                        ),
+                        if (Provider.of<AccountProvider>(context, listen: false)
+                                .account!
+                                .goupID ==
+                            'banGH') ...[
+                          ButtonN(
+                            label: 'Tạo 1 lớp',
+                            icon: Icon(FontAwesomeIcons.circlePlus,
+                                color: Colors.black),
+                            color: Colors.cyan.shade200,
+                            colorText: Colors.black,
+                            textSize: 13,
+                            borderRadius: BorderRadius.circular(10),
+                            ontap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CreateOneClassDialog(
+                                      onCreate: _refreshClasses);
+                                },
+                              );
+                            },
+                          ),
+                          ButtonN(
+                            label: 'Tạo DS lớp',
+                            icon: Icon(FontAwesomeIcons.upload,
+                                color: Colors.black),
+                            color: Colors.cyan.shade200,
+                            colorText: Colors.black,
+                            textSize: 13,
+                            borderRadius: BorderRadius.circular(10),
+                            ontap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CreateListClassDialog(
+                                      onCreate: _refreshClasses);
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ],
                     )),
                 // Dropdown cho khối và năm học

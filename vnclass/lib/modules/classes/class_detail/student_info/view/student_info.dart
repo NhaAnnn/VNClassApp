@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vnclass/common/widget/back_bar.dart';
 import 'package:vnclass/common/widget/button_n.dart';
+import 'package:vnclass/modules/account/model/account_edit_model.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/controller/student_detail_controller.dart';
 import 'package:vnclass/modules/classes/class_detail/student_info/model/student_model.dart';
@@ -66,16 +68,7 @@ class _StudentInfoState extends State<StudentInfo> {
                       ),
                     ),
                     SizedBox(height: paddingValue * 0.5),
-                    if (studentModel != null) ...[
-                      _buildStudentDetailRow(
-                          'Mã học sinh:', studentModel!.id.toString()),
-                      _buildStudentDetailRow(
-                          'Họ và tên:', studentModel!.studentName ?? 'N/A'),
-                      _buildStudentDetailRow(
-                          'Giới tính:', studentModel!.gender ?? 'N/A'),
-                      _buildStudentDetailRow(
-                          'Ngày sinh:', studentModel!.birthday ?? 'N/A'),
-                    ] else if (studentDetailModel != null) ...[
+                    if (studentDetailModel != null) ...[
                       _buildStudentDetailRow(
                           'Mã học sinh:', studentDetailModel!.id.toString()),
                       _buildStudentDetailRow(
@@ -86,81 +79,178 @@ class _StudentInfoState extends State<StudentInfo> {
                           'Giới tính:', studentDetailModel!.gender ?? 'N/A'),
                       _buildStudentDetailRow(
                           'Ngày sinh:', studentDetailModel!.birthday ?? 'N/A'),
+                    ] else if (studentModel != null) ...[
+                      _buildStudentDetailRow(
+                          'Mã học sinh:', studentModel!.id.toString()),
+                      _buildStudentDetailRow(
+                          'Họ và tên:', studentModel!.studentName ?? 'N/A'),
+                      _buildStudentDetailRow(
+                          'Giới tính:', studentModel!.gender ?? 'N/A'),
+                      _buildStudentDetailRow(
+                          'Ngày sinh:', studentModel!.birthday ?? 'N/A'),
                     ],
                     if (accountProvider.account!.goupID
                         .contains('giaoVien')) ...[
                       Padding(
-                        padding: EdgeInsets.all(paddingValue),
-                        child: const Text(
-                          'Chức vụ:',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                  labelText: 'Chức vụ',
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color:
+                                          Colors.grey.shade400, // Border color
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color:
+                                          Colors.grey.shade400, // Border color
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors
+                                          .blueAccent, // Focused border color
+                                    ),
+                                  ),
+                                ),
+                                dropdownColor: Colors
+                                    .white, // Dropdown menu background color
+                                value: studentDetailModel?.committee,
+                                items: ['Học sinh', 'Ban cán sự']
+                                    .map((position) => DropdownMenuItem<String>(
+                                          value: position,
+                                          child: Text(
+                                            position,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black, // Text color
+                                            ),
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) async {
+                                  setState(() {
+                                    studentDetailModel?.committee = value!;
+                                  });
+                                  if (studentDetailModel != null) {
+                                    StudentDetailController
+                                        .updateStudentPositionInDatabase(
+                                            context, studentDetailModel!);
+                                  }
+                                  final stuAccID =
+                                      await StudentController.fetchAccountByID(
+                                          studentDetailModel!.studentID!);
+                                  print('object $stuAccID');
+                                  try {
+                                    CollectionReference accounts =
+                                        FirebaseFirestore.instance
+                                            .collection('ACCOUNT');
+                                    QuerySnapshot querySnapshot = await accounts
+                                        .where('_id',
+                                            isEqualTo: stuAccID.toString())
+                                        .get();
+                                    if (querySnapshot.docs.isNotEmpty) {
+                                      DocumentSnapshot document =
+                                          querySnapshot.docs.first;
+                                      List<dynamic> permissions =
+                                          document.get('_permission') ?? [];
+                                      if (value == 'Ban cán sự') {
+                                        if (!permissions.contains(
+                                            'Cập nhật vi phạm lớp học')) {
+                                          permissions
+                                              .add('Cập nhật vi phạm lớp học');
+                                        }
+                                        await accounts.doc(document.id).update(
+                                            {'_permission': permissions});
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Lưu thay đổi quyền thành công!'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      } else if (value == 'Học sinh') {
+                                        permissions
+                                            .remove('Cập nhật vi phạm lớp học');
+                                        await accounts.doc(document.id).update(
+                                            {'_permission': permissions});
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content:
+                                                Text('Xóa quyền thành công!'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content:
+                                              Text('Không tìm thấy tài khoản!'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    print('Lỗi khi lưu permissions: $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Lưu thay đổi thất bại!'),
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: RadioListTile(
-                              title: const Text('Học sinh',
-                                  style: TextStyle(fontSize: 16)),
-                              value: 'Học sinh',
-                              groupValue: studentDetailModel?.committee,
-                              onChanged: (value) {
-                                setState(() {
-                                  studentDetailModel?.committee = value!;
-                                });
-                              },
-                              activeColor: Colors.blueAccent,
-                            ),
-                          ),
-                          Expanded(
-                            child: RadioListTile(
-                              title: const Text('Ban cán sự',
-                                  style: TextStyle(fontSize: 16)),
-                              value: 'Ban cán sự',
-                              groupValue: studentDetailModel?.committee,
-                              onChanged: (value) {
-                                setState(() {
-                                  studentDetailModel?.committee = value!;
-                                });
-                              },
-                              activeColor: Colors.blueAccent,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: paddingValue), // Space between buttons
-                      Center(
-                        child: ButtonN(
-                          color: Colors.blueAccent,
-                          ontap: () {
-                            if (studentDetailModel != null) {
-                              StudentDetailController
-                                  .updateStudentPositionInDatabase(
-                                      context, studentDetailModel!);
-                            }
-                          },
-                          label: 'Cập nhật chức vụ',
-                          colorText: Colors.white,
-                        ),
-                      ),
+
                       SizedBox(
                           height: paddingValue * 0.5), // Space between buttons
                       Center(
-                        child: ButtonN(
-                          color: Colors.blueAccent,
-                          ontap: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return SendNotificationParentDialog(
-                                    pID: studentModel!.pID!,
-                                  );
-                                });
-                          },
-                          label: 'Gửi thông báo cho phụ huynh',
-                          colorText: Colors.white,
+                        child: SizedBox(
+                          width: double.infinity, // Full width button
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return SendNotificationParentDialog(
+                                      pID: studentModel!.pID!,
+                                    );
+                                  });
+                            },
+                            child: const Text(
+                              'Gửi thông báo cho phụ huynh',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ],

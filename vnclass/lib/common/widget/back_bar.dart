@@ -7,11 +7,13 @@ class BackBar extends StatelessWidget {
     this.title,
     this.shape,
     this.backgroundColor,
+    this.leading = true,
   });
 
   final ShapeBorder? shape;
   final Color? backgroundColor;
   final String? title;
+  final bool leading;
 
   @override
   Widget build(BuildContext context) {
@@ -26,25 +28,27 @@ class BackBar extends StatelessWidget {
               bottomRight: Radius.circular(8),
             ),
           ),
-      leading: Padding(
-        padding: const EdgeInsets.all(12),
-        child: IconButton(
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(Colors.white),
-            shape: WidgetStateProperty.all(RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            )),
-          ),
-          icon: Icon(
-            FontAwesomeIcons.arrowLeft,
-            color: Colors.blueAccent,
-            size: 16,
-          ), // Custom back button icon
-          onPressed: () {
-            Navigator.pop(context); // Navigate back
-          },
-        ),
-      ),
+      leading: leading
+          ? Padding(
+              padding: const EdgeInsets.all(12),
+              child: IconButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.white),
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  )),
+                ),
+                icon: Icon(
+                  FontAwesomeIcons.arrowLeft,
+                  color: Colors.blueAccent,
+                  size: 16,
+                ), // Custom back button icon
+                onPressed: () {
+                  Navigator.pop(context); // Navigate back
+                },
+              ),
+            )
+          : null,
       titleSpacing: 0.5,
       titleTextStyle: TextStyle(
         fontWeight: FontWeight.bold,
