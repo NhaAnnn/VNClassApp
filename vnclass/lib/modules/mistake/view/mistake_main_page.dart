@@ -500,48 +500,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
-          // Trường hợp 1: Học sinh với quyền "Cập nhật vi phạm lớp học" hoặc giáo viên
-          if (isStudentWithClassMistakePermission ||
-              account.goupID == 'giaoVien') ...[
-            Row(
-              children: [
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    hintText: 'Học kỳ',
-                    items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
-                    selectedItem: selectedHocKy,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedHocKy = newValue;
-                        updateClassY(idclass ?? '');
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropMenuWidget<String>(
-                    enabled: false,
-                    hintText: 'Năm học',
-                    items: years,
-                    selectedItem: selectedYear,
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedYear = newValue;
-                        updateClassY(idclass ?? '');
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: buildFutureBuilderY(classFilter: idclass ?? ''),
-            ),
-          ]
-          // Trường hợp 2: Học sinh với quyền "Cập nhật vi phạm học sinh toàn trường" hoặc ban giám hiệu
-          else if (isStudentWithSchoolMistakePermission ||
+          if (isStudentWithSchoolMistakePermission ||
               account.goupID == 'banGH') ...[
             Row(
               children: [
@@ -640,6 +599,47 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
             ),
           ]
           // Trường hợp 3: Học sinh không có quyền đặc biệt
+          else // Trường hợp 1: Học sinh với quyền "Cập nhật vi phạm lớp học" hoặc giáo viên
+          if (isStudentWithClassMistakePermission ||
+              account.goupID == 'giaoVien') ...[
+            Row(
+              children: [
+                Expanded(
+                  child: DropMenuWidget<String>(
+                    hintText: 'Học kỳ',
+                    items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+                    selectedItem: selectedHocKy,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedHocKy = newValue;
+                        updateClassY(idclass ?? '');
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropMenuWidget<String>(
+                    enabled: false,
+                    hintText: 'Năm học',
+                    items: years,
+                    selectedItem: selectedYear,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedYear = newValue;
+                        updateClassY(idclass ?? '');
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: buildFutureBuilderY(classFilter: idclass ?? ''),
+            ),
+          ]
+          // Trường hợp 2: Học sinh với quyền "Cập nhật vi phạm học sinh toàn trường" hoặc ban giám hiệu
           else if (account.goupID == 'hocSinh') ...[
             Row(
               children: [
