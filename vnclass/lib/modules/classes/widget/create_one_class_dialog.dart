@@ -138,6 +138,22 @@ class _CreateOneClassDialogState extends State<CreateOneClassDialog> {
                     ],
                   ),
                 );
+              }
+              if (await ClassController.tearcherExists(
+                  teacherId.toLowerCase().replaceAll(' ', ''))) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Thông báo'),
+                    content: Text('Giáo viên đã có lớp.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text('OK'),
+                      ),
+                    ],
+                  ),
+                );
               } else {
                 await ClassController.createClass(
                     context, className, teacherId, teacherName, year);

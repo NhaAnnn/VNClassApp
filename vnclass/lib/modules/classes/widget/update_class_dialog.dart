@@ -77,6 +77,7 @@ class _UpdateClassDialogState extends State<UpdateClassDialog> {
               colorBorder: Color(0xFF666666),
             ),
             TextfieldWidget(
+              enabled: false,
               labelText: teacherId.isEmpty ? 'Mã GVCN' : teacherId,
               colorBorder: Color(0xFF666666),
             ),
@@ -109,28 +110,46 @@ class _UpdateClassDialogState extends State<UpdateClassDialog> {
         ElevatedButton(
           onPressed: () async {
             try {
-              await ClassController.updateTeacherName(
-                  classModel.id!, teacherId, selectedTeacher!);
-              widget.onUpdate();
-
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
+              if (await ClassController.tearcherExists(
+                  teacherId.toLowerCase().replaceAll(' ', ''))) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
                     title: Text('Thông báo'),
-                    content: Text('Cập nhật thành công!'),
+                    content: Text('Giáo viên đã có lớp.'),
                     actions: [
                       TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Đóng dialog thông báo
-                        },
+                        onPressed: () => Navigator.of(context).pop(),
                         child: Text('OK'),
                       ),
                     ],
-                  );
-                },
-              );
+                  ),
+                );
+              } else {
+                await ClassController.updateTeacherName(
+                    classModel.id!, teacherId, selectedTeacher!);
+                widget.onUpdate();
+
+                Navigator.of(context).pop();
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Thông báo'),
+                      content: Text('Cập nhật thành công!'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Đóng dialog thông báo
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             } catch (e) {
               Navigator.of(context).pop(); // Đóng dialog xóa
               showDialog(

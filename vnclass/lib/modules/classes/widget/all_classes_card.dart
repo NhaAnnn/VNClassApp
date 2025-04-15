@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:vnclass/modules/classes/class_detail/model/class_model.dart';
 import 'package:vnclass/modules/classes/class_detail/view/class_detail.dart';
 import 'package:vnclass/modules/classes/widget/delete_class_dialog.dart';
 import 'package:vnclass/modules/classes/widget/update_class_dialog.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vnclass/modules/login/controller/provider.dart';
 
 class AllClassesCard extends StatefulWidget {
   const AllClassesCard({
@@ -61,7 +63,12 @@ class _AllClassesCardState extends State<AllClassesCard> {
                     _buildClassRow('Sỉ số:', classModel.amount.toString()),
                     _buildClassRow('GVCN:', classModel.teacherName.toString()),
                     if (!kIsWeb) ...[
-                      if (_isVisible) _buildControlRow(),
+                      if (_isVisible &&
+                          Provider.of<AccountProvider>(context, listen: false)
+                                  .account!
+                                  .goupID !=
+                              'giaoVien')
+                        _buildControlRow(),
                     ]
                   ],
                 ),
@@ -80,6 +87,7 @@ class _AllClassesCardState extends State<AllClassesCard> {
                           );
                         },
                       );
+                      widget.onUpdate!();
                     } else if (value == 'remove') {
                       showDialog(
                         context: context,
@@ -90,6 +98,7 @@ class _AllClassesCardState extends State<AllClassesCard> {
                           );
                         },
                       );
+                      widget.onUpdate!();
                     }
                   },
                   itemBuilder: (context) => [

@@ -71,7 +71,7 @@ class _AllConductState extends State<AllConduct> {
   List<String> _getValidMonths(String term) {
     if (term == 'Học kỳ 2') {
       return [
-        'Học kỳ 2',
+        'Tất cả HK2',
         'Tháng 1',
         'Tháng 2',
         'Tháng 3',
@@ -79,15 +79,15 @@ class _AllConductState extends State<AllConduct> {
         'Tháng 5'
       ];
     } else if (term == 'Học kỳ 1') {
-      return ['Học kỳ 1', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+      return ['Tất cả HK1', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
     }
     return ['Cả năm'];
   }
 
   int _getMonthKey(String selectedMonth) {
-    if (selectedMonth.contains('Học kỳ 1')) {
+    if (selectedMonth.contains('Tất cả HK1')) {
       return 100;
-    } else if (selectedMonth.contains('Học kỳ 2')) {
+    } else if (selectedMonth.contains('Tất cả HK2')) {
       return 200;
     } else if (selectedMonth.contains('Cả năm')) {
       return 300;
@@ -120,23 +120,37 @@ class _AllConductState extends State<AllConduct> {
                     Row(
                       children: [
                         Expanded(
-                          child: DropMenuWidget(
-                            items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
-                            hintText: 'Học kỳ',
-                            selectedItem: selectedTerm,
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: 'Học kỳ',
+                              border: OutlineInputBorder(),
+                            ),
+                            value: selectedTerm,
+                            items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm']
+                                .map((term) => DropdownMenuItem<String>(
+                                      value: term,
+                                      child: Text(term),
+                                    ))
+                                .toList(),
                             onChanged: (termValue) {
-                              // Call _updateTermAndMonths to update both term and months
                               _updateTermAndMonths(termValue!);
                             },
                           ),
                         ),
                         SizedBox(width: paddingValue * 0.02),
                         Expanded(
-                          child: DropMenuWidget(
-                            items: validMonths,
-                            key: ValueKey(validMonths), // Add a ValueKey
-                            selectedItem: selectedMonth,
-                            hintText: 'Tháng',
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              labelText: 'Tháng',
+                              border: OutlineInputBorder(),
+                            ),
+                            value: selectedMonth,
+                            items: validMonths
+                                .map((month) => DropdownMenuItem<String>(
+                                      value: month,
+                                      child: Text(month),
+                                    ))
+                                .toList(),
                             onChanged: (value) {
                               setState(() {
                                 selectedMonth = value!;

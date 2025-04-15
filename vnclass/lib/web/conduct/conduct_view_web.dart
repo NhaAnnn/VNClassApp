@@ -84,7 +84,7 @@ class _ConductViewWebState extends State<ConductViewWeb> {
   List<String> _getValidMonths(String term) {
     if (term == 'Học kỳ 2') {
       return [
-        'Học kỳ 2',
+        'Tất cả HK2',
         'Tháng 1',
         'Tháng 2',
         'Tháng 3',
@@ -92,15 +92,15 @@ class _ConductViewWebState extends State<ConductViewWeb> {
         'Tháng 5'
       ];
     } else if (term == 'Học kỳ 1') {
-      return ['Học kỳ 1', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+      return ['Tất cả HK1', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
     }
     return ['Cả năm'];
   }
 
   int _getMonthKey(String selectedMonth) {
-    if (selectedMonth.contains('Học kỳ 1')) {
+    if (selectedMonth.contains('Tất cả HK1')) {
       return 100;
-    } else if (selectedMonth.contains('Học kỳ 2')) {
+    } else if (selectedMonth.contains('Tất cả HK2')) {
       return 200;
     } else if (selectedMonth.contains('Cả năm')) {
       return 300;
@@ -172,28 +172,92 @@ class _ConductViewWebState extends State<ConductViewWeb> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: DropMenuWidget<String>(
-                              items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
-                              hintText: 'Học kỳ',
-                              selectedItem: selectedTerm,
-                              borderColor: Color(0xFFD3D3D3),
+                          Expanded(
+                            flex: 1,
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: 'Học kỳ',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors
+                                        .blueAccent, // Focused border color
+                                  ),
+                                ),
+                              ),
+                              isExpanded: true,
+                              itemHeight: null,
+                              items: [
+                                DropdownMenuItem(
+                                  value: 'Học kỳ 1',
+                                  child: Text('Học kỳ 1'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Học kỳ 2',
+                                  child: Text('Học kỳ 2'),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Cả năm',
+                                  child: Text('Cả năm'),
+                                ),
+                              ],
+                              value: selectedTerm,
                               onChanged: (termValue) {
-                                // Call _updateTermAndMonths to update both term and months
                                 _updateTermAndMonths(termValue!);
                               },
                             ),
                           ),
                           SizedBox(width: paddingValue * 0.02),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: DropMenuWidget(
-                              items: validMonths,
-                              key: ValueKey(validMonths),
-                              selectedItem: selectedMonth,
-                              borderColor: Color(0xFFD3D3D3),
-                              hintText: 'Tháng',
+                          Expanded(
+                            flex: 1,
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: 'Tháng',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors
+                                        .blueAccent, // Focused border color
+                                  ),
+                                ),
+                              ),
+                              isExpanded: true,
+                              itemHeight: null,
+                              items: validMonths.map((month) {
+                                return DropdownMenuItem(
+                                  value: month,
+                                  child: Text(month),
+                                );
+                              }).toList(),
+                              value: selectedMonth,
                               onChanged: (value) {
                                 setState(() {
                                   selectedMonth = value!;
@@ -202,13 +266,42 @@ class _ConductViewWebState extends State<ConductViewWeb> {
                             ),
                           ),
                           SizedBox(width: paddingValue * 0.02),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.1,
-                            child: DropMenuWidget(
-                              items: yearProvider.years,
-                              selectedItem: selectedYear,
-                              borderColor: Color(0xFFD3D3D3),
-                              hintText: 'Niên Khóa',
+                          Expanded(
+                            flex: 1,
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: 'Niên Khóa',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.grey.shade400, // Border color
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors
+                                        .blueAccent, // Focused border color
+                                  ),
+                                ),
+                              ),
+                              isExpanded: true,
+                              itemHeight: null,
+                              items: yearProvider.years.map((year) {
+                                return DropdownMenuItem(
+                                  value: year,
+                                  child: Text(year),
+                                );
+                              }).toList(),
+                              value: selectedYear,
                               onChanged: (value) {
                                 setState(() {
                                   selectedYear = value!;

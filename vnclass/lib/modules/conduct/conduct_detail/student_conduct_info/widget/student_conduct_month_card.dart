@@ -86,28 +86,30 @@ class _StudentConductMonthCardState extends State<StudentConductMonthCard> {
                   ],
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(
-                    StudentConductInfoMonth.routeName,
-                    arguments: {
-                      'studentID': widget.studentID,
-                      'studentName': widget.studentName,
-                      'monthKey': Getmonthnow.getMonthNumber(widget.month!),
-                      'trainingScore': widget.trainingScore,
-                      'conduct': widget.conduct,
-                    },
-                  );
-                },
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(
-                    FontAwesomeIcons.angleRight,
-                    size: 30,
-                    color: Colors.black,
+              if (!kIsWeb) ...[
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      StudentConductInfoMonth.routeName,
+                      arguments: {
+                        'studentID': widget.studentID,
+                        'studentName': widget.studentName,
+                        'monthKey': Getmonthnow.getMonthNumber(widget.month!),
+                        'trainingScore': widget.trainingScore,
+                        'conduct': widget.conduct,
+                      },
+                    );
+                  },
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      FontAwesomeIcons.angleRight,
+                      size: 30,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-              ),
+              ]
             ],
           ),
         ),

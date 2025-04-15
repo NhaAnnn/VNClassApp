@@ -75,18 +75,30 @@ class _ConductStudentTermState extends State<ConductStudentTerm> {
                 Card(
                   elevation: 4.0,
                   margin: const EdgeInsets.only(top: 15.0, right: 15, left: 15),
-                  color: const Color(0xFF003B6F),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: const Color(0xFF003B6F), width: 1),
+                    side: BorderSide(color: Colors.transparent, width: 1),
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                    ),
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10)),
                   ),
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     padding: const EdgeInsets.symmetric(
                         vertical: 10.0, horizontal: 15.0),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF003B6F),
+                          Color.fromARGB(255, 0, 166, 255)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),
+                    ),
                     child: Text(
                       'Thông tin:',
                       style: TextStyle(fontSize: 20, color: Colors.white),

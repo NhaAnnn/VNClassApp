@@ -108,6 +108,14 @@ class ClassController {
     return snapshot.docs.isNotEmpty;
   }
 
+  static Future<bool> tearcherExists(String teacherID) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('CLASS')
+        .where('T_id', isEqualTo: teacherID)
+        .get();
+    return snapshot.docs.isNotEmpty;
+  }
+
   static Future<void> createClass(BuildContext context, String className,
       String teacherId, String teacherName, String year) async {
     // Tạo dữ liệu mới

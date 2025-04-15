@@ -53,8 +53,10 @@ class _ClassViewWebState extends State<ClassViewWeb> {
   }
 
   Future<void> _refreshClasses() async {
+    final classes = await loadClasses(); // Fetch latest classes
     setState(() {
-      // loadClasses();
+      _allClasses = classes; // Update the all classes list
+      _filteredClasses = classes; // You can also reset filtered classes
     });
   }
 
@@ -75,12 +77,13 @@ class _ClassViewWebState extends State<ClassViewWeb> {
   }
 
   Future<List<ClassModel>> loadClasses() async {
+    print(accountProvider.account!.goupID);
     List<ClassModel> fetchedClasses = await ClassController.fetchAllClasses();
 
-    // Filter by teacher roles and year, if applicable
     if (accountProvider.account!.goupID == 'giaoVien' && selectedYear != null) {
       fetchedClasses = await ClassController.fetchAllClassesByYearAndTearcher(
           selectedYear!, accountProvider.account!.idAcc);
+      print('giaoVien fetchedClasses: $fetchedClasses');
     } else if (accountProvider.account!.goupID == 'banGH' &&
         selectedYear != null) {
       fetchedClasses =
@@ -169,14 +172,13 @@ class _ClassViewWebState extends State<ClassViewWeb> {
                             FontAwesomeIcons.circlePlus,
                             color: Colors.blueAccent,
                           ),
-                          onPressed: () {
-                            showDialog(
+                          onPressed: () async {
+                            await showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return CreateOneClassDialog(
-                                  onCreate: () {
-                                    loadClasses();
-                                    setState(() {});
+                                  onCreate: () async {
+                                    await _refreshClasses();
                                   },
                                 );
                               },
@@ -193,13 +195,13 @@ class _ClassViewWebState extends State<ClassViewWeb> {
                               context: context,
                               builder: (BuildContext context) {
                                 return CreateListClassDialog(
-                                  onCreate: () {
-                                    loadClasses();
-                                    setState(() {});
+                                  onCreate: () async {
+                                    await _refreshClasses();
                                   },
                                 );
                               },
                             );
+                            loadClasses();
                           },
                         ),
                       ]
@@ -211,52 +213,114 @@ class _ClassViewWebState extends State<ClassViewWeb> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(
-                        width: padding * 0.08,
-                        child: Text('Khối:'),
-                      ),
-                      SizedBox(
-                        width: padding * 0.09,
-                        height: padding * 0.025,
-                        child: DropMenuWidget(
-                          items: ['Khối 10', 'Khối 11', 'Khối 12'],
-                          hintText: 'Tất cả',
-                          borderColor: Color(0xFFD3D3D3),
-                          textStyle:
-                              TextStyle(fontSize: 13, color: Colors.black),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGrade = value;
-                              _filterClasses();
-                            });
-                          },
+                        width: padding * 0.15,
+                        child: Row(
+                          children: [
+                            Text('Khối:'),
+                            SizedBox(width: 10),
+                            Flexible(
+                              child: DropdownButtonFormField<String>(
+                                value: selectedGrade,
+                                items: ['Khối 10', 'Khối 11', 'Khối 12']
+                                    .map((grade) => DropdownMenuItem<String>(
+                                          value: grade,
+                                          child: Text(
+                                            grade,
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black),
+                                          ),
+                                        ))
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 12),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFFD3D3D3), width: 1.5),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFFD3D3D3), width: 1.5),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1E90FF), width: 2.0),
+                                  ),
+                                  hintText: 'Tất cả',
+                                  hintStyle: TextStyle(
+                                      fontSize: 13, color: Colors.grey[600]),
+                                ),
+                                isExpanded: true,
+                                itemHeight: null,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedGrade = value;
+                                    _filterClasses();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
+                      SizedBox(width: 20),
                       SizedBox(
-                        width: padding * 0.08,
-                        child: Text('Niên khóa:'),
-                      ),
-                      SizedBox(
-                        width: padding * 0.09,
-                        height: padding * 0.025,
-                        child: DropMenuWidget(
-                          selectedItem: selectedYear,
-                          items: yearProvider.years,
-                          hintText: 'Tất cả',
-                          borderColor: Color(0xFFD3D3D3),
-                          textStyle:
-                              TextStyle(fontSize: 13, color: Colors.black),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedYear = value;
-                              _filterClasses();
-                            });
-                          },
+                        width: padding * 0.18,
+                        child: Row(
+                          children: [
+                            Text('Niên khóa:'),
+                            SizedBox(width: 10),
+                            Flexible(
+                              child: DropdownButtonFormField<String>(
+                                value: selectedYear,
+                                items: yearProvider.years
+                                    .map((year) => DropdownMenuItem<String>(
+                                          value: year,
+                                          child: Text(
+                                            year,
+                                            style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black),
+                                          ),
+                                        ))
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 12),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFFD3D3D3), width: 1.5),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFFD3D3D3), width: 1.5),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                        color: Color(0xFF1E90FF), width: 2.0),
+                                  ),
+                                  hintText: 'Tất cả',
+                                  hintStyle: TextStyle(
+                                      fontSize: 13, color: Colors.grey[600]),
+                                ),
+                                isExpanded: true,
+                                itemHeight: null,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedYear = value;
+                                    _filterClasses();
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
