@@ -68,55 +68,56 @@ class _AllClassesCardState extends State<AllClassesCard> {
                   ],
                 ),
               ),
-              if (kIsWeb &&
-                  Provider.of<AccountProvider>(context, listen: false)
-                          .account!
-                          .goupID !=
-                      'giaoVien') ...[
-                PopupMenuButton<String>(
-                  icon: const Icon(FontAwesomeIcons.ellipsis, size: 20),
-                  onSelected: (value) {
-                    if (value == 'edit') {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return UpdateClassDialog(
-                            classModel: classModel,
-                            onUpdate: widget.onUpdate!,
-                          );
-                        },
-                      );
-                      widget.onUpdate!();
-                    } else if (value == 'remove') {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return DeleteClassDialog(
-                            classId: classModel.id.toString(),
-                            onDelete: widget.onUpdate!,
-                          );
-                        },
-                      );
-                      widget.onUpdate!();
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    _customPopupMenuItem(
-                        'edit',
-                        'Chỉnh sửa',
-                        TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.w500),
-                        Icon(FontAwesomeIcons.pencil,
-                            color: Colors.blue, size: 20)),
-                    _customPopupMenuItem(
-                        'remove',
-                        'Xóa',
-                        TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.w500),
-                        Icon(FontAwesomeIcons.solidTrashCan,
-                            color: Colors.red, size: 20)),
-                  ],
-                ),
+              if (kIsWeb) ...[
+                if (Provider.of<AccountProvider>(context, listen: false)
+                        .account!
+                        .goupID !=
+                    'giaoVien') ...[
+                  PopupMenuButton<String>(
+                    icon: const Icon(FontAwesomeIcons.ellipsis, size: 20),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return UpdateClassDialog(
+                              classModel: classModel,
+                              onUpdate: widget.onUpdate!,
+                            );
+                          },
+                        );
+                        widget.onUpdate!();
+                      } else if (value == 'remove') {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return DeleteClassDialog(
+                              classId: classModel.id.toString(),
+                              onDelete: widget.onUpdate!,
+                            );
+                          },
+                        );
+                        widget.onUpdate!();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      _customPopupMenuItem(
+                          'edit',
+                          'Chỉnh sửa',
+                          TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.w500),
+                          Icon(FontAwesomeIcons.pencil,
+                              color: Colors.blue, size: 20)),
+                      _customPopupMenuItem(
+                          'remove',
+                          'Xóa',
+                          TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.w500),
+                          Icon(FontAwesomeIcons.solidTrashCan,
+                              color: Colors.red, size: 20)),
+                    ],
+                  ),
+                ],
               ] else ...[
                 GestureDetector(
                   onTap: () {
