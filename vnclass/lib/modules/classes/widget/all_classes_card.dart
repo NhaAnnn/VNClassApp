@@ -63,17 +63,16 @@ class _AllClassesCardState extends State<AllClassesCard> {
                     _buildClassRow('Sỉ số:', classModel.amount.toString()),
                     _buildClassRow('GVCN:', classModel.teacherName.toString()),
                     if (!kIsWeb) ...[
-                      if (_isVisible &&
-                          Provider.of<AccountProvider>(context, listen: false)
-                                  .account!
-                                  .goupID !=
-                              'giaoVien')
-                        _buildControlRow(),
+                      if (_isVisible) _buildControlRow(),
                     ]
                   ],
                 ),
               ),
-              if (kIsWeb) ...[
+              if (kIsWeb &&
+                  Provider.of<AccountProvider>(context, listen: false)
+                          .account!
+                          .goupID !=
+                      'giaoVien') ...[
                 PopupMenuButton<String>(
                   icon: const Icon(FontAwesomeIcons.ellipsis, size: 20),
                   onSelected: (value) {
@@ -232,30 +231,54 @@ class _AllClassesCardState extends State<AllClassesCard> {
             child: _buildControlButton(
                 'Sửa', FontAwesomeIcons.pencil, Colors.blueAccent),
             onTap: () async {
-              await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return UpdateClassDialog(
-                    classModel: classModel,
-                    onUpdate: widget.onUpdate!,
-                  );
-                },
-              );
+              if (Provider.of<AccountProvider>(context, listen: false)
+                      .account!
+                      .goupID ==
+                  'banGH') {
+                await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return UpdateClassDialog(
+                      classModel: classModel,
+                      onUpdate: widget.onUpdate!,
+                    );
+                  },
+                );
+              } else {
+                // Show a message or do nothing
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Bạn không có quyền sửa lớp này.'),
+                  ),
+                );
+              }
             },
           ),
           GestureDetector(
             child: _buildControlButton(
                 'Xóa', FontAwesomeIcons.solidTrashCan, Colors.redAccent),
             onTap: () async {
-              await showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return DeleteClassDialog(
-                    classId: classModel.id.toString(),
-                    onDelete: widget.onUpdate!,
-                  );
-                },
-              );
+              if (Provider.of<AccountProvider>(context, listen: false)
+                      .account!
+                      .goupID ==
+                  'banGH') {
+                await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DeleteClassDialog(
+                      classId: classModel.id.toString(),
+                      onDelete: widget.onUpdate!,
+                    );
+                  },
+                );
+              } else {
+                // Show a message or do nothing
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Bạn không có quyền xóa lớp này.'),
+                  ),
+                );
+              }
             },
           ),
         ],

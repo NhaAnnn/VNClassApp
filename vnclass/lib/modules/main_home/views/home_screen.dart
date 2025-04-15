@@ -364,15 +364,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             dialog: 'Dialog',
                           ),
                           const SizedBox(height: 16),
-                          _buildHomeItem(
-                            context,
-                            icon: FontAwesomeIcons.school,
-                            title: 'Lớp Học',
-                            route: StudentInfo.routeName,
-                            data: {
-                              'studentModel': studentModel,
-                            },
-                          ),
+                          // _buildHomeItem(
+                          //   context,
+                          //   icon: FontAwesomeIcons.school,
+                          //   title: 'Lớp Học',
+                          //   route: StudentInfo.routeName,
+                          //   data: {
+                          //     'studentModel': studentModel,
+                          //   },
+                          // ),
                         ] else if (account.goupID == 'phuHuynh') ...[
                           _buildHomeItem(
                             context,
