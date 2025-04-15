@@ -297,18 +297,21 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
                         _buildSidebarItem(
                             Icons.class_rounded, 'Quản lý lớp học', '/student',
                             isSelected: _selectedRoute == '/student'),
-                        _buildSidebarItem(Icons.person, 'Quản lý tài khoản',
-                            '/account_management',
-                            isSelected:
-                                _selectedRoute == '/account_management'),
-                        _buildSidebarItem(
-                            Icons.tune, 'Thiết lập mức điểm', '/score_settings',
-                            isSelected: _selectedRoute == '/score_settings'),
-                        _buildSidebarItem(
-                            Icons.tune,
-                            'Thiết lập vi phạm và loại vi phạm',
-                            '/mistake_settings',
-                            isSelected: _selectedRoute == '/mistake_settings'),
+                        if (account?.goupID == 'banGH') ...[
+                          _buildSidebarItem(Icons.person, 'Quản lý tài khoản',
+                              '/account_management',
+                              isSelected:
+                                  _selectedRoute == '/account_management'),
+                          _buildSidebarItem(Icons.tune, 'Thiết lập mức điểm',
+                              '/score_settings',
+                              isSelected: _selectedRoute == '/score_settings'),
+                          _buildSidebarItem(
+                              Icons.tune,
+                              'Thiết lập vi phạm và loại vi phạm',
+                              '/mistake_settings',
+                              isSelected:
+                                  _selectedRoute == '/mistake_settings'),
+                        ],
                       ],
                     ),
                   ),

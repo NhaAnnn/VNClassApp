@@ -507,7 +507,7 @@ class _AccountMainPageWebState extends State<AccountMainPageWeb> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Mô tả ngắn (nếu có) cho tài khoản này...',
+            ' ',
             style:
                 GoogleFonts.roboto(fontSize: 13, color: Colors.grey.shade700),
           ),
