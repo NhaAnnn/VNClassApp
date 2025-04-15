@@ -195,91 +195,184 @@ class _DialogExportAccWebState extends State<DialogExportAccWeb> {
     );
   }
 
+  // Widget _buildExportActionCard() {
+  //   return Card(
+  //     elevation: 3,
+  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  //     color: Colors.blue.shade50,
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(8),
+  //       child: Row(
+  //         children: [
+  //           Expanded(
+  //             flex: 2,
+  //             child: Text(
+  //               'Dữ liệu xuất: ${selectedOption == 'Học sinh - PHHS' ? 'Báo cáo thông tin học sinh' : 'Báo cáo thông tin nhân sự'}',
+  //               style: const TextStyle(
+  //                 fontSize: 14,
+  //                 fontWeight: FontWeight.w500,
+  //                 color: Colors.blueGrey,
+  //                 fontFamily: 'Roboto',
+  //               ),
+  //             ),
+  //           ),
+  //           const SizedBox(width: 8),
+  //           ElevatedButton(
+  //             onPressed: isExporting
+  //                 ? null
+  //                 : () async {
+  //                     setState(() => isExporting = true);
+  //                     await exportToExcel(context);
+  //                     setState(() => isExporting = false);
+  //                   },
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: Colors.blueAccent,
+  //               shape: RoundedRectangleBorder(
+  //                   borderRadius: BorderRadius.circular(8)),
+  //               padding:
+  //                   const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  //             ),
+  //             child: isExporting
+  //                 ? const SizedBox(
+  //                     width: 16,
+  //                     height: 16,
+  //                     child: CircularProgressIndicator(
+  //                       color: Colors.white,
+  //                       strokeWidth: 2,
+  //                     ),
+  //                   )
+  //                 : const Text(
+  //                     'Xuất file',
+  //                     style: TextStyle(
+  //                       color: Colors.white,
+  //                       fontWeight: FontWeight.bold,
+  //                       fontSize: 13,
+  //                       fontFamily: 'Roboto',
+  //                     ),
+  //                   ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildExportActionCard() {
     return Card(
-      elevation: 3,
+      elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.blue.shade50,
       child: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Text(
-                'Dữ liệu xuất: ${selectedOption == 'Học sinh - PHHS' ? 'Báo cáo thông tin học sinh' : 'Báo cáo thông tin nhân sự'}',
+                'Dữ liệu xuất: ${selectedOption == 'Học sinh - PHHS' ? 'Báo cáo thông tin học sinh' : selectedOption != null ? 'Báo cáo thông tin nhân sự' : 'Chưa chọn loại tài khoản'}',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 15,
                   fontWeight: FontWeight.w500,
                   color: Colors.blueGrey,
                   fontFamily: 'Roboto',
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: isExporting
-                  ? null
-                  : () async {
-                      setState(() => isExporting = true);
-                      await exportToExcel(context);
-                      setState(() => isExporting = false);
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              ),
-              child: isExporting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Xuất file',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-            ),
+            const SizedBox(width: 12),
+            // ElevatedButton(
+            //   onPressed: isExporting || selectedOption == null
+            //       ? null // Vô hiệu hóa nút nếu chưa chọn loại tài khoản
+            //       : () async {
+            //           setState(() => isExporting = true);
+            //           await exportToExcel(context);
+            //           setState(() => isExporting = false);
+            //           if (context.mounted) {
+            //             Navigator.pop(context);
+            //           }
+            //         },
+            //   style: ElevatedButton.styleFrom(
+            //     backgroundColor: Colors.blueAccent,
+            //     shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(8)),
+            //     padding:
+            //         const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            //   ),
+            //   child: isExporting
+            //       ? const SizedBox(
+            //           width: 20,
+            //           height: 20,
+            //           child: CircularProgressIndicator(
+            //             color: Colors.white,
+            //             strokeWidth: 2,
+            //           ),
+            //         )
+            //       : const Text(
+            //           'Xuất file',
+            //           style: TextStyle(
+            //             color: Colors.white,
+            //             fontWeight: FontWeight.bold,
+            //             fontSize: 14,
+            //             fontFamily: 'Roboto',
+            //           ),
+            //         ),
+            // ),
           ],
         ),
       ),
     );
   }
 
+  // Widget _buildDownloadButton() {
+  //   return ElevatedButton.icon(
+  //     onPressed: isExporting
+  //         ? null
+  //         : () async {
+  //             setState(() => isExporting = true);
+  //             await exportToExcel(context);
+  //             setState(() => isExporting = false);
+  //           },
+  //     icon: const Icon(Icons.download, color: Colors.white, size: 18),
+  //     label: const Text(
+  //       'Tải xuống',
+  //       style: TextStyle(
+  //         color: Colors.white,
+  //         fontWeight: FontWeight.bold,
+  //         fontSize: 13,
+  //         fontFamily: 'Roboto',
+  //       ),
+  //     ),
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: Colors.green,
+  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  //       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  //     ),
+  //   );
+  // }
   Widget _buildDownloadButton() {
     return ElevatedButton.icon(
-      onPressed: isExporting
-          ? null
+      onPressed: isExporting || selectedOption == null
+          ? null // Vô hiệu hóa nút nếu chưa chọn loại tài khoản
           : () async {
               setState(() => isExporting = true);
               await exportToExcel(context);
               setState(() => isExporting = false);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             },
-      icon: const Icon(Icons.download, color: Colors.white, size: 18),
+      icon: const Icon(Icons.download, color: Colors.white, size: 20),
       label: const Text(
         'Tải xuống',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
-          fontSize: 13,
+          fontSize: 14,
           fontFamily: 'Roboto',
         ),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.green,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 12),
       ),
     );
   }
