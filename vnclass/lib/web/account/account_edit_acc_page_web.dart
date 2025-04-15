@@ -10,6 +10,7 @@ import 'package:vnclass/common/widget/custom_dialog_widget.dart';
 import 'package:vnclass/common/widget/radio_button_widget.dart';
 import 'package:vnclass/modules/account/model/account_edit_model.dart';
 import 'package:vnclass/modules/account/widget/textfield_widget.dart';
+import 'package:vnclass/modules/main_home/controller/class_provider.dart';
 import 'package:vnclass/modules/main_home/controller/year_provider.dart';
 
 class AccountEditAccPageWeb extends StatefulWidget {
@@ -65,17 +66,12 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
       _selectedAcademicYear =
           (years.contains(academicYear)) ? academicYear : null;
 
-      final List<String> classes = [
-        'Lớp 6A',
-        'Lớp 6B',
-        'Lớp 7A',
-        'Lớp 7B',
-        'Lớp 8A',
-        'Lớp 8B'
-      ];
-      String? className = accountEditModel.classMistakeModel?.className;
-      _selectedClass = (classes.contains(className)) ? className : null;
-
+      final classProvider = Provider.of<ClassProvider>(context);
+      final classes = classProvider.classNames.toString().toUpperCase();
+      String? className =
+          accountEditModel.classMistakeModel?.className.toUpperCase();
+      _selectedClass =
+          (className != null && classes.contains(className)) ? className : null;
       groupPermissions = [];
       accountPermissions = List.from(accountEditModel.accountModel.permission);
       dbPermissions = [];
@@ -108,26 +104,84 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
       setState(() => _dateController.text = picked.toString().split(" ")[0]);
   }
 
-  final String apiToken = '28118374-7d32-42fd-bf28-5f574262087e';
-  Future<void> sendEmail() async {
-    final url = 'https://api.postmarkapp.com/email';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'X-Postmark-Server-Token': apiToken,
-        'Content-Type': 'application/json'
-      },
-      body: jsonEncode({
-        'From': 'suongb2103561@student.ctu.edu.vn',
-        'To': 'nhanb2110134@student.ctu.edu.vn',
-        'Subject': 'Cấp lại mật khẩu',
-        'TextBody': 'Mật khẩu mới của bạn là: 123',
-      }),
-    );
-    if (response.statusCode == 200) {
-      print('Email sent successfully!');
-    } else {
-      print('Failed to send email: ${response.body}');
+  // final String apiToken = '28118374-7d32-42fd-bf28-5f574262087e';
+  // Future<void> sendEmail() async {
+  //   final url = 'https://api.postmarkapp.com/email';
+  //   final response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {
+  //       'X-Postmark-Server-Token': apiToken,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: jsonEncode({
+  //       'From': 'suongb2103561@student.ctu.edu.vn',
+  //       'To': 'nhanb2110134@student.ctu.edu.vn',
+  //       'Subject': 'Cấp lại mật khẩu',
+  //       'TextBody': 'Mật khẩu mới của bạn là: 123',
+  //     }),
+  //   );
+  //   if (response.statusCode == 200) {
+  //     print('Email sent successfully!');
+  //   } else {
+  //     print('Failed to send email: ${response.body}');
+  //   }
+  // }
+// Future<bool> sendEmail(String recipient, String newPassword) async {
+//   try {
+//     await EmailJS.send(
+//       'service_h0y0ztu', // Ví dụ: service_abc123
+//       'template_ei2kr3i', // Ví dụ: template_xyz789
+//       {
+//         'to_email': recipient,
+//         'newPassword': newPassword,
+//       },
+//       Options(
+//         publicKey: '7kk_13pvuS4sLk644', // Ví dụ: user_123456789
+//         privateKey: 'QjvwfHf0Bp1HyHCmk1gXN', // Ví dụ: abcdef123456
+//       ),
+//     );
+//     print('Email sent successfully!');
+//     return true;
+//   } catch (e) {
+//     print('Error sending email: $e');
+//     return false;
+//   }
+// }
+
+  Future<bool> sendEmail() async {
+    const String url = 'https://api.emailjs.com/api/v1.0/email/send';
+    const String userId = '7kk_13pvuS4sLk644'; // Thay bằng User ID thực
+    const String serviceId = 'service_h0y0ztu'; // Thay bằng Service ID thực
+    const String templateId = 'template_ei2kr3i'; // Thay bằng Template ID thực
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'user_id': userId,
+          'service_id': serviceId,
+          'template_id': templateId,
+          'template_params': {
+            'to': 'suongb2103561@student.ctu.edu.vn',
+            'newPassword': '123',
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Email sent successfully!');
+        return true;
+      } else {
+        print(
+            'Failed to send email: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error sending email: $e');
+      return false;
     }
   }
 
