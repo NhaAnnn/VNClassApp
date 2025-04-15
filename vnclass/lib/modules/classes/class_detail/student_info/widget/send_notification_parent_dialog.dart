@@ -42,40 +42,46 @@ class _SendNotificationParentDialogState
       content: SingleChildScrollView(
         child: Column(
           children: [
-            TextfieldWidget(
-              maxLines: 5,
-              labelText: 'Tiêu đề thông báo',
-              colorBorder: Color(0xFF666666),
-              onChanged: (value) {
-                setState(() {
-                  title = value;
-                  titleError = null;
-                });
-              },
-              errorText: titleError,
-              onTap: () {
-                setState(() {
-                  titleError = null; // Ẩn thông báo lỗi
-                });
-              },
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: TextfieldWidget(
+                maxLines: 1,
+                labelText: 'Tiêu đề thông báo',
+                colorBorder: Color(0xFF666666),
+                onChanged: (value) {
+                  setState(() {
+                    title = value;
+                    titleError = null;
+                  });
+                },
+                errorText: titleError,
+                onTap: () {
+                  setState(() {
+                    titleError = null; // Ẩn thông báo lỗi
+                  });
+                },
+              ),
             ),
             SizedBox(height: 8),
-            TextfieldWidget(
-              maxLines: 15,
-              labelText: 'Nội dung thông báo',
-              colorBorder: Color(0xFF666666),
-              onChanged: (value) {
-                setState(() {
-                  content = value;
-                  contentError = null; // Xóa lỗi khi người dùng nhập
-                });
-              },
-              errorText: contentError,
-              onTap: () {
-                setState(() {
-                  contentError = null; // Ẩn thông báo lỗi
-                });
-              },
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: TextfieldWidget(
+                maxLines: 3,
+                labelText: 'Nội dung thông báo',
+                colorBorder: Color(0xFF666666),
+                onChanged: (value) {
+                  setState(() {
+                    content = value;
+                    contentError = null; // Xóa lỗi khi người dùng nhập
+                  });
+                },
+                errorText: contentError,
+                onTap: () {
+                  setState(() {
+                    contentError = null; // Ẩn thông báo lỗi
+                  });
+                },
+              ),
             ),
           ],
         ),
