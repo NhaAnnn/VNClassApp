@@ -55,18 +55,62 @@ class _MistakeMainPageWebState extends State<MistakeMainPageWeb> {
     futureMistakeClass = mistakeRepository.fetchMistakeClasses('CLASS');
   }
 
+  // Future<void> _loadClasses() async {
+  //   try {
+  //     final classes = await mistakeRepository.fetchMistakeClasses('CLASS');
+  //     setState(() {
+  //       allClasses = classes;
+  //       filteredClasses = allClasses.where((classItem) {
+  //         return classItem.className.startsWith(currentClassFilter) &&
+  //             (selectedYear == null || classItem.academicYear == selectedYear);
+  //       }).toList();
+  //     });
+  //   } catch (e) {
+  //     print('Lỗi khi tải danh sách lớp: $e');
+  //   }
+  // }
   Future<void> _loadClasses() async {
     try {
-      final classes = await mistakeRepository.fetchMistakeClasses('CLASS');
+      final accountProvider =
+          Provider.of<AccountProvider>(context, listen: false);
+      final account = accountProvider.account;
+      List<ClassMistakeModel> classes;
+
+      if (account?.goupID == 'banGH') {
+        // Ban giám hiệu: Load tất cả lớp
+        classes = await mistakeRepository.fetchMistakeClasses('CLASS');
+      } else if (account?.goupID == 'giaoVien') {
+        // Giáo viên: Tìm lớp có T_id khớp với account.idAcc
+        final querySnapshot = await FirebaseFirestore.instance
+            .collection('CLASS')
+            .where('T_id', isEqualTo: account?.idAcc)
+            .get();
+        classes = querySnapshot.docs
+            .map((doc) => ClassMistakeModel.fromFirestore(doc))
+            .toList();
+      } else {
+        // Trường hợp khác (ví dụ: học sinh), không load lớp
+        classes = [];
+      }
+
       setState(() {
         allClasses = classes;
         filteredClasses = allClasses.where((classItem) {
-          return classItem.className.startsWith(currentClassFilter) &&
-              (selectedYear == null || classItem.academicYear == selectedYear);
+          final matchesYear =
+              selectedYear == null || classItem.academicYear == selectedYear;
+          // Chỉ áp dụng bộ lọc lớp (10, 11, 12) cho ban giám hiệu
+          final matchesClass = account?.goupID == 'banGH'
+              ? classItem.className.startsWith(currentClassFilter)
+              : true;
+          return matchesYear && matchesClass;
         }).toList();
       });
     } catch (e) {
       print('Lỗi khi tải danh sách lớp: $e');
+      setState(() {
+        allClasses = [];
+        filteredClasses = [];
+      });
     }
   }
 

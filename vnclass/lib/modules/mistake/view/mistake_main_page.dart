@@ -27,6 +27,53 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
   String? selectedHocKy;
   Map<String, List<ClassMistakeModel>> cachedData = {};
 
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   final accountProvider =
+  //       Provider.of<AccountProvider>(context, listen: false);
+  //   final account = accountProvider.account;
+  //   if (account!.goupID == 'hocSinh') {
+  //     final studentDetailProvider =
+  //         Provider.of<StudentDetailProvider>(context, listen: false);
+  //     final classIdST = studentDetailProvider.classIdST;
+  //     final yearClass = classIdST.length >= 9
+  //         ? classIdST.substring(classIdST.length - 9)
+  //         : classIdST;
+  //     futureMistakeClass = fetchFilteredMistakeClassesByY(classIdST);
+  //     int currentMonth = DateTime.now().month;
+  //     if (currentMonth >= 9 && currentMonth <= 12) {
+  //       selectedHocKy = 'Học kỳ 1';
+  //     } else {
+  //       selectedHocKy = 'Học kỳ 2';
+  //     }
+  //     selectedYear = yearClass;
+  //   } else if (account.goupID == 'giaoVien') {
+  //     final teacherProvider =
+  //         Provider.of<TeacherProvider>(context, listen: false);
+  //     final classIdGV = teacherProvider.classIdTeacher;
+  //     final yearClass = classIdGV.length >= 9
+  //         ? classIdGV.substring(classIdGV.length - 9)
+  //         : classIdGV;
+  //     futureMistakeClass = fetchFilteredMistakeClassesByY(classIdGV);
+  //     int currentMonth = DateTime.now().month;
+  //     if (currentMonth >= 9 && currentMonth <= 12) {
+  //       selectedHocKy = 'Học kỳ 1';
+  //     } else {
+  //       selectedHocKy = 'Học kỳ 2';
+  //     }
+  //     selectedYear = yearClass;
+  //   } else {
+  //     futureMistakeClass = fetchFilteredMistakeClassesByK('10');
+  //     int currentMonth = DateTime.now().month;
+  //     if (currentMonth >= 9 && currentMonth <= 12) {
+  //       selectedHocKy = 'Học kỳ 1';
+  //     } else {
+  //       selectedHocKy = 'Học kỳ 2';
+  //     }
+  //   }
+  // }
   @override
   void initState() {
     super.initState();
@@ -34,6 +81,9 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     final accountProvider =
         Provider.of<AccountProvider>(context, listen: false);
     final account = accountProvider.account;
+    final pers =
+        Provider.of<PermissionProvider>(context, listen: false).permission;
+
     if (account!.goupID == 'hocSinh') {
       final studentDetailProvider =
           Provider.of<StudentDetailProvider>(context, listen: false);
@@ -41,7 +91,15 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
       final yearClass = classIdST.length >= 9
           ? classIdST.substring(classIdST.length - 9)
           : classIdST;
-      futureMistakeClass = fetchFilteredMistakeClassesByY(classIdST);
+
+      if (pers.contains('Cập nhật vi phạm học sinh toàn trường')) {
+        // Quyền toàn trường: lấy tất cả lớp
+        futureMistakeClass = fetchFilteredMistakeClassesByK('10');
+      } else {
+        // Quyền lớp học hoặc không có quyền đặc biệt: chỉ lấy lớp của học sinh
+        futureMistakeClass = fetchFilteredMistakeClassesByY(classIdST);
+      }
+
       int currentMonth = DateTime.now().month;
       if (currentMonth >= 9 && currentMonth <= 12) {
         selectedHocKy = 'Học kỳ 1';

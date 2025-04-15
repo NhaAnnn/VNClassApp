@@ -371,40 +371,41 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
                           ],
                         ),
                         const Spacer(),
-                        IconButton(
-                          icon: Stack(
-                            children: [
-                              const Icon(Icons.notifications,
-                                  color: Colors.white, size: 28),
-                              if (Provider.of<NotificationChange>(context)
-                                      .unreadCount >
-                                  0)
-                                Positioned(
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(2),
-                                    decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(6)),
-                                    constraints: const BoxConstraints(
-                                        minWidth: 12, minHeight: 12),
-                                    child: Text(
-                                      '${Provider.of<NotificationChange>(context).unreadCount}',
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 10),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _selectedRoute = NotificationScreen.routeName;
-                              _saveSelectedRoute(_selectedRoute);
-                            });
-                          },
-                        ),
+                        // IconButton(
+                        //   icon: Stack(
+                        //     children: [
+                        //       const Icon(Icons.notifications,
+                        //           color: Colors.white, size: 28),
+                        //       if (Provider.of<NotificationChange>(context)
+                        //               .unreadCount >
+                        //           0)
+                        //         Positioned(
+                        //           right: 0,
+                        //           child: Container(
+                        //             padding: const EdgeInsets.all(2),
+                        //             decoration: BoxDecoration(
+                        //                 color: Colors.red,
+                        //                 borderRadius: BorderRadius.circular(6)),
+                        //             constraints: const BoxConstraints(
+                        //                 minWidth: 12, minHeight: 12),
+                        //             child: Text(
+                        //               '${Provider.of<NotificationChange>(context).unreadCount}',
+                        //               style: const TextStyle(
+                        //                   color: Colors.white, fontSize: 10),
+                        //               textAlign: TextAlign.center,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //     ],
+                        //   ),
+                        //   onPressed: () {
+                        //     setState(() {
+                        //       _selectedRoute = NotificationScreen.routeName;
+                        //       _saveSelectedRoute(_selectedRoute);
+                        //     });
+                        //   },
+                        // ),
+
                         const SizedBox(width: 16),
                         Row(
                           children: [
@@ -436,8 +437,8 @@ class _MainHomeWebPageState extends State<MainHomeWebPage> {
                               ],
                             ),
                             const SizedBox(width: 8),
-                            const Icon(Icons.arrow_drop_down,
-                                color: Colors.white),
+                            // const Icon(Icons.arrow_drop_down,
+                            //     color: Colors.white),
                           ],
                         ),
                       ],
