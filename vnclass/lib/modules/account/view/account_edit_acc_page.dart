@@ -142,26 +142,62 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
     setState(() => _isShowPassAgain = !_isShowPassAgain);
   }
 
-  final String apiToken = '28118374-7d32-42fd-bf28-5f574262087e';
-  Future<void> sendEmail() async {
-    final url = 'https://api.postmarkapp.com/email';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'X-Postmark-Server-Token': apiToken,
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'From': 'suongb2103561@student.ctu.edu.vn',
-        'To': 'nhanb2110134@student.ctu.edu.vn',
-        'Subject': 'Cấp lại mật khẩu',
-        'TextBody': 'Mật khẩu mới của bạn là: 123',
-      }),
-    );
-    if (response.statusCode == 200) {
-      print('Email sent successfully!');
-    } else {
-      print('Failed to send email: ${response.body}');
+  // final String apiToken = '28118374-7d32-42fd-bf28-5f574262087e';
+  // Future<void> sendEmail() async {
+  //   final url = 'https://api.postmarkapp.com/email';
+  //   final response = await http.post(
+  //     Uri.parse(url),
+  //     headers: {
+  //       'X-Postmark-Server-Token': apiToken,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: jsonEncode({
+  //       'From': 'suongb2103561@student.ctu.edu.vn',
+  //       'To': 'nhanb2110134@student.ctu.edu.vn',
+  //       'Subject': 'Cấp lại mật khẩu',
+  //       'TextBody': 'Mật khẩu mới của bạn là: 123',
+  //     }),
+  //   );
+  //   if (response.statusCode == 200) {
+  //     print('Email sent successfully!');
+  //   } else {
+  //     print('Failed to send email: ${response.body}');
+  //   }
+  // }
+  Future<bool> sendEmail(String rep) async {
+    const String url = 'https://api.emailjs.com/api/v1.0/email/send';
+    const String userId = '7kk_13pvuS4sLk644'; // Thay bằng User ID thực
+    const String serviceId = 'service_h0y0ztu'; // Thay bằng Service ID thực
+    const String templateId = 'template_ei2kr3i'; // Thay bằng Template ID thực
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'user_id': userId,
+          'service_id': serviceId,
+          'template_id': templateId,
+          'template_params': {
+            'email': rep,
+            'newPassword': '123',
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Email sent successfully!');
+        return true;
+      } else {
+        print(
+            'Failed to send email: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error sending email: $e');
+      return false;
     }
   }
 
@@ -611,19 +647,74 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
                 ),
               ),
               const SizedBox(height: 24),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     bool success = await updateAccountPassword(
+              //         accountEditModel.accountModel.idAcc, '123');
+              //     ScaffoldMessenger.of(context).showSnackBar(
+              //       SnackBar(
+              //         content: Text(success
+              //             ? 'Cập nhật mật khẩu thành công!'
+              //             : 'Cập nhật mật khẩu thất bại!'),
+              //         duration: const Duration(seconds: 2),
+              //       ),
+              //     );
+              //     if (success) sendEmail();
+              //   },
+              //   style: ElevatedButton.styleFrom(
+              //     backgroundColor: const Color(0xFF388E3C),
+              //     padding:
+              //         const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     elevation: 4,
+              //   ),
+              //   child: const Text(
+              //     'Gửi mật khẩu mới',
+              //     style: TextStyle(
+              //       fontSize: 16,
+              //       fontWeight: FontWeight.bold,
+              //       color: Colors.white,
+              //     ),
+              //   ),
+              // ),
               ElevatedButton(
                 onPressed: () async {
-                  bool success = await updateAccountPassword(
-                      accountEditModel.accountModel.idAcc, '123');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(success
-                          ? 'Cập nhật mật khẩu thành công!'
-                          : 'Cập nhật mật khẩu thất bại!'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                  if (success) sendEmail();
+                  if (accountEditModel.accountModel.email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Email Không Tồn tại vui lòng bổ sung email!'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    return;
+                  } else {
+                    bool success = await updateAccountPassword(
+                        accountEditModel.accountModel.idAcc, '123');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(success
+                            ? 'Cập nhật mật khẩu thành công!'
+                            : 'Cập nhật mật khẩu thất bại!'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    if (success) {
+                      sendEmail(accountEditModel.accountModel.email)
+                          .then((emailSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(emailSuccess
+                                ? 'Email đã được gửi thành công!'
+                                : 'Gửi email thất bại!'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      });
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF388E3C),

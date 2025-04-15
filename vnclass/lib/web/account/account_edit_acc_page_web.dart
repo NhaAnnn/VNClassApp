@@ -67,11 +67,17 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
           (years.contains(academicYear)) ? academicYear : null;
 
       final classProvider = Provider.of<ClassProvider>(context);
-      final classes = classProvider.classNames.toString().toUpperCase();
+      List<String> classList =
+          classProvider.classNames.map((name) => name.toUpperCase()).toList();
+// Loại bỏ trùng lặp
+      List<String> uniqueClassList = classList.toSet().toList();
       String? className =
           accountEditModel.classMistakeModel?.className.toUpperCase();
       _selectedClass =
-          (className != null && classes.contains(className)) ? className : null;
+          (className != null && uniqueClassList.contains(className))
+              ? className
+              : (uniqueClassList.isNotEmpty ? uniqueClassList.first : null);
+
       groupPermissions = [];
       accountPermissions = List.from(accountEditModel.accountModel.permission);
       dbPermissions = [];
@@ -148,7 +154,7 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
 //   }
 // }
 
-  Future<bool> sendEmail() async {
+  Future<bool> sendEmail(String rep) async {
     const String url = 'https://api.emailjs.com/api/v1.0/email/send';
     const String userId = '7kk_13pvuS4sLk644'; // Thay bằng User ID thực
     const String serviceId = 'service_h0y0ztu'; // Thay bằng Service ID thực
@@ -165,7 +171,7 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
           'service_id': serviceId,
           'template_id': templateId,
           'template_params': {
-            'to': 'suongb2103561@student.ctu.edu.vn',
+            'email': rep,
             'newPassword': '123',
           },
         }),
@@ -380,14 +386,11 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
 
   Widget _buildInfoTab(BuildContext context, List years) {
     // Thêm vào _AccountEditAccPageState
-    final List<String> classes = [
-      'Lớp 6A',
-      'Lớp 6B',
-      'Lớp 7A',
-      'Lớp 7B',
-      'Lớp 8A',
-      'Lớp 8B',
-    ]; // Thay bằng danh sách thực tế của bạn
+    final classProvider = Provider.of<ClassProvider>(context);
+    // Lấy danh sách lớp và loại bỏ trùng lặp
+    List<String> classes =
+        classProvider.classNames.map((name) => name.toUpperCase()).toList();
+    List<String> uniqueClasses = classes.toSet().toList();
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -793,17 +796,40 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                  bool success = await updateAccountPassword(
-                      accountEditModel.accountModel.idAcc, '123');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(success
-                          ? 'Cập nhật mật khẩu thành công!'
-                          : 'Cập nhật mật khẩu thất bại!'),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                  if (success) sendEmail();
+                  if (accountEditModel.accountModel.email.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Email Không Tồn tại vui lòng bổ sung email!'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                    return;
+                  } else {
+                    bool success = await updateAccountPassword(
+                        accountEditModel.accountModel.idAcc, '123');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(success
+                            ? 'Cập nhật mật khẩu thành công!'
+                            : 'Cập nhật mật khẩu thất bại!'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    if (success) {
+                      sendEmail(accountEditModel.accountModel.email)
+                          .then((emailSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(emailSuccess
+                                ? 'Email đã được gửi thành công!'
+                                : 'Gửi email thất bại!'),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      });
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF388E3C),
