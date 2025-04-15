@@ -119,7 +119,7 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
       },
       body: jsonEncode({
         'From': 'suongb2103561@student.ctu.edu.vn',
-        'To': 'dosuong16203@gmail.com',
+        'To': 'nhanb2110134@student.ctu.edu.vn',
         'Subject': 'Cấp lại mật khẩu',
         'TextBody': 'Mật khẩu mới của bạn là: 123',
       }),

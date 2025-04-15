@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb; // Thêm kIsWeb
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:vnclass/common/widget/confirmation_dialog.dart';
 
 import 'package:vnclass/modules/account/controller/account_repository.dart';
 import 'package:vnclass/modules/account/model/account_edit_model.dart';
@@ -464,18 +466,20 @@ class _AccountMainPageWebState extends State<AccountMainPageWeb> {
                   if (value == 'edit') {
                     _handleEdit(context, acc);
                   } else if (value == 'remove') {
-                    // Xử lý xóa tài khoản, sau đó gọi _updateAccount(acc, true)
+                    _handleDelete(context, acc);
                   }
                 },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
                     value: 'edit',
                     child: Text('Chỉnh sửa'),
                   ),
-                  PopupMenuItem(
-                    value: 'remove',
-                    child: Text('Xóa'),
-                  ),
+                  if (acc.accountModel.goupID !=
+                      'phuHuynh') // Không cho phép xóa PHHS trực tiếp
+                    const PopupMenuItem(
+                      value: 'remove',
+                      child: Text('Xóa'),
+                    ),
                 ],
               ),
             ],
@@ -510,6 +514,122 @@ class _AccountMainPageWebState extends State<AccountMainPageWeb> {
         ],
       ),
     );
+  }
+
+// Hàm xử lý xóa tài khoản
+  void _handleDelete(BuildContext context, AccountEditModel acc) {
+    ConfirmationDialog.show(
+      context: context,
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc chắn muốn xóa tài khoản này không?',
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmColor: Colors.redAccent,
+    ).then((confirmed) {
+      if (confirmed == true) {
+        _deleteAccount(context, acc);
+      }
+    });
+  }
+
+// Hàm xóa tài khoản
+  Future<void> _deleteAccount(
+      BuildContext context, AccountEditModel acc) async {
+    final String groupId = acc.accountModel.goupID;
+    final String accountId = acc.accountModel.idAcc;
+
+    try {
+      if (groupId == 'banGH' || groupId == 'giaoVien') {
+        await Future.wait([
+          FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(accountId)
+              .delete(),
+          FirebaseFirestore.instance
+              .collection('TEACHER')
+              .doc(accountId)
+              .delete(),
+        ]);
+      } else if (groupId == 'hocSinh') {
+        final studentDoc = await FirebaseFirestore.instance
+            .collection('STUDENT')
+            .doc(accountId)
+            .get();
+        final String? parentId = studentDoc.data()?['P_id'];
+
+        final String? classId = acc.studentDetailModel?.classID;
+        if (classId != null) {
+          final classDoc = await FirebaseFirestore.instance
+              .collection('CLASS')
+              .doc(classId)
+              .get();
+          if (classDoc.exists) {
+            final currentAmount = classDoc.data()!['_amount'] as num? ?? 0;
+            final newAmount = currentAmount > 0 ? currentAmount.toInt() - 1 : 0;
+            await FirebaseFirestore.instance
+                .collection('CLASS')
+                .doc(classId)
+                .update({'_amount': newAmount});
+          }
+        }
+
+        await Future.wait([
+          FirebaseFirestore.instance
+              .collection('ACCOUNT')
+              .doc(accountId)
+              .delete(),
+          FirebaseFirestore.instance
+              .collection('STUDENT')
+              .doc(accountId)
+              .delete(),
+          if (acc.classMistakeModel?.academicYear != null)
+            FirebaseFirestore.instance
+                .collection('STUDENT_DETAIL')
+                .doc('$accountId${acc.classMistakeModel!.academicYear}')
+                .delete(),
+          if (acc.classMistakeModel?.academicYear != null)
+            FirebaseFirestore.instance
+                .collection('CONDUCT_MONTH')
+                .doc('$accountId${acc.classMistakeModel!.academicYear}')
+                .delete(),
+          if (parentId != null)
+            FirebaseFirestore.instance
+                .collection('ACCOUNT')
+                .doc(parentId)
+                .delete(),
+          if (parentId != null)
+            FirebaseFirestore.instance
+                .collection('PARENT')
+                .doc(parentId)
+                .delete(),
+        ]);
+      } else {
+        // Không xử lý xóa PHHS ở đây, vì đã ẩn tùy chọn xóa
+        return;
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xóa tài khoản thành công!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      setState(() {
+        _updateAccount(acc, true); // Cập nhật danh sách, đánh dấu là đã xóa
+      });
+    } catch (e) {
+      debugPrint('Lỗi khi xóa tài khoản: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Xóa tài khoản thất bại!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   /// Hàm chuyển sang trang chỉnh sửa tài khoản
