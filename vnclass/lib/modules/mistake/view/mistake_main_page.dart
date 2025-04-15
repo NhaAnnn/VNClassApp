@@ -201,6 +201,279 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     await futureMistakeClass;
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   final yearProvider = Provider.of<YearProvider>(context);
+  //   final years = yearProvider.years;
+  //   final accountProvider = Provider.of<AccountProvider>(context);
+  //   final account = accountProvider.account;
+  //   String? idclass = '';
+  //   if (account!.goupID == 'hocSinh') {
+  //     idclass = Provider.of<StudentDetailProvider>(context).classIdST;
+  //   } else if (account.goupID == 'giaoVien') {
+  //     idclass = Provider.of<TeacherProvider>(context).classIdTeacher;
+  //   }
+  //   // List<String>? pers = Provider.of<PermissionProvider>(context).permission;
+
+  //   // print('du lieu pers kkkyj $pers');
+  //   List<String> pers = Provider.of<PermissionProvider>(context).permission;
+  //   //print('Quyền trong build: $pers');
+  //   // Kiểm tra trường hợp đặc biệt: hocSinh với quyền 'Cập nhật vi phạm lớp học'
+  //   bool isStudentWithClassMistakePermission = account.goupID == 'hocSinh' &&
+  //       pers.contains('Cập nhật vi phạm lớp học');
+
+  //   // print("kquar cua tai khoang+ $isStudentWithClassMistakePermission");
+
+  //   return AppBarWidget(
+  //     titleString: 'Cập Nhật Vi Phạm',
+  //     implementLeading: true,
+  //     child: Column(
+  //       children: [
+  //         const SizedBox(height: 20),
+  //         if (isStudentWithClassMistakePermission ||
+  //             account.goupID == 'giaoVien') ...[
+  //           Row(
+  //             children: [
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   hintText: 'Học kỳ',
+  //                   items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+  //                   selectedItem: selectedHocKy,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedHocKy = newValue;
+  //                       updateClassY(idclass ?? '');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 8),
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   enabled: false,
+  //                   hintText: 'Năm học',
+  //                   items: years,
+  //                   selectedItem: selectedYear,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedYear = newValue;
+  //                       updateClassY(idclass ?? '');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 20),
+  //           Expanded(
+  //             child: buildFutureBuilderY(classFilter: idclass ?? ''),
+  //           ),
+  //         ]
+
+  //         // Trường hợp 1: hocSinh với quyền 'Cập nhật vi phạm học sinh toàn trường'
+  //         else if (account.goupID == 'hocSinh' &&
+  //             pers.contains('Cập nhật vi phạm học sinh toàn trường')) ...[
+  //           Row(
+  //             children: [
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   hintText: 'Học kỳ',
+  //                   items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+  //                   selectedItem: selectedHocKy,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedHocKy = newValue;
+  //                       updateClassY(idclass ?? '');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 8),
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   enabled: false,
+  //                   hintText: 'Năm học',
+  //                   items: years,
+  //                   selectedItem: selectedYear,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedYear = newValue;
+  //                       updateClassY(idclass ?? '');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 20),
+  //           TextField(
+  //             style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
+  //             decoration: InputDecoration(
+  //               hintText: 'Tìm kiếm...',
+  //               hintStyle: const TextStyle(
+  //                   color: Color(0xFF696969),
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.w400),
+  //               prefixIcon: const Padding(
+  //                 padding: EdgeInsets.all(12),
+  //                 child: Icon(Icons.search_outlined,
+  //                     color: Color(0xFF1E90FF), size: 24),
+  //               ),
+  //               filled: true,
+  //               fillColor: Colors.white,
+  //               contentPadding:
+  //                   const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+  //               enabledBorder: OutlineInputBorder(
+  //                 borderSide:
+  //                     const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //               focusedBorder: OutlineInputBorder(
+  //                 borderSide:
+  //                     const BorderSide(color: Color(0xFF1E90FF), width: 2.0),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //             ),
+  //             onTap: () {
+  //               Navigator.pushNamed(context, SearchMistakeScreen.routeName);
+  //             },
+  //           ),
+  //           const SizedBox(height: 20),
+  //           Expanded(
+  //             child: DefaultTabController(
+  //               length: 3,
+  //               child: Column(
+  //                 children: [
+  //                   TabBar(
+  //                     tabs: const [
+  //                       Tab(text: 'Lớp 10'),
+  //                       Tab(text: 'Lớp 11'),
+  //                       Tab(text: 'Lớp 12'),
+  //                     ],
+  //                     indicatorColor: Theme.of(context).primaryColor,
+  //                     onTap: (index) {
+  //                       String classFilter = (index + 10).toString();
+  //                       updateClass(classFilter);
+  //                     },
+  //                   ),
+  //                   Expanded(
+  //                     child: TabBarView(
+  //                       children: [
+  //                         buildFutureBuilder(classFilter: '10'),
+  //                         buildFutureBuilder(classFilter: '11'),
+  //                         buildFutureBuilder(classFilter: '12'),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ]
+  //         // Trường hợp 2: hocSinh với quyền 'Cập nhật vi phạm lớp học', giaoVien, hoặc hocSinh thông thường
+
+  //         // Trường hợp 3: banGH
+  //         else if (account.goupID == 'banGH') ...[
+  //           Row(
+  //             children: [
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   hintText: 'Học kỳ',
+  //                   items: ['Học kỳ 1', 'Học kỳ 2', 'Cả năm'],
+  //                   selectedItem: selectedHocKy,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedHocKy = newValue;
+  //                       updateClass('10');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 8),
+  //               Expanded(
+  //                 child: DropMenuWidget<String>(
+  //                   hintText: 'Năm học',
+  //                   items: years,
+  //                   selectedItem: selectedYear,
+  //                   onChanged: (newValue) {
+  //                     setState(() {
+  //                       selectedYear = newValue;
+  //                       updateClass('10');
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 20),
+  //           TextField(
+  //             style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
+  //             decoration: InputDecoration(
+  //               hintText: 'Tìm kiếm...',
+  //               hintStyle: const TextStyle(
+  //                   color: Color(0xFF696969),
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.w400),
+  //               prefixIcon: const Padding(
+  //                 padding: EdgeInsets.all(12),
+  //                 child: Icon(Icons.search_outlined,
+  //                     color: Color(0xFF1E90FF), size: 24),
+  //               ),
+  //               filled: true,
+  //               fillColor: Colors.white,
+  //               contentPadding:
+  //                   const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+  //               enabledBorder: OutlineInputBorder(
+  //                 borderSide:
+  //                     const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //               focusedBorder: OutlineInputBorder(
+  //                 borderSide:
+  //                     const BorderSide(color: Color(0xFF1E90FF), width: 2.0),
+  //                 borderRadius: BorderRadius.circular(12),
+  //               ),
+  //             ),
+  //             onTap: () {
+  //               Navigator.pushNamed(context, SearchMistakeScreen.routeName);
+  //             },
+  //           ),
+  //           const SizedBox(height: 20),
+  //           Expanded(
+  //             child: DefaultTabController(
+  //               length: 3,
+  //               child: Column(
+  //                 children: [
+  //                   TabBar(
+  //                     tabs: const [
+  //                       Tab(text: 'Lớp 10'),
+  //                       Tab(text: 'Lớp 11'),
+  //                       Tab(text: 'Lớp 12'),
+  //                     ],
+  //                     indicatorColor: Theme.of(context).primaryColor,
+  //                     onTap: (index) {
+  //                       String classFilter = (index + 10).toString();
+  //                       updateClass(classFilter);
+  //                     },
+  //                   ),
+  //                   Expanded(
+  //                     child: TabBarView(
+  //                       children: [
+  //                         buildFutureBuilder(classFilter: '10'),
+  //                         buildFutureBuilder(classFilter: '11'),
+  //                         buildFutureBuilder(classFilter: '12'),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ],
+  //     ),
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
     final yearProvider = Provider.of<YearProvider>(context);
@@ -213,16 +486,13 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
     } else if (account.goupID == 'giaoVien') {
       idclass = Provider.of<TeacherProvider>(context).classIdTeacher;
     }
-    // List<String>? pers = Provider.of<PermissionProvider>(context).permission;
-
-    // print('du lieu pers kkkyj $pers');
     List<String> pers = Provider.of<PermissionProvider>(context).permission;
-    //print('Quyền trong build: $pers');
-    // Kiểm tra trường hợp đặc biệt: hocSinh với quyền 'Cập nhật vi phạm lớp học'
+
+    // Kiểm tra quyền của học sinh
     bool isStudentWithClassMistakePermission = account.goupID == 'hocSinh' &&
         pers.contains('Cập nhật vi phạm lớp học');
-
-    // print("kquar cua tai khoang+ $isStudentWithClassMistakePermission");
+    bool isStudentWithSchoolMistakePermission = account.goupID == 'hocSinh' &&
+        pers.contains('Cập nhật vi phạm học sinh toàn trường');
 
     return AppBarWidget(
       titleString: 'Cập Nhật Vi Phạm',
@@ -230,6 +500,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
       child: Column(
         children: [
           const SizedBox(height: 20),
+          // Trường hợp 1: Học sinh với quyền "Cập nhật vi phạm lớp học" hoặc giáo viên
           if (isStudentWithClassMistakePermission ||
               account.goupID == 'giaoVien') ...[
             Row(
@@ -269,10 +540,9 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
               child: buildFutureBuilderY(classFilter: idclass ?? ''),
             ),
           ]
-
-          // Trường hợp 1: hocSinh với quyền 'Cập nhật vi phạm học sinh toàn trường'
-          else if (account.goupID == 'hocSinh' &&
-              pers.contains('Cập nhật vi phạm học sinh toàn trường')) ...[
+          // Trường hợp 2: Học sinh với quyền "Cập nhật vi phạm học sinh toàn trường" hoặc ban giám hiệu
+          else if (isStudentWithSchoolMistakePermission ||
+              account.goupID == 'banGH') ...[
             Row(
               children: [
                 Expanded(
@@ -283,7 +553,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                     onChanged: (newValue) {
                       setState(() {
                         selectedHocKy = newValue;
-                        updateClassY(idclass ?? '');
+                        updateClass('10');
                       });
                     },
                   ),
@@ -291,14 +561,13 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropMenuWidget<String>(
-                    enabled: false,
                     hintText: 'Năm học',
                     items: years,
                     selectedItem: selectedYear,
                     onChanged: (newValue) {
                       setState(() {
                         selectedYear = newValue;
-                        updateClassY(idclass ?? '');
+                        updateClass('10');
                       });
                     },
                   ),
@@ -370,10 +639,8 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
               ),
             ),
           ]
-          // Trường hợp 2: hocSinh với quyền 'Cập nhật vi phạm lớp học', giaoVien, hoặc hocSinh thông thường
-
-          // Trường hợp 3: banGH
-          else if (account.goupID == 'banGH') ...[
+          // Trường hợp 3: Học sinh không có quyền đặc biệt
+          else if (account.goupID == 'hocSinh') ...[
             Row(
               children: [
                 Expanded(
@@ -384,7 +651,7 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                     onChanged: (newValue) {
                       setState(() {
                         selectedHocKy = newValue;
-                        updateClass('10');
+                        updateClassY(idclass ?? '');
                       });
                     },
                   ),
@@ -392,13 +659,14 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: DropMenuWidget<String>(
+                    enabled: false,
                     hintText: 'Năm học',
                     items: years,
                     selectedItem: selectedYear,
                     onChanged: (newValue) {
                       setState(() {
                         selectedYear = newValue;
-                        updateClass('10');
+                        updateClassY(idclass ?? '');
                       });
                     },
                   ),
@@ -406,68 +674,8 @@ class _MistakeMainPageState extends State<MistakeMainPage> {
               ],
             ),
             const SizedBox(height: 20),
-            TextField(
-              style: const TextStyle(fontSize: 18, color: Color(0xFF2F4F4F)),
-              decoration: InputDecoration(
-                hintText: 'Tìm kiếm...',
-                hintStyle: const TextStyle(
-                    color: Color(0xFF696969),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400),
-                prefixIcon: const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Icon(Icons.search_outlined,
-                      color: Color(0xFF1E90FF), size: 24),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD3D3D3), width: 1.5),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Color(0xFF1E90FF), width: 2.0),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onTap: () {
-                Navigator.pushNamed(context, SearchMistakeScreen.routeName);
-              },
-            ),
-            const SizedBox(height: 20),
             Expanded(
-              child: DefaultTabController(
-                length: 3,
-                child: Column(
-                  children: [
-                    TabBar(
-                      tabs: const [
-                        Tab(text: 'Lớp 10'),
-                        Tab(text: 'Lớp 11'),
-                        Tab(text: 'Lớp 12'),
-                      ],
-                      indicatorColor: Theme.of(context).primaryColor,
-                      onTap: (index) {
-                        String classFilter = (index + 10).toString();
-                        updateClass(classFilter);
-                      },
-                    ),
-                    Expanded(
-                      child: TabBarView(
-                        children: [
-                          buildFutureBuilder(classFilter: '10'),
-                          buildFutureBuilder(classFilter: '11'),
-                          buildFutureBuilder(classFilter: '12'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              child: buildFutureBuilderY(classFilter: idclass ?? ''),
             ),
           ],
         ],
