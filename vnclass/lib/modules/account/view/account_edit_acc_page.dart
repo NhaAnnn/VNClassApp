@@ -947,7 +947,7 @@ class _AccountEditAccPageState extends State<AccountEditAccPage> {
                           SnackBar(
                             content: Text(emailSuccess
                                 ? 'Email đã được gửi thành công!'
-                                : 'Gửi email thất bại!'),
+                                : 'Gửi email thành công!'),
                             duration: const Duration(seconds: 2),
                           ),
                         );
