@@ -470,8 +470,8 @@ class _CreateListClassDialogState extends State<CreateListClassDialog> {
                   await ClassController.createClass(
                     context,
                     newData['_className'],
-                    newData['T_name'],
                     newData['T_id'],
+                    newData['T_name'],
                     newData['_year'],
                   );
                 }
