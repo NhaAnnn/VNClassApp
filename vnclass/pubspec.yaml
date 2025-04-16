@@ -62,6 +62,7 @@ dependencies:
   google_fonts: ^6.2.1
   pie_chart: ^5.4.0
   url_launcher: ^6.1.10
+  emailjs: ^4.0.0
 
 dev_dependencies:
   flutter_test:

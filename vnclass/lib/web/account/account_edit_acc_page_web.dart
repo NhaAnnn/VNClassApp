@@ -338,7 +338,7 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
                         Expanded(
                           child: TabBarView(
                             children: [
-                              _buildInfoTab(context, years),
+                              _buildInfoTab(context, years, accountEditModel),
                               _buildPermissionTab(),
                               _buildResetPasswordTab(context, accountEditModel),
                             ],
@@ -384,7 +384,115 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
     );
   }
 
-  Widget _buildInfoTab(BuildContext context, List years) {
+  Future<void> _saveChanges(AccountEditModel accountEditModel) async {
+    try {
+      // Lấy tên tài khoản từ controller
+      String accountName = _accountNameController.text.trim();
+      if (accountName.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tên tài khoản không được để trống!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      // Tìm tài khoản trong Firestore dựa trên _userName
+      QuerySnapshot accountQuery = await FirebaseFirestore.instance
+          .collection('ACCOUNT')
+          .where('_userName', isEqualTo: accountName)
+          .get();
+
+      if (accountQuery.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Không tìm thấy tài khoản với tên này!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      String accountId = accountQuery.docs.first.id;
+
+      // Cập nhật dữ liệu vào collection ACCOUNT
+      await FirebaseFirestore.instance
+          .collection('ACCOUNT')
+          .doc(accountId)
+          .update({
+        '_accName': _userNameController.text.trim(),
+        '_birth': _dateController.text.trim(),
+        '_email': _emailController.text.trim(),
+        '_phone': _phoneController.text.trim(),
+        '_gender': _selectedGender,
+      });
+
+      // Nếu là học sinh, cập nhật STUDENT và STUDENT_DETAIL
+      if (accountEditModel.groupModel?.groupName == 'Học sinh') {
+        await FirebaseFirestore.instance
+            .collection('STUDENT')
+            .doc(accountId)
+            .update({
+          '_studentName': _userNameController.text.trim(),
+          '_birthday': _dateController.text.trim(),
+          '_phone': _phoneController.text.trim(),
+          '_gender': _selectedGender,
+        });
+
+        // // Kiểm tra _selectedAcademicYear và _selectedClass trước khi cập nhật
+        // if (_selectedAcademicYear != null && _selectedClass != null) {
+        //   await FirebaseFirestore.instance
+        //       .collection('STUDENT_DETAIL')
+        //       .doc('$accountId$_selectedAcademicYear')
+        //       .update({
+        //     'Class_id': '${_selectedClass!.toLowerCase()}$_selectedAcademicYear',
+        //     'Class_name': _selectedClass!.toLowerCase(),
+        //     '_studentName': _userNameController.text.trim(),
+        //     '_birthday': _dateController.text.trim(),
+        //     '_phone': _phoneController.text.trim(),
+        //     '_gender': _selectedGender,
+        //   });
+
+        //   // Cập nhật số lượng trong CLASS
+        //   await _updateClassAmount(_selectedClass.toLowerCase(), _selectedAcademicYear!);
+        // } else {
+        //   print('Thiếu thông tin lớp hoặc năm học để cập nhật STUDENT_DETAIL');
+        // }
+      } else if (accountEditModel.groupModel?.groupName == 'Giáo viên' ||
+          accountEditModel.groupModel?.groupName == 'Ban giám hiệu') {
+        // Cập nhật TEACHER nếu là giáo viên hoặc ban giám hiệu
+        await FirebaseFirestore.instance
+            .collection('TEACHER')
+            .doc(accountId)
+            .update({
+          '_teacherName': _userNameController.text.trim(),
+          '_birthday': _dateController.text.trim(),
+          '_phone': _phoneController.text.trim(),
+          '_gender': _selectedGender,
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cập nhật tài khoản thành công!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() => _isEditing = false);
+    } catch (e) {
+      print('Lỗi khi cập nhật tài khoản: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cập nhật tài khoản thất bại!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Widget _buildInfoTab(
+      BuildContext context, List years, AccountEditModel accountEditModel) {
     // Thêm vào _AccountEditAccPageState
     final classProvider = Provider.of<ClassProvider>(context);
     // Lấy danh sách lớp và loại bỏ trùng lặp
@@ -459,26 +567,267 @@ class _AccountEditAccPageWebState extends State<AccountEditAccPageWeb> {
               _isEditing, (value) => setState(() => _selectedGender = value)),
           const SizedBox(height: 32),
           // Nút hành động
+          // Row(
+          //   children: [
+          //     Expanded(
+          //       child: ElevatedButton(
+          //         onPressed: _isEditing
+          //             ? () {
+          //                 print(
+          //                     "Loại tài khoản: ${_accountTypeController.text}");
+          //                 print(
+          //                     "Tên tài khoản: ${_accountNameController.text}");
+          //                 print("Tên người dùng: ${_userNameController.text}");
+          //                 print("Ngày: ${_dateController.text}");
+          //                 print("Email: ${_emailController.text}");
+          //                 print("SĐT: ${_phoneController.text}");
+          //                 print("Lớp: $_selectedClass");
+          //                 print("Năm học: $_selectedAcademicYear");
+          //                 print("Giới tính: $_selectedGender");
+          //                 CustomDialogWidget.showConfirmationDialog(
+          //                   context,
+          //                   'Xác nhận lưu thay đổi?',
+          //                   onTapOK: () => _saveChanges(accountEditModel),
+          //                 );
+          //               }
+          //             : null,
+          //         style: ElevatedButton.styleFrom(
+          //           backgroundColor: const Color(0xFF1976D2),
+          //           padding: const EdgeInsets.symmetric(vertical: 16),
+          //           shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(12),
+          //           ),
+          //           elevation: 4,
+          //         ),
+          //         child: const Text(
+          //           'Lưu thay đổi',
+          //           style: TextStyle(
+          //             fontSize: 16,
+          //             fontWeight: FontWeight.bold,
+          //             color: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 16),
+          //     Expanded(
+          //       child: ElevatedButton(
+          //         onPressed: () => Navigator.of(context).pop(),
+          //         style: ElevatedButton.styleFrom(
+          //           backgroundColor: Colors.redAccent,
+          //           padding: const EdgeInsets.symmetric(vertical: 16),
+          //           shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(12),
+          //           ),
+          //           elevation: 4,
+          //         ),
+          //         child: const Text(
+          //           'Thoát',
+          //           style: TextStyle(
+          //             fontSize: 16,
+          //             fontWeight: FontWeight.bold,
+          //             color: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // // Trong _buildInfoTab, phần nút hành động
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: _isEditing
                       ? () {
-                          print(
-                              "Loại tài khoản: ${_accountTypeController.text}");
-                          print(
-                              "Tên tài khoản: ${_accountNameController.text}");
-                          print("Tên người dùng: ${_userNameController.text}");
-                          print("Ngày: ${_dateController.text}");
-                          print("Email: ${_emailController.text}");
-                          print("SĐT: ${_phoneController.text}");
-                          print("Lớp: $_selectedClass");
-                          print("Năm học: $_selectedAcademicYear");
-                          print("Giới tính: $_selectedGender");
-                          CustomDialogWidget.showConfirmationDialog(
-                            context,
-                            'Xác nhận lưu thay đổi?',
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text(
+                                  'Xác nhận',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                content: const Text(
+                                  'Bạn có chắc chắn muốn lưu thay đổi?',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context)
+                                        .pop(), // Đóng dialog
+                                    child: const Text(
+                                      'Hủy',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context)
+                                          .pop(); // Đóng dialog
+                                      try {
+                                        // Lấy tên tài khoản từ controller
+                                        String accountName =
+                                            _accountNameController.text.trim();
+                                        if (accountName.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Tên tài khoản không được để trống!'),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        // Tìm tài khoản trong Firestore dựa trên _userName
+                                        QuerySnapshot accountQuery =
+                                            await FirebaseFirestore.instance
+                                                .collection('ACCOUNT')
+                                                .where('_userName',
+                                                    isEqualTo: accountName)
+                                                .get();
+
+                                        if (accountQuery.docs.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Không tìm thấy tài khoản với tên này!'),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        String accountId =
+                                            accountQuery.docs.first.id;
+
+                                        // Cập nhật dữ liệu vào collection ACCOUNT
+                                        await FirebaseFirestore.instance
+                                            .collection('ACCOUNT')
+                                            .doc(accountId)
+                                            .update({
+                                          '_accName':
+                                              _userNameController.text.trim(),
+                                          '_birth': _dateController.text.trim(),
+                                          '_email':
+                                              _emailController.text.trim(),
+                                          '_phone':
+                                              _phoneController.text.trim(),
+                                          '_gender': _selectedGender,
+                                        });
+
+                                        // Nếu là học sinh, chỉ cập nhật STUDENT
+                                        if (accountEditModel
+                                                .groupModel?.groupName ==
+                                            'Học sinh') {
+                                          await FirebaseFirestore.instance
+                                              .collection('STUDENT')
+                                              .doc(accountId)
+                                              .update({
+                                            '_studentName':
+                                                _userNameController.text.trim(),
+                                            '_birthday':
+                                                _dateController.text.trim(),
+                                            '_phone':
+                                                _phoneController.text.trim(),
+                                            '_gender': _selectedGender,
+                                          });
+                                        } else if (accountEditModel
+                                                    .groupModel?.groupName ==
+                                                'Giáo viên' ||
+                                            accountEditModel
+                                                    .groupModel?.groupName ==
+                                                'Ban giám hiệu') {
+                                          // Cập nhật TEACHER nếu là giáo viên hoặc ban giám hiệu
+                                          await FirebaseFirestore.instance
+                                              .collection('TEACHER')
+                                              .doc(accountId)
+                                              .update({
+                                            '_teacherName':
+                                                _userNameController.text.trim(),
+                                            '_birthday':
+                                                _dateController.text.trim(),
+                                            '_phone':
+                                                _phoneController.text.trim(),
+                                            '_gender': _selectedGender,
+                                          });
+                                        }
+
+                                        // Tải lại dữ liệu từ Firestore để đồng bộ giao diện
+                                        DocumentSnapshot accountDoc =
+                                            await FirebaseFirestore.instance
+                                                .collection('ACCOUNT')
+                                                .doc(accountId)
+                                                .get();
+                                        if (accountDoc.exists) {
+                                          final accountData = accountDoc.data()
+                                              as Map<String, dynamic>;
+                                          setState(() {
+                                            _userNameController.text =
+                                                accountData['_accName'] ?? '';
+                                            _dateController.text =
+                                                accountData['_birth'] ?? '';
+                                            _emailController.text =
+                                                accountData['_email'] ?? '';
+                                            _phoneController.text =
+                                                accountData['_phone'] ?? '';
+                                            _selectedGender =
+                                                accountData['_gender'] ?? 'Nam';
+                                            _isEditing =
+                                                false; // Tắt chế độ chỉnh sửa
+                                          });
+                                        }
+
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Cập nhật tài khoản thành công!'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      } catch (e) {
+                                        print('Lỗi khi cập nhật tài khoản: $e');
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'Cập nhật tài khoản thất bại!'),
+                                            duration: Duration(seconds: 2),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: const Text(
+                                      'Lưu',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF1976D2),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                backgroundColor: Colors.white,
+                                elevation: 4,
+                              );
+                            },
                           );
                         }
                       : null,
